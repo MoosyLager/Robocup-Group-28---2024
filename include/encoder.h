@@ -13,4 +13,11 @@ enum DriveMotorPinAssignments {
     encoder2PinB = 5,
 };
 
+extern volatile unsigned int encoderPos1;
+extern unsigned int lastReportedPos1;
+extern volatile unsigned int encoderPos2;
+extern unsigned int lastReportedPos2;
+
+void InitDriveEncoders();
+
 #endif
