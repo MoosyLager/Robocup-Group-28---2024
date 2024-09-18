@@ -16,4 +16,8 @@
 #define NUM_TOF_L0            2
 #define NUM_TOF_L1            0
 
+void InitSensors();
+void InitTOFL0();
+void InitTOFL1();
+
 #endif
