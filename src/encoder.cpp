@@ -11,21 +11,6 @@ bool aSet2 = false;
 bool bSet2 = false;
 
 /**
- * Initialise the encoders on the two drive motors
- */
-void InitDriveEncoders()
-{
-    // Set encoder pins as inputs
-    pinMode(encoder1PinA, INPUT);
-    pinMode(encoder1PinB, INPUT);
-    pinMode(encoder2PinA, INPUT);
-    pinMode(encoder2PinB, INPUT);
-
-    attachInterrupt(digitalPinToInterrupt(2), DoEncoder1A, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(4), DoEncoder2A, CHANGE);
-}
-
-/**
  * Interrupt on A changing state
  */
 void DoEncoder1A()
@@ -53,4 +38,19 @@ void DoEncoder2A()
     bSet1 = digitalRead(encoder2PinB) == HIGH;
     // and adjust counter - if B follows A
     encoderPos2 += (aSet2 == bSet2) ? -1 : +1;
+}
+
+/**
+ * Initialise the encoders on the two drive motors
+ */
+void InitDriveEncoders()
+{
+    // Set encoder pins as inputs
+    pinMode(encoder1PinA, INPUT);
+    pinMode(encoder1PinB, INPUT);
+    pinMode(encoder2PinA, INPUT);
+    pinMode(encoder2PinB, INPUT);
+
+    attachInterrupt(digitalPinToInterrupt(2), DoEncoder1A, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(4), DoEncoder2A, CHANGE);
 }
