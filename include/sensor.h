@@ -19,5 +19,7 @@
 void InitSensors();
 void InitTOFL0();
 void InitTOFL1();
+VL53L0X *returnL0();
+VL53L1X *returnL1();
 
 #endif

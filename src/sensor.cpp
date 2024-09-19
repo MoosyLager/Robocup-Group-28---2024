@@ -93,3 +93,13 @@ void InitTOFL1()
         sensorsL1[i].startContinuous(50);
     }
 }
+
+VL53L0X *returnL0()
+{
+    return sensorsL0;
+}
+
+VL53L1X *returnL1()
+{
+    return sensorsL1;
+}
