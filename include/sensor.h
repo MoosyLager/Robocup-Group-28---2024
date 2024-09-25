@@ -13,13 +13,17 @@
 #define VL53L0X_ADDRESS_START 0x30
 #define VL53L1X_ADDRESS_START 0x35
 
+#define IR_ADDRESS_A          A9
+#define IR_ADDRESS_B          A8
+
 #define NUM_TOF_L0            2
 #define NUM_TOF_L1            0
 
 void InitSensors();
 void InitTOFL0();
 void InitTOFL1();
-VL53L0X *returnL0();
-VL53L1X *returnL1();
+
+int IRValueA();
+int IRValueB();
 
 #endif

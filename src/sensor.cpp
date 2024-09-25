@@ -94,12 +94,12 @@ void InitTOFL1()
     }
 }
 
-VL53L0X *returnL0()
+int IRValueA()
 {
-    return sensorsL0;
+    return analogRead(IR_ADDRESS_A);
 }
 
-VL53L1X *returnL1()
+int IRValueB()
 {
-    return sensorsL1;
+    return analogRead(IR_ADDRESS_B);
 }
