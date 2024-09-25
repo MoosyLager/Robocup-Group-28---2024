@@ -2,6 +2,7 @@
 
 Servo leftMotor;
 Servo rightMotor;
+Servo collectionMotor;
 
 /**
  * Initialise the left and right drive motors
@@ -10,6 +11,23 @@ void InitDriveMotors()
 {
     leftMotor.attach(LEFT_MOTOR_ADDRESS);
     rightMotor.attach(RIGHT_MOTOR_ADDRESS);
+}
+
+/**
+ * Initialise the collection motor
+ */
+void InitCollectionMotor()
+{
+    collectionMotor.attach(COLLECTION_MOTOR_ADDRESS);
+}
+
+/**
+ * Initialise all connected motors
+ */
+void InitMotors()
+{
+    InitDriveMotors();
+    InitCollectionMotor();
 }
 
 /**
