@@ -6,24 +6,24 @@
 #include <stdint.h>
 
 enum DriveEncoderPinAssignments {
-    encoder1PinA = 2,
-    encoder1PinB = 3,
-    encoder2PinA = 4,
-    encoder2PinB = 5,
+    leftMotorPinA = 2,
+    leftMotorPinB = 3,
+    rightMotorPinA = 4,
+    rightMotorPinB = 5,
 };
 
-extern volatile unsigned int encoderPos1;
-extern unsigned int lastReportedPos1;
-extern volatile unsigned int encoderPos2;
-extern unsigned int lastReportedPos2;
+extern volatile unsigned int leftMotorPos;
+extern unsigned int prevLeftMotorPos;
+extern volatile unsigned int RightMotorPos;
+extern unsigned int prevRightMotorPos;
 
-extern boolean A_set1;
-extern boolean B_set1;
-extern boolean A_set2;
-extern boolean B_set2;
+extern boolean leftASet;
+extern boolean leftBSet;
+extern boolean rightASet;
+extern boolean rightBSet;
 
-void doEncoder1A();
-void doEncoder2A();
+void LeftEncoderIntHandler();
+void RightEncoderIntHandler();
 void InitDriveEncoders();
 
 #endif
