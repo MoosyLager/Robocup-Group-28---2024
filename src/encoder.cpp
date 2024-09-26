@@ -1,5 +1,12 @@
 #include "encoder.h"
 
+extern volatile uint16_t PID_leftMotorPos = 0;
+extern volatile uint16_t PID_rightMotorPos = 0;
+
+extern const uint16_t Kp = 1; 
+extern const uint16_t Ki = 0;
+extern const uint16_t Kd = 0;
+
 volatile unsigned int leftMotorPos = 0;
 unsigned int prevLeftMotorPos = 1;
 volatile unsigned int RightMotorPos = 0;
@@ -45,4 +52,20 @@ void InitDriveEncoders()
 
     attachInterrupt(digitalPinToInterrupt(2), LeftEncoderIntHandler, CHANGE);  // Set up an interrupt for each encoder
     attachInterrupt(digitalPinToInterrupt(4), RightEncoderIntHandler, CHANGE);
+}
+
+uint16_t PID_Controller(uint16_t desiredSpeed, uint16_t currentPos, uint16_t prevPos)
+{
+    /*uint16_t currentSpeed = (currentPos - prevPos) /  deltaTime;
+    uint16_t error = desiredSpeed - currentSpeed;
+
+    how to do the correct integral controller and derivative controller?
+
+    uint16_t integral = 0;
+    uint16_t derivative = 0;
+
+    integral += error;
+    derivative = currentPos - prevPos;
+
+    return (Kp * error) + (Ki * integral) + (Kd * derivative);*/
 }

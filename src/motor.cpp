@@ -54,3 +54,9 @@ uint16_t CheckSpeedLimits(uint16_t speed)
     }
     return speed;
 }
+
+/*
+
+Needs a motion state machine to control the motors
+
+*/

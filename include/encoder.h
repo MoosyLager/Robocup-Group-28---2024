@@ -12,6 +12,14 @@ enum DriveEncoderPinAssignments {
     rightMotorPinB = 5,
 };
 
+extern volatile uint16_t PID_leftMotorPos;
+extern volatile uint16_t PID_rightMotorPos;
+
+extern const uint16_t Kp; 
+extern const uint16_t Ki;
+extern const uint16_t Kd;
+
+
 extern volatile unsigned int leftMotorPos;
 extern unsigned int prevLeftMotorPos;
 extern volatile unsigned int RightMotorPos;
