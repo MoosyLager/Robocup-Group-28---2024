@@ -15,7 +15,7 @@ Colour_t GetColour()
     Colour_t colour;
 
     colourSensor.setInterrupt(false);
-    delay(100);
+    delay(60);
     colourSensor.getRawData(&red, &green, &blue, &clear);
     colourSensor.setIntegrationTime(true);
 
