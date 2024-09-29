@@ -2,7 +2,7 @@
 
 volatile unsigned int leftMotorPos = 0;
 unsigned int prevLeftMotorPos = 1;
-volatile unsigned int RightMotorPos = 0;
+volatile unsigned int rightMotorPos = 0;
 unsigned int prevRightMotorPos = 1;
 
 boolean leftASet = false;
@@ -29,11 +29,11 @@ void RightEncoderIntHandler()
     // Test transition
     rightASet = digitalRead(rightMotorPinA) == HIGH;
     // and adjust counter + if A leads B
-    RightMotorPos += (rightASet != rightBSet) ? +1 : -1;
+    rightMotorPos += (rightASet != rightBSet) ? +1 : -1;
 
     rightBSet = digitalRead(rightMotorPinB) == HIGH;
     // and adjust counter + if B follows A
-    RightMotorPos += (rightASet == rightBSet) ? +1 : -1;
+    rightMotorPos += (rightASet == rightBSet) ? +1 : -1;
 }
 
 void InitDriveEncoders()
