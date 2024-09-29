@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <utility/imumaths.h>
 
-Adafruit_BNO055 bno = Adafruit_BNO055(IMU_ID, IMU_ADDRESS, &Wire1);
+Adafruit_BNO055 bno = Adafruit_BNO055(IMU_ID, IMU_ADDRESS, &IMU_WIRE);
 int8_t boardTemp;
 sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
 
