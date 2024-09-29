@@ -2,12 +2,12 @@
 #include "encoder.h"
 #include <elapsedMillis.h>
 
-uint16_t Ki = 0;
-uint16_t Kp = 100;
+uint16_t Ki = 1;
+uint16_t Kp = 0;
 uint16_t Kd = 0;
 
-uint16_t prevSampledLeftMotorPos;
-uint16_t prevSampledRightMotorPos;
+signed long prevSampledLeftMotorPos = 0;
+signed long prevSampledRightMotorPos = 0;
 
 elapsedMillis currentTime = 0;
 
@@ -47,7 +47,7 @@ void InitMotors()
 /**
  * Ensures a valid input then sets motor speed
  */
-void SetMotorSpeed(Servo motor, uint16_t speed)
+void SetMotorSpeed(Servo motor, signed int speed)
 {
     uint16_t clampedSpeed = CheckSpeedLimits(speed);
     motor.writeMicroseconds(clampedSpeed);
@@ -61,11 +61,11 @@ void SetMotorSpeed(Servo motor, uint16_t speed)
 uint16_t CheckSpeedLimits(uint16_t speed)
 {
     if ( speed > MAX_MOTOR_VAL ) {
-        Serial.printf("Speed was out of bounds. Clamped to %u", MAX_MOTOR_VAL);
+        // Serial.printf("Speed was out of bounds. Clamped to %u", MAX_MOTOR_VAL);
         return MAX_MOTOR_VAL;
     }
     if ( speed < MIN_MOTOR_VAL ) {
-        Serial.printf("Speed was out of bounds. Clamped to %u", MIN_MOTOR_VAL);
+        // Serial.printf("Speed was out of bounds. Clamped to %u", MIN_MOTOR_VAL);
         return MIN_MOTOR_VAL;
     }
     return speed;
@@ -74,28 +74,13 @@ uint16_t CheckSpeedLimits(uint16_t speed)
 
 
 
-uint16_t pidMotorControl(uint16_t targetMotorSpeed, uint16_t currentMotorSpeed, uint16_t currentMotorPos, uint16_t prevMotorPos, unsigned long deltaT)
-{
-    // Proportional control
-    uint16_t error = targetMotorSpeed - currentMotorSpeed;
-    uint16_t p = Kp * error;
 
-    // Integral control
-    static uint16_t i = 0;
-    i = i + Ki * error;
-
-    // Deals with non-linear time intervals
-    uint16_t d = (currentMotorPos - prevMotorPos) / deltaT;
-    
-    return p + i + d;
-}
 
 
 uint16_t leftJoystickRead(void) 
 {
     return analogRead(LEFT_JOYSTICK_ADDRESS);
 }
-
 
 
 uint16_t rightJoystickRead(void) 
@@ -107,45 +92,63 @@ uint16_t rightJoystickRead(void)
 
 void findTargetMotorSpeed(uint16_t* leftMotorTarget, uint16_t* rightMotorTarget )
 {
-    // Say 60Hz refresh rate
-    if (USE_JOYSTICK) {
-        *leftMotorTarget = 3000;
-        *rightMotorTarget = 3000;
-    } else {
-        // Need to implement
-    }
+    *leftMotorTarget = 3000;
+    *rightMotorTarget = 3000;
 }
 
-uint16_t findMotorSpeed(uint16_t motorPos, uint16_t prevMotorPos, unsigned long deltaT)
+signed long findMotorSpeed(signed long deltaPos, signed int deltaT)
 {
-    uint16_t speed = (motorPos - prevMotorPos) * 1000 / deltaT; // ticks/s
+    signed long speed = deltaPos * 1000 / deltaT; // ticks/s
     return speed;
+}
+
+signed int pidMotorControl(signed int targetMotorSpeed, signed int currentMotorSpeed, unsigned long deltaT)
+{
+    // Proportional control
+    signed int error = targetMotorSpeed - currentMotorSpeed;
+    Serial.print("Error: ");
+    Serial.print(error);
+    Serial.print(" ");
+    signed int p = Kp * error;
+
+    // Integral control
+    static signed int i = 0;
+    i = i + Ki * error;
+
+    // Deals with non-linear time intervals
+    static signed int prevMotorSpeed = 0;
+    signed int d = Kd * (currentMotorSpeed - prevMotorSpeed) / (deltaT);
+    prevMotorSpeed = currentMotorSpeed;
+    
+    signed int control =  p + i + d;
+    control = control / 1000;
+    Serial.print("Control: ");
+    Serial.print(control);
+    Serial.print(" ");
+    return control;
 }
 
 
 void PIDMotorSpeedControl(void)
 {
-    static unsigned long prevTime = 0;
-    unsigned long deltaT = currentTime - prevTime;
+    static signed long prevTime = 0;
+    signed int deltaT = currentTime - prevTime;
+    prevTime = currentTime;
 
-    uint16_t leftMotorTarget;
-    uint16_t rightMotorTarget;
-    findTargetMotorSpeed(&leftMotorTarget, &rightMotorTarget);
+    signed long deltaPos = leftMotorPos - prevSampledLeftMotorPos;
+    prevSampledLeftMotorPos = leftMotorPos;
 
-    uint16_t leftMotorSpeed = findMotorSpeed(leftMotorPos, prevSampledLeftMotorPos, deltaT);
-    uint16_t rightMotorSpeed = findMotorSpeed(rightMotorPos, prevSampledRightMotorPos, deltaT);
+    // findTargetMotorSpeed(&leftMotorTarget, &rightMotorTarget);
 
-    uint16_t leftMotorControl = pidMotorControl(leftMotorTarget, leftMotorSpeed, leftMotorPos, prevSampledLeftMotorPos, deltaT);
-    uint16_t rightMotorControl = pidMotorControl(rightMotorTarget, rightMotorSpeed, rightMotorPos, prevSampledRightMotorPos, deltaT);
+    signed long leftMotorSpeed = findMotorSpeed(deltaPos, deltaT);
+    Serial.print("Left Motor Speed: ");
+    Serial.println(leftMotorSpeed);
+    
+    signed int leftMotorTarget = 3000;
+    signed int leftMotorControl = pidMotorControl(3000, leftMotorSpeed, deltaT);
 
     SetMotorSpeed(leftMotor, leftMotorControl);
-    Serial.println(leftMotorControl);
-    SetMotorSpeed(rightMotor, rightMotorControl);
-    Serial.println(rightMotorControl);
-
-    prevSampledLeftMotorPos = leftMotorPos;
-    prevSampledRightMotorPos = rightMotorPos;
-    prevTime = currentTime;
+    return;
 }
 
 

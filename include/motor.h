@@ -23,6 +23,9 @@ extern uint16_t Kd;
 
 extern elapsedMillis currentTime;
 
+extern signed long prevSampledLeftMotorPos;
+extern signed long prevSampledRightMotorPos;
+
 extern Servo leftMotor;
 extern Servo rightMotor;
 extern Servo collectionMotor;
@@ -30,7 +33,7 @@ extern Servo collectionMotor;
 void InitDriveMotors();
 void InitCollectionMotor();
 void InitMotors();
-void SetMotorSpeed(Servo motor, uint16_t speed);
+void SetMotorSpeed(Servo motor, signed int speed);
 uint16_t CheckSpeedLimits(uint16_t speed);
 uint16_t pidMotorControl(uint16_t targetMotorSpeed, uint16_t currentMotorSpeed, uint16_t currentMotorPos, uint16_t prevMotorPos);
 uint16_t leftJoystickRead(void);

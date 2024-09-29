@@ -11,21 +11,15 @@ elapsedMillis motorMicros;
 void setup()
 {
     Serial.begin(9600);
-
+    delay(1000);
     InitDriveEncoders();
     InitDriveMotors();
-    InitSensors();
+    Serial.println("Setup");
+    SetMotorSpeed(leftMotor, 1800);
 }
 
 void loop()
 {
-    SetMotorSpeed(leftMotor, motorSpeed);
-
-    if ( motorDelay >= 1500 ) {
-        motorSpeed = (motorSpeed == 1100) ? 1900 : 1100;
-        motorDelay = 0;
-    }
-
     // if ( (leftMotorPos != prevLeftMotorPos) || (rightMotorPos != prevRightMotorPos) ) {
     //     Serial.print("Index:");
     //     Serial.print(leftMotorPos, DEC);
@@ -35,15 +29,8 @@ void loop()
     //     prevLeftMotorPos = leftMotorPos;
     //     prevRightMotorPos = rightMotorPos;
     // }
-
-    // for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
-    //     Serial.print(returnL0()[i].readRangeContinuousMillimeters());
-    //     if ( returnL0()[i].timeoutOccurred() ) {
-    //         Serial.print(" TIMEOUT");
-    //     }
-    //     Serial.print('\t');
-    // }
-    // Serial.println();
-
-    Serial.print("test");
+    if (motorDelay > 50) {
+        PIDMotorSpeedControl();
+        motorDelay = 0;
+    }
 }
