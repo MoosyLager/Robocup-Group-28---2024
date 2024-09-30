@@ -15,6 +15,8 @@ Servo leftMotor;
 Servo rightMotor;
 Servo collectionMotor;
 
+Motor_t leftServo = {leftMotor, LEFT_MOTOR, 0, 0, 0, 0, 0};
+
 /**
  * Initialise the left and right drive motors
  */
@@ -123,7 +125,7 @@ signed int pidMotorControl(signed int targetMotorSpeed, signed int currentMotorS
     Serial.print("Control: ");
     Serial.print(control);
     Serial.print(" ");
-    return control;
+    return -control;
 }
 
 
@@ -134,19 +136,22 @@ void PIDMotorSpeedControl(void)
     signed int deltaT = currentTime - prevTime;
     prevTime = currentTime;
 
-    signed long deltaPos = leftMotorPos - prevSampledLeftMotorPos;
+    signed long leftDeltaPos = leftMotorPos - prevSampledLeftMotorPos;
+    signed long rightDeltaPos = rightMotorPos - prevSampledRightMotorPos;
     prevSampledLeftMotorPos = leftMotorPos;
+    prevSampledRightMotorPos = rightMotorPos;
 
     // findTargetMotorSpeed(&leftMotorTarget, &rightMotorTarget);
 
-    signed long leftMotorSpeed = findMotorSpeed(deltaPos, deltaT);
-    Serial.print("Left Motor Speed: ");
-    Serial.println(leftMotorSpeed);
+    // signed long leftMotorSpeed = findMotorSpeed(leftDeltaPos, deltaT);
+    signed long rightMotorSpeed = findMotorSpeed(rightDeltaPos, deltaT);
+    Serial.print("Right Motor: ");
+    Serial.println(rightMotorSpeed);
     
     // Bruh sound effect
-    signed int leftMotorControl = pidMotorControl(3000, leftMotorSpeed, deltaT);
+    signed int rightMotorControl = pidMotorControl(3000, rightMotorSpeed, deltaT);
 
-    SetMotorSpeed(leftMotor, leftMotorControl);
+    SetMotorSpeed(rightMotor, rightMotorControl);
     return;
 }
 

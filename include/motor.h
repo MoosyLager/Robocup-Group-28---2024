@@ -30,6 +30,22 @@ extern Servo leftMotor;
 extern Servo rightMotor;
 extern Servo collectionMotor;
 
+typedef enum {
+    LEFT_MOTOR,
+    RIGHT_MOTOR,
+    COLLECTION_MOTOR
+} MotorType_t;
+
+typedef struct {
+    Servo servoDriver;
+    MotorType_t motorType;
+    signed int motorSpeed;
+    signed int targetMotorSpeed;
+    signed int currentMotorSpeed;
+    signed long prevSampledMotorPos;
+    signed long currentMotorPos;
+} Motor_t;
+
 void InitDriveMotors();
 void InitCollectionMotor();
 void InitMotors();
