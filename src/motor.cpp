@@ -51,9 +51,7 @@ void InitMotors()
  */
 void SetMotorSpeed(Servo motor, signed int speed)
 {
-    Serial.print("Written Speed: ");
     signed int clampedSpeed = CheckSpeedLimits(speed);
-    Serial.print(clampedSpeed);
     motor.writeMicroseconds(clampedSpeed);
 }
 
@@ -138,6 +136,7 @@ void PIDMotorSpeedControl(void)
 
     signed long leftDeltaPos = leftMotorPos - prevSampledLeftMotorPos;
     signed long rightDeltaPos = rightMotorPos - prevSampledRightMotorPos;
+    signed long collectionDeltaPos = collectionMotorPos - prevSampledCollectionMotorPos;
     prevSampledLeftMotorPos = leftMotorPos;
     prevSampledRightMotorPos = rightMotorPos;
 

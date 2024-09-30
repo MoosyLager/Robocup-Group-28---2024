@@ -13,6 +13,7 @@ void setup()
     Serial.begin(9600);
     delay(1000);
     InitDriveEncoders();
+    InitCollectionMotor();
     InitDriveMotors();
     Serial.println("Setup");
     // SetMotorSpeed(leftMotor, 1800);
@@ -20,17 +21,18 @@ void setup()
 
 void loop()
 {
-    // if ( (leftMotorPos != prevLeftMotorPos) || (rightMotorPos != prevRightMotorPos) ) {
-    //     Serial.print("Index:");
-    //     Serial.print(leftMotorPos, DEC);
-    //     Serial.print(":");
-    //     Serial.print(rightMotorPos, DEC);
-    //     Serial.println();
-    //     prevLeftMotorPos = leftMotorPos;
-    //     prevRightMotorPos = rightMotorPos;
-    // }
-    if (motorDelay > 33) {
-        PIDMotorSpeedControl();
-        motorDelay = 0;
+    if ( (leftMotorPos != prevLeftMotorPos) || (rightMotorPos != prevRightMotorPos) || (collectionMotorPos != prevCollectionMotorPos)) {
+        Serial.print("Index:");
+        Serial.print(leftMotorPos, DEC);
+        Serial.print(":");
+        Serial.print(rightMotorPos, DEC);
+        Serial.print(":");
+        Serial.print(collectionMotorPos, DEC);
+        Serial.println();
+        prevLeftMotorPos = leftMotorPos;
+        prevRightMotorPos = rightMotorPos;
+        prevCollectionMotorPos = collectionMotorPos;
     }
+    motorSpeed = 1900;  
+    SetMotorSpeed(collectionMotor, motorSpeed);
 }

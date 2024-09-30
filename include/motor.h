@@ -14,8 +14,6 @@
 #define MIN_MOTOR_VAL       1010
 #define MAX_MOTOR_VAL       1990
 #define MOTOR_STOP_VAL      1500
-#define USE_JOYSTICK true
-#define JOYSTICK_CONVERSION_FACTOR 60
 
 extern uint16_t Ki;
 extern uint16_t Kp;
@@ -25,6 +23,7 @@ extern elapsedMillis currentTime;
 
 extern signed long prevSampledLeftMotorPos;
 extern signed long prevSampledRightMotorPos;
+extern signed long prevSampledCollectionMotorPos;
 
 extern Servo leftMotor;
 extern Servo rightMotor;
