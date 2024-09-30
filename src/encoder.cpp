@@ -3,7 +3,7 @@
 // Position variables for the drive encoders
 volatile unsigned int leftMotorPos = 0;
 unsigned int prevLeftMotorPos = 1;
-volatile unsigned int RightMotorPos = 0;
+volatile unsigned int rightMotorPos = 0;
 unsigned int prevRightMotorPos = 1;
 
 volatile unsigned int collectionMotorPos = 0;
@@ -38,11 +38,11 @@ void RightEncoderIntHandler()
     // Test transition
     rightASet = digitalRead(rightEncoderPinA) == HIGH;
     // and adjust counter + if A leads B
-    RightMotorPos += (rightASet != rightBSet) ? +1 : -1;
+    rightMotorPos += (rightASet != rightBSet) ? +1 : -1;
 
     rightBSet = digitalRead(rightEncoderPinB) == HIGH;
     // and adjust counter + if B follows A
-    RightMotorPos += (rightASet == rightBSet) ? +1 : -1;
+    rightMotorPos += (rightASet == rightBSet) ? +1 : -1;
 }
 
 // Collection motor encoder interrupt handler

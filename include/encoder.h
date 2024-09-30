@@ -19,7 +19,7 @@ enum CollectionMotorPinAssignments {
 
 extern volatile unsigned int leftMotorPos;
 extern unsigned int prevLeftMotorPos;
-extern volatile unsigned int RightMotorPos;
+extern volatile unsigned int rightMotorPos;
 extern unsigned int prevRightMotorPos;
 
 extern volatile unsigned int collectionMotorPos;
