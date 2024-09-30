@@ -17,10 +17,10 @@ extern Servo leftMotor;
 extern Servo rightMotor;
 extern Servo collectionMotor;
 
-void InitDriveMotors();
 void SetMotorSpeed(Servo motor, uint16_t speed);
 uint16_t CheckSpeedLimits(uint16_t speed);
 void InitMotors();
+void InitDriveMotors();
 void InitCollectionMotor();
 
 #endif
