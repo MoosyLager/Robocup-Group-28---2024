@@ -2,8 +2,8 @@
 #include "encoder.h"
 #include <elapsedMillis.h>
 
-uint16_t Ki = 1;
-uint16_t Kp = 0;
+uint16_t Ki = 8;
+uint16_t Kp = 50;
 uint16_t Kd = 0;
 
 signed long prevSampledLeftMotorPos = 0;
@@ -49,7 +49,9 @@ void InitMotors()
  */
 void SetMotorSpeed(Servo motor, signed int speed)
 {
-    uint16_t clampedSpeed = CheckSpeedLimits(speed);
+    Serial.print("Written Speed: ");
+    signed int clampedSpeed = CheckSpeedLimits(speed);
+    Serial.print(clampedSpeed);
     motor.writeMicroseconds(clampedSpeed);
 }
 
@@ -58,7 +60,7 @@ void SetMotorSpeed(Servo motor, signed int speed)
 /**
  * Ensures speed is within limits
  */
-uint16_t CheckSpeedLimits(uint16_t speed)
+signed int CheckSpeedLimits(signed int speed)
 {
     if ( speed > MAX_MOTOR_VAL ) {
         // Serial.printf("Speed was out of bounds. Clamped to %u", MAX_MOTOR_VAL);
@@ -70,10 +72,6 @@ uint16_t CheckSpeedLimits(uint16_t speed)
     }
     return speed;
 }
-
-
-
-
 
 
 
@@ -109,15 +107,15 @@ signed int pidMotorControl(signed int targetMotorSpeed, signed int currentMotorS
     Serial.print("Error: ");
     Serial.print(error);
     Serial.print(" ");
-    signed int p = Kp * error;
+    signed int p = - Kp * error;
 
     // Integral control
     static signed int i = 0;
-    i = i + Ki * error;
+    i = i - Ki * error;
 
     // Deals with non-linear time intervals
     static signed int prevMotorSpeed = 0;
-    signed int d = Kd * (currentMotorSpeed - prevMotorSpeed) / (deltaT);
+    signed int d = - Kd * (currentMotorSpeed - prevMotorSpeed) / (deltaT);
     prevMotorSpeed = currentMotorSpeed;
     
     signed int control =  p + i + d;
@@ -132,6 +130,7 @@ signed int pidMotorControl(signed int targetMotorSpeed, signed int currentMotorS
 void PIDMotorSpeedControl(void)
 {
     static signed long prevTime = 0;
+
     signed int deltaT = currentTime - prevTime;
     prevTime = currentTime;
 
@@ -144,7 +143,7 @@ void PIDMotorSpeedControl(void)
     Serial.print("Left Motor Speed: ");
     Serial.println(leftMotorSpeed);
     
-    signed int leftMotorTarget = 3000;
+    // Bruh sound effect
     signed int leftMotorControl = pidMotorControl(3000, leftMotorSpeed, deltaT);
 
     SetMotorSpeed(leftMotor, leftMotorControl);

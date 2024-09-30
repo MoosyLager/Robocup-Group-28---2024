@@ -15,7 +15,7 @@ void setup()
     InitDriveEncoders();
     InitDriveMotors();
     Serial.println("Setup");
-    SetMotorSpeed(leftMotor, 1800);
+    // SetMotorSpeed(leftMotor, 1800);
 }
 
 void loop()
@@ -29,7 +29,7 @@ void loop()
     //     prevLeftMotorPos = leftMotorPos;
     //     prevRightMotorPos = rightMotorPos;
     // }
-    if (motorDelay > 50) {
+    if (motorDelay > 33) {
         PIDMotorSpeedControl();
         motorDelay = 0;
     }

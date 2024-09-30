@@ -34,7 +34,7 @@ void InitDriveMotors();
 void InitCollectionMotor();
 void InitMotors();
 void SetMotorSpeed(Servo motor, signed int speed);
-uint16_t CheckSpeedLimits(uint16_t speed);
+signed int CheckSpeedLimits(signed int speed);
 uint16_t pidMotorControl(uint16_t targetMotorSpeed, uint16_t currentMotorSpeed, uint16_t currentMotorPos, uint16_t prevMotorPos);
 uint16_t leftJoystickRead(void);
 uint16_t rightJoystickRead(void);
