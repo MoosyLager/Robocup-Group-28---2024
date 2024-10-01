@@ -15,18 +15,17 @@ void InitSensors()
 {
     Wire.begin();
     Wire.setClock(400000);
-    io.begin(SX1509_ADDRESS);
+    io.begin(TOF_CONTROL_ADDRESS);
+    io.begin(AIO_ADDRESS);
     InitTOFL0();
     InitTOFL1();
     InitLimit();
 }
-
 /**
  * Initialise any limit switches
  */
 void InitLimit()
 {
-    io.begin(COLLECTION_SWITCH_ADDRESS);
     io.pinMode(AIO_0, INPUT);
 }
 
