@@ -13,6 +13,7 @@ void setup()
     Serial.begin(9600);
     delay(1000);
     InitDriveEncoders();
+    InitCollectionEncoder();
     InitCollectionMotor();
     InitDriveMotors();
     Serial.println("Setup");
@@ -33,6 +34,6 @@ void loop()
         prevRightMotorPos = rightMotorPos;
         prevCollectionMotorPos = collectionMotorPos;
     }
-    motorSpeed = 1900;  
+    motorSpeed = 1990;  
     SetMotorSpeed(collectionMotor, motorSpeed);
 }
