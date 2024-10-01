@@ -2,39 +2,49 @@
 #define SEARCHALGORITHM_H
 
 #include <Arduino.h>
+#include <stdbool.h>
 
 extern uint8_t weightsOnboard;
+extern bool finished_calibrating;
 
+// Main state machine
+typedef enum {
+    CALIBRATING,
+    HUNTING,
+    AVOIDING,
+    RETURNING
+} MainState_t;
+
+// Sub state machine for hunting
 typedef enum {
     SEARCH,
     CHASE,
-    COLLECT,
-    RETURN,
-    DEPOSIT,
-} Mode_t;
+    COLLECT
+} HuntState_t;
 
+// Sub state machine for returning
 typedef enum {
-    CLOCKWISE,
-    COUNTERCLOCKWISE,
-    FORWARD,
-    BACKWARD,
-} Direction_t;
+    HOMESEEK,
+    DEPOSIT
+} ReturnState_t;
 
 typedef struct {
-    Mode_t mode;
-    Direction_t direction;
-    uint16_t speed;
-    uint16_t distance;
-} SearchAlgorithm_t;
-
-/* 
-loop
-if 3 weights on board or at time limit:
-    Mode = RETURN
-else if (weight detected)
-    Mode = CHASE
+    MainState_t currentState;
+    MainState_t lastMainState;  // To track the last state (HUNTING or RETURNING)
+    HuntState_t huntState;
+    ReturnState_t returnState;
+    int collectedWeights;
+    bool tooCloseToWall;
+    bool calibrated;
+} RobotFSM;
 
 
-*/
+
+// Function prototypes
+void handleCalibrating(RobotFSM *fsm);
+void handleHunting(RobotFSM *fsm);
+void handleAvoiding(RobotFSM *fsm);
+void handleReturning(RobotFSM *fsm);
+void checkWallProximity(RobotFSM *fsm);
 
 #endif // SEARCHALGORITHM_H
