@@ -1,11 +1,11 @@
 #include "encoder.h"
 
-extern volatile uint16_t PID_leftMotorPos = 0;
-extern volatile uint16_t PID_rightMotorPos = 0;
+volatile uint16_t PID_leftMotorPos = 0;
+volatile uint16_t PID_rightMotorPos = 0;
 
-extern const uint16_t Kp = 1; 
-extern const uint16_t Ki = 0;
-extern const uint16_t Kd = 0;
+const uint16_t Kp = 1;
+const uint16_t Ki = 0;
+const uint16_t Kd = 0;
 
 volatile unsigned int leftMotorPos = 0;
 unsigned int prevLeftMotorPos = 1;
