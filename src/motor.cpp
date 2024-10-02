@@ -32,8 +32,8 @@ void InitCollectionMotor()
 void InitStepper()
 {
     stepper = AccelStepper(1, STEPPER_DIR_PIN, STEPPER_STEP_PIN);
-    stepper.setMaxSpeed(1000);
-    stepper.setAcceleration(500);
+    stepper.setMaxSpeed(STEPPER_MAX_SPEED);
+    stepper.setAcceleration(STEPPER_MAX_ACCELERATION);
     stepper.setCurrentPosition(0);
 }
 
