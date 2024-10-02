@@ -56,3 +56,17 @@ void CloseCollector()
 void ActuateCollector()
 {
 }
+
+/**
+ * Set the ramp to the lowered position
+ */
+void LowerRamp()
+{
+}
+
+/**
+ * Set the ramp to the lifted positioned
+ */
+void LiftRamp()
+{
+}
