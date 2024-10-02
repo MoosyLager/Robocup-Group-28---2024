@@ -7,7 +7,7 @@
 Servo leftMotor;
 Servo rightMotor;
 Servo collectionMotor;
-AccelStepper stepper;
+AccelStepper rampStepper;
 
 /**
  * Initialise the left and right drive motors
@@ -31,10 +31,10 @@ void InitCollectionMotor()
  */
 void InitStepper()
 {
-    stepper = AccelStepper(1, STEPPER_DIR_PIN, STEPPER_STEP_PIN);
-    stepper.setMaxSpeed(STEPPER_MAX_SPEED);
-    stepper.setAcceleration(STEPPER_MAX_ACCELERATION);
-    stepper.setCurrentPosition(0);
+    rampStepper = AccelStepper(1, STEPPER_DIR_PIN, STEPPER_STEP_PIN);
+    rampStepper.setMaxSpeed(STEPPER_MAX_SPEED);
+    rampStepper.setAcceleration(STEPPER_MAX_ACCELERATION);
+    rampStepper.setCurrentPosition(0);
 }
 
 /**
