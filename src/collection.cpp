@@ -15,6 +15,10 @@ void CalibrateCollector()
     }
 }
 
+void CalibrateStepper()
+{
+}
+
 void ActuateCollector()
 {
 }
