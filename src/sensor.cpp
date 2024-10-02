@@ -13,11 +13,29 @@ VL53L1X sensorsL1[NUM_TOF_L1];
  */
 void InitSensors()
 {
-    io.begin(SX1509_ADDRESS);
-    Wire.begin();
-    Wire.setClock(400000);
+    InitIOExpander();
     InitTOFL0();
     InitTOFL1();
+    InitLimit();
+}
+
+/**
+ * Initialise the SX1509 IO Expander
+ */
+void InitIOExpander()
+{
+    Wire.begin();
+    Wire.setClock(400000);
+    io.begin(TOF_CONTROL_ADDRESS);
+    io.begin(AIO_ADDRESS);
+}
+
+/**
+ * Initialise any limit switches
+ */
+void InitLimit()
+{
+    io.pinMode(AIO_0, INPUT);
 }
 
 /**
@@ -94,14 +112,26 @@ void InitTOFL1()
     }
 }
 
-VL53L0X *returnL0()
+/**
+ * Returns reading from IR sensor A
+ */
+int IRValueA()
 {
-    return sensorsL0;
+    return analogRead(IR_ADDRESS_A);
 }
 
-VL53L1X *returnL1()
+/**
+ * Returns reading from IR sensor B
+ */
+int IRValueB()
 {
-    return sensorsL1;
+    return analogRead(IR_ADDRESS_B);
 }
 
-/* This code needs to be updated for the amount of */ 
+/**
+ * Returns the current state of the collector limit switch
+ */
+int CollectorPosition()
+{
+    return io.digitalRead(AIO_0);
+}

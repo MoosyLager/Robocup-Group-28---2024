@@ -1,8 +1,13 @@
+/**
+ * Module for controlling all connected motors including 2 DC drive motors, 1 worm gear DC motor, and 1 stepper motor
+ */
+
 #include "motor.h"
 
 Servo leftMotor;
 Servo rightMotor;
 Servo collectionMotor;
+AccelStepper stepper;
 
 /**
  * Initialise the left and right drive motors
@@ -22,12 +27,24 @@ void InitCollectionMotor()
 }
 
 /**
+ * Initialise the ramp stepper motor
+ */
+void InitStepper()
+{
+    stepper = AccelStepper(1, STEPPER_DIR_PIN, STEPPER_STEP_PIN);
+    stepper.setMaxSpeed(1000);
+    stepper.setAcceleration(500);
+    stepper.setCurrentPosition(0);
+}
+
+/**
  * Initialise all connected motors
  */
 void InitMotors()
 {
     InitDriveMotors();
     InitCollectionMotor();
+    InitStepper();
 }
 
 /**
