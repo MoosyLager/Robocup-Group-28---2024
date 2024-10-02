@@ -13,6 +13,21 @@ void initializeRobotFSM(RobotFSM* fsm) {
     fsm->calibrated = false;          // Robot is not calibrated at the start
 }
 
+void checkWeightsOnboard(RobotFSM* fsm)
+{
+    // weightCheckFunction(fsm); changes the state to RETURNING if >= 3 weights are onboard
+}
+
+void checkWallDistance(RobotFSM* fsm)
+{
+    // checks the sensor values to determine if the robot is too close to the wall
+}
+
+void checkCalibration(RobotFSM* fsm)
+{
+    // calibrationCheckFunction(fsm); changes the state to HUNTING if calibration is completed
+}
+
 // Main FSM processing function
 void processFSM(RobotFSM* fsm) {
     // Checks if robot is calibrated
@@ -40,18 +55,6 @@ void processFSM(RobotFSM* fsm) {
             Serial.println("Unknown state!");
             break;
     }
-}
-
-void checkWeightsOnboard(RobotFSM* fsm) {
-    // weightCheckFunction(fsm); changes the state to RETURNING if >= 3 weights are onboard
-}
-
-void checkWallDistance(RobotFSM* fsm) {
-    // checks the sensor values to determine if the robot is too close to the wall
-}
-
-void checkCalibration(RobotFSM* fsm) {
-    // calibrationCheckFunction(fsm); changes the state to HUNTING if calibration is completed
 }
 
 /*
