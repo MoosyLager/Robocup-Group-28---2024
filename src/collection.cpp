@@ -1,5 +1,8 @@
 #include "collection.h"
 
+/**
+ * Calibrate the collector encoder to a known position
+ */
 void CalibrateCollector()
 {
     Serial.println("Calibrating Collector...");
@@ -15,6 +18,9 @@ void CalibrateCollector()
     }
 }
 
+/**
+ * Calibrate the ramp stepper motor to a known position
+ */
 void CalibrateStepper()
 {
     Serial.println("Calibraing Stepper Motor...");
@@ -30,10 +36,23 @@ void CalibrateStepper()
     }
 }
 
-void ActuateCollector()
+/**
+ * Set the collector jaws to an open position to allow for weights to pass through
+ */
+void OpenCollector()
 {
 }
 
-void ResetCollector()
+/**
+ * Set the collector jaws to a closed position to block weights from passing through
+ */
+void CloseCollector()
+{
+}
+
+/**
+ * Actuate the collector through a full rotation and move to the closed position
+ */
+void ActuateCollector()
 {
 }
