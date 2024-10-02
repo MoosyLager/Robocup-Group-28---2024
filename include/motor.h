@@ -15,6 +15,7 @@
 #define MIN_MOTOR_VAL       1010
 #define MAX_MOTOR_VAL       1990
 #define MOTOR_STOP_VAL      1500
+#define INTEGRAL_LIMIT      50000000
 
 extern elapsedMillis currentTime;
 
@@ -27,29 +28,29 @@ typedef enum {
 typedef struct {
     Servo servoDriver;
     MotorType_t motorType;
-    signed int motorSpeed;
-    signed int targetMotorSpeed;
     signed int currentMotorSpeed;
-    signed long prevSampledMotorPos;
     signed long currentMotorPos;
     signed int prevMotorSpeed;   // To store the previous motor speed for the derivative term
+    signed long prevSampledMotorPos;
     signed int integral;         // To store the integral term for each motor
-    bool isInverted;             // To handle inverted control for some motors
+    bool speedInverted;             // To handle inverted control for some motors
     uint16_t Kp;                 // Proportional gain
     uint16_t Ki;                 // Integral gain
     uint16_t Kd;                 // Derivative gain
-    signed long targetPosition;   // Target position for position control
+    signed long targetMotorPos;   // Target position for position control
+    signed int targetMotorSpeed;  // Target speed for speed control
 } Motor_t;
+
+extern Motor_t leftMotor;
+extern Motor_t rightMotor;
+extern Motor_t collectionMotor;
 
 
 void InitMotors(Motor_t *leftMotor, Motor_t *rightMotor, Motor_t *collectionMotor);
 void SetMotorSpeed(Motor_t *motor, signed int speed);
 signed int CheckSpeedLimits(signed int speed);
 void findTargetMotorSpeed(uint16_t* leftMotorTarget, uint16_t* rightMotorTarget );
-signed long findMotorSpeed(signed long deltaPos, signed int deltaT);
-signed int pidMotorDistanceControl(Motor_t *motor, signed long targetPosition, unsigned long deltaT);
-signed int pidMotorSpeedControl(Motor_t *motor, signed int targetMotorSpeed, signed int currentMotorSpeed, unsigned long deltaT);
-void PIDMotorPositionControl(Motor_t *leftMotor, Motor_t *rightMotor);
-void PIDMotorSpeedControl(Motor_t *leftMotor, Motor_t *rightMotor);
-
+void findMotorSpeed(signed long deltaPos, signed int deltaT);
+signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long target, unsigned long deltaT);
+void PIDMotorControl(Motor_t *leftMotor, Motor_t *rightMotor, bool isPositionControl);
 #endif
