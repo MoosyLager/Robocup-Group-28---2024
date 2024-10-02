@@ -92,5 +92,6 @@ int IRValueB();
 void UpdateIMU();
 
 int CollectorPosition();
+int RampPosition();
 
 #endif
