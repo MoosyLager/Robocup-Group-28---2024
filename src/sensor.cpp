@@ -1,12 +1,27 @@
 #include "sensor.h"
 
+SX1509 io;  // Port Expander
+
+/**
+ * TOF Data
+ */
 // The Arduino pin connected to the XSHUT pin of each sensor
 const uint8_t xShutPinsL0[8] = {0, 1};
 const uint8_t xShutPinsL1[8] = {};
-
-SX1509 io;  // SX1509 object to use throughout
 VL53L0X sensorsL0[NUM_TOF_L0];
 VL53L1X sensorsL1[NUM_TOF_L1];
+
+/**
+ * IMU Data
+ */
+Adafruit_BNO055 bno = Adafruit_BNO055(IMU_ID, IMU_ADDRESS, &IMU_WIRE);
+int8_t boardTemp;
+sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
+
+/**
+ * Colour Sensor Data
+ */
+Adafruit_TCS34725 colourSensor = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
 
 /**
  * Initialise the IO board, I2C bus and the sensor
@@ -113,6 +128,26 @@ void InitTOFL1()
 }
 
 /**
+ * Initialises the IMU
+ */
+void InitIMU()
+{
+    if ( !bno.begin() ) {
+        Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    }
+}
+
+/**
+ * Initialise the colour sensor
+ */
+void InitColourSensor()
+{
+    if ( !colourSensor.begin(COLOUR_SENSOR_ADDRESS, &COLOUR_SENSOR_WIRE) ) {
+        Serial.println("COLOUR SENSOR NOT DETECTED");
+    }
+}
+
+/**
  * Returns reading from IR sensor A
  */
 int IRValueA()
@@ -134,4 +169,33 @@ int IRValueB()
 int CollectorPosition()
 {
     return io.digitalRead(AIO_0);
+}
+
+void UpdateIMU()
+{
+    bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+    bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
+    bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+    bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+    bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);
+    boardTemp = bno.getTemp();
+}
+
+Colour_t GetColour()
+{
+    uint16_t red, green, blue, clear;
+    Colour_t colour;
+
+    colourSensor.setInterrupt(false);
+    delay(60);
+    colourSensor.getRawData(&red, &green, &blue, &clear);
+    colourSensor.setIntegrationTime(true);
+
+    colour.R = red;
+    colour.G = blue;
+    colour.B = green;
+    colour.C = clear;
+
+    return colour;
 }
