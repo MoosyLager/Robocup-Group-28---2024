@@ -71,8 +71,8 @@ void InitDriveEncoders()
     pinMode(rightEncoderPinA, INPUT);
     pinMode(rightEncoderPinB, INPUT);
 
-    attachInterrupt(digitalPinToInterrupt(2), LeftEncoderIntHandler, CHANGE);  // Set up an interrupt for each encoder
-    attachInterrupt(digitalPinToInterrupt(4), RightEncoderIntHandler, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(leftEncoderPinA), LeftEncoderIntHandler, CHANGE);  // Set up an interrupt for each encoder
+    attachInterrupt(digitalPinToInterrupt(rightEncoderPinA), RightEncoderIntHandler, CHANGE);
 }
 
 uint16_t PID_Controller(uint16_t desiredSpeed, uint16_t currentPos, uint16_t prevPos)
