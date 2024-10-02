@@ -13,14 +13,23 @@ VL53L1X sensorsL1[NUM_TOF_L1];
  */
 void InitSensors()
 {
-    Wire.begin();
-    Wire.setClock(400000);
-    io.begin(TOF_CONTROL_ADDRESS);
-    io.begin(AIO_ADDRESS);
+    InitIOExpander();
     InitTOFL0();
     InitTOFL1();
     InitLimit();
 }
+
+/**
+ * Initialise the SX1509 IO Expander
+ */
+void InitIOExpander()
+{
+    Wire.begin();
+    Wire.setClock(400000);
+    io.begin(TOF_CONTROL_ADDRESS);
+    io.begin(AIO_ADDRESS);
+}
+
 /**
  * Initialise any limit switches
  */

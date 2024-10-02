@@ -42,6 +42,7 @@
 #define NUM_TOF_L1 0  // Number of VL53L1X TOF sensors
 
 void InitSensors();
+void InitIOExpander();
 void InitTOFL0();
 void InitTOFL1();
 void InitLimit();
