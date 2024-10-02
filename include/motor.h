@@ -5,6 +5,7 @@
 #include <Servo.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <elapsedMillis.h>
 
 #define LEFT_MOTOR_ADDRESS  0
 #define RIGHT_MOTOR_ADDRESS 1
@@ -15,19 +16,7 @@
 #define MAX_MOTOR_VAL       1990
 #define MOTOR_STOP_VAL      1500
 
-extern uint16_t Ki;
-extern uint16_t Kp;
-extern uint16_t Kd;
-
 extern elapsedMillis currentTime;
-
-extern signed long prevSampledLeftMotorPos;
-extern signed long prevSampledRightMotorPos;
-extern signed long prevSampledCollectionMotorPos;
-
-extern Servo leftMotor;
-extern Servo rightMotor;
-extern Servo collectionMotor;
 
 typedef enum {
     LEFT_MOTOR,
@@ -43,18 +32,24 @@ typedef struct {
     signed int currentMotorSpeed;
     signed long prevSampledMotorPos;
     signed long currentMotorPos;
+    signed int prevMotorSpeed;   // To store the previous motor speed for the derivative term
+    signed int integral;         // To store the integral term for each motor
+    bool isInverted;             // To handle inverted control for some motors
+    uint16_t Kp;                 // Proportional gain
+    uint16_t Ki;                 // Integral gain
+    uint16_t Kd;                 // Derivative gain
+    signed long targetPosition;   // Target position for position control
 } Motor_t;
 
-void InitDriveMotors();
-void InitCollectionMotor();
-void InitMotors();
-void SetMotorSpeed(Servo motor, signed int speed);
+
+void InitMotors(Motor_t *leftMotor, Motor_t *rightMotor, Motor_t *collectionMotor);
+void SetMotorSpeed(Motor_t *motor, signed int speed);
 signed int CheckSpeedLimits(signed int speed);
-uint16_t pidMotorControl(uint16_t targetMotorSpeed, uint16_t currentMotorSpeed, uint16_t currentMotorPos, uint16_t prevMotorPos);
-uint16_t leftJoystickRead(void);
-uint16_t rightJoystickRead(void);
 void findTargetMotorSpeed(uint16_t* leftMotorTarget, uint16_t* rightMotorTarget );
-uint16_t findMotorSpeed(uint16_t motorPos, uint16_t prevMotorPos, unsigned long deltaT);
-void PIDMotorSpeedControl(void);
+signed long findMotorSpeed(signed long deltaPos, signed int deltaT);
+signed int pidMotorDistanceControl(Motor_t *motor, signed long targetPosition, unsigned long deltaT);
+signed int pidMotorSpeedControl(Motor_t *motor, signed int targetMotorSpeed, signed int currentMotorSpeed, unsigned long deltaT);
+void PIDMotorPositionControl(Motor_t *leftMotor, Motor_t *rightMotor);
+void PIDMotorSpeedControl(Motor_t *leftMotor, Motor_t *rightMotor);
 
 #endif
