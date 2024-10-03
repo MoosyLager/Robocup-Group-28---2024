@@ -75,6 +75,14 @@ void InitDriveEncoders()
     attachInterrupt(digitalPinToInterrupt(rightEncoderPinA), RightEncoderIntHandler, CHANGE);
 }
 
+void InitCollectionEncoder()
+{
+    pinMode(collectionEncoderPinA, INPUT);
+    pinMode(collectionEncoderPinB, INPUT);
+
+    attachInterrupt(digitalPinToInterrupt(collectionEncoderPinA), CollectionEncoderIntHandler, CHANGE);
+}
+
 uint16_t PID_Controller(uint16_t desiredSpeed, uint16_t currentPos, uint16_t prevPos)
 {
     /*uint16_t currentSpeed = (currentPos - prevPos) /  deltaTime;
