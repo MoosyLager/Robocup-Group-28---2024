@@ -20,6 +20,9 @@
 #define COLOUR_SENSOR_ADDRESS 0x29
 #define COLOUR_SENSOR_WIRE    Wire1
 
+/**
+ * Wrapper to hold RGBA colour information
+ */
 typedef struct {
     uint16_t R;
     uint16_t G;
@@ -40,8 +43,8 @@ extern Adafruit_TCS34725 colourSensor;
  * Port Expander AIO
  */
 #define AIO_ADDRESS 0x3E  // Port expander address for AIO digital pins
-#define AIO_0       0
-#define AIO_1       1
+#define AIO_0       0     // Collector Position Limit Switch
+#define AIO_1       1     // Ramp Position Limit Switch
 #define AIO_2       2
 #define AIO_3       3
 #define AIO_4       4
@@ -62,8 +65,17 @@ extern Adafruit_TCS34725 colourSensor;
 #define TOF_CONTROL_ADDRESS   0x3F  // Port expander address for TOF control pins
 #define VL53L0X_ADDRESS_START 0x30  // Start of VL53L0X address space
 #define VL53L1X_ADDRESS_START 0x35  // Start of VL53L1X address space
-#define NUM_TOF_L0            2     // Number of VL53L0X TOF sensors
+#define NUM_TOF_L0            0     // Number of VL53L0X TOF sensors
 #define NUM_TOF_L1            0     // Number of VL53L1X TOF sensors
+
+#define TOF_L0_XSHUT_1        0
+#define TOF_L0_XSHUT_1        1
+#define TOF_L0_XSHUT_1        2
+#define TOF_L0_XSHUT_1        3
+#define TOF_L1_XSHUT_1        4
+#define TOF_L1_XSHUT_1        5
+#define TOF_L1_XSHUT_1        6
+#define TOF_L1_XSHUT_1        7
 
 /**
  * IMU
@@ -76,12 +88,6 @@ extern Adafruit_TCS34725 colourSensor;
 extern sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
 extern Adafruit_BNO055 bno;
 extern int8_t boardTemp;
-
-/**
- * Circular Buffers
- */
-// extern CircBuff_t sensorL0Data[NUM_TOF_L0];
-// extern CircBuff_t sensorL1Data[NUM_TOF_L1];
 
 void InitSensors();
 void InitIOExpander();
