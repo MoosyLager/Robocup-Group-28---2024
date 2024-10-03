@@ -1,5 +1,4 @@
 #include "sensor.h"
-#include "circularBuf.h"
 
 SX1509 io;  // Port Expander
 
@@ -24,35 +23,134 @@ const uint8_t xShutPinsL1[8] = {};
 VL53L0X sensorsL0[NUM_TOF_L0];
 VL53L1X sensorsL1[NUM_TOF_L1];
 
-/**
- * ! NEED TO RETHINK THIS, IT IS CURRENTLY DOES NOT MAKE SENSE
- */
-CircularBuff_t sensorL0Data[NUM_TOF_L0];
-CircularBuff_t sensorL1Data[NUM_TOF_L1];
+CircBuff_t sensorL0Data[NUM_TOF_L0];
+CircBuff_t sensorL1Data[NUM_TOF_L1];
 
 /**
- * Initialise the circular buffers for the sensor data
+ * Given a circular buffer, returns the mean
  */
-void initCircularBuffers(CircularBuff_t *buffers)
+uint16_t CalculateBufferMean(CircBuff_t *buffer)
 {
-    for (uint32_t i = 0; i < NUM_TOF_L0; i++) {
-        // Initialize each buffer in the array with the given size
-        circularBufTInit(&buffers[i], CIRCULAR_BUF_SIZE);
+    uint32_t sum = 0;
+    for ( int i = 0; i < CIRCULAR_BUF_SIZE; i++ ) {
+        sum = sum + CircBufRead(buffer);
     }
+    uint16_t avg = ((2 * sum + CIRCULAR_BUF_SIZE) / 2 / CIRCULAR_BUF_SIZE);
+    return avg;
+}
 
-    for (uint32_t i = 0; i < NUM_TOF_L1; i++) {
-        // Initialize each buffer in the array with the given size
-        circularBufTInit(&buffers[i], CIRCULAR_BUF_SIZE);
+/**
+ * Read the value from each TOF sensor and add the reading to its circular buffer
+ */
+void UpdateTOFL0()
+{
+    for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
+        // Read sensor data
+        uint16_t sensorValue = sensorsL0[i].readRangeContinuousMillimeters();
+
+        // Write sensor data to circular buffer
+        CircBuffWrite(&sensorL0Data[i], sensorValue);
+
+        // // Print the average value
+        // Serial.print("Sensor L0 ");
+        // Serial.print(i);
+        // Serial.print(" Avg: ");
+        // Serial.print(avg);
+
+        if ( sensorsL0[i].timeoutOccurred() ) {
+            Serial.print(" TIMEOUT");
+        }
+        Serial.print('\t');
     }
 }
 
+/**
+ * Read the value from each TOF sensor and add the reading to its circular buffer
+ */
+void UpdateTOFL1()
+{
+    for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
+        // Read sensor data
+        uint16_t sensorValue = sensorsL1[i].readRangeContinuousMillimeters();
+
+        // Write sensor data to circular buffer
+        CircBuffWrite(&sensorL1Data[i], sensorValue);
+
+        if ( sensorsL0[i].timeoutOccurred() ) {
+            Serial.print(" TIMEOUT");
+        }
+        Serial.print('\t');
+    }
+}
 
 /**
- * Initialise the IO board, I2C bus and the sensor
+ * Returns 0 if the collector is at the reference position
+ */
+int CollectorPosition()
+{
+    return io.digitalRead(AIO_0);
+}
+
+/**
+ * Returns 0 if the ramp is at the zero position
+ */
+int RampPosition()
+{
+    return io.digitalRead(AIO_1);
+}
+
+void UpdateIMU()
+{
+    bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+    bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
+    bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+    bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+    bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
+    bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);
+    boardTemp = bno.getTemp();
+}
+
+/**
+ * Reads the colours of the suface under the colour sensor
+ */
+Colour_t GetColour()
+{
+    uint16_t red, green, blue, clear;
+    Colour_t colour;
+
+    colourSensor.setInterrupt(false);
+    delay(60);
+    colourSensor.getRawData(&red, &green, &blue, &clear);
+    colourSensor.setInterrupt(true);
+
+    colour.R = red;
+    colour.G = blue;
+    colour.B = green;
+    colour.C = clear;
+
+    return colour;
+}
+
+/**
+ * Initialise the circular buffers for the TOF sensor data
+ */
+void InitCircularBuffers(CircBuff_t *buffers)
+{
+    for ( int i = 0; i < NUM_TOF_L0; i++ ) {
+        CircBuffInit(&sensorL0Data[i], CIRCULAR_BUF_SIZE);
+    }
+    for ( int i = 0; i < NUM_TOF_L1; i++ ) {
+        CircBuffInit(&sensorL1Data[i], CIRCULAR_BUF_SIZE);
+    }
+}
+
+/**
+ * Initialise the IO board, I2C bus, circular buffers, and all sensors
  */
 void InitSensors()
 {
     InitIOExpander();
+    InitCircularBuffers();
     InitTOFL0();
     InitTOFL1();
     InitLimitSwitch();
@@ -152,6 +250,9 @@ void InitTOFL1()
     }
 }
 
+/**
+ * Initialises the IMU
+ */
 void InitIMU()
 {
     if ( !bno.begin() ) {
@@ -167,108 +268,4 @@ void InitColourSensor()
     if ( !colourSensor.begin(COLOUR_SENSOR_ADDRESS, &COLOUR_SENSOR_WIRE) ) {
         Serial.println("COLOUR SENSOR NOT DETECTED");
     }
-}
-
-void ReadTOFL0()
-{
-    for (uint8_t i = 0; i < NUM_TOF_L0; i++) {
-        // Read sensor data
-        uint16_t sensorValue = sensorsL0[i].readRangeContinuousMillimeters();
-        
-        // Write sensor data to circular buffer
-        circularBufTWrite(&sensorL0Data[i], sensorValue);
-        
-        // Calculate the average from the circular buffer
-        uint32_t avg = findBufAvg(&sensorL0Data[i]);
-        
-        // Print the average value
-        Serial.print("Sensor L0 ");
-        Serial.print(i);
-        Serial.print(" Avg: ");
-        Serial.print(avg);
-        
-        if (sensorsL0[i].timeoutOccurred()) {
-            Serial.print(" TIMEOUT");
-        }
-        Serial.print('\t');
-    }
-    Serial.println();
-}
-
-void ReadTOFL1()
-{
-    for (uint8_t i = 0; i < NUM_TOF_L1; i++) {
-        // Read sensor data
-        uint16_t sensorValue = sensorsL1[i].readRangeContinuousMillimeters();
-        
-        // Write sensor data to circular buffer
-        circularBufTWrite(&sensorL1Data[i], sensorValue);
-        
-        // Calculate the average from the circular buffer
-        uint32_t avg = findBufAvg(&sensorL1Data[i]);
-        
-        // Print the average value
-        Serial.print("Sensor L1 ");
-    }
-}
-
-// /**
-//  * Returns reading from IR sensor A
-//  */
-// int IRValueA()
-// {
-//     return analogRead(IR_ADDRESS_A);
-// }
-
-// /**
-//  * Returns reading from IR sensor B
-//  */
-// int IRValueB()
-// {
-//     return analogRead(IR_ADDRESS_B);
-// }
-
-/**
- * Returns 0 if the collector is at the reference position
- */
-int CollectorPosition()
-{
-    return io.digitalRead(AIO_0);
-}
-
-/**
- * Returns 0 if the ramp is at the zero position
- */
-int RampPosition()
-{
-    return io.digitalRead(AIO_1);
-}
-
-void UpdateIMU()
-{
-    bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
-    bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
-    bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
-    bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
-    bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
-    bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);
-    boardTemp = bno.getTemp();
-}
-
-Colour_t GetColour()
-{
-    uint16_t red, green, blue, clear;
-    Colour_t colour;
-
-    colourSensor.setInterrupt(false);
-    delay(60);
-    colourSensor.getRawData(&red, &green, &blue, &clear);
-    colourSensor.setIntegrationTime(true);
-
-    colour.R = red;
-    colour.G = blue;
-    colour.B = green;
-    colour.C = clear;
-
-    return colour;
 }

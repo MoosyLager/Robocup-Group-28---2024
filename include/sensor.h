@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
+#include "circularBuf.h"
 #include <Adafruit_BNO055.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_TCS34725.h>
@@ -76,8 +77,11 @@ extern sensors_event_t orientationData, angVelocityData, linearAccelData, magnet
 extern Adafruit_BNO055 bno;
 extern int8_t boardTemp;
 
-extern uint16_t sensorL0Data[NUM_TOF_L0];
-extern uint16_t sensorL1Data[NUM_TOF_L1];
+/**
+ * Circular Buffers
+ */
+// extern CircBuff_t sensorL0Data[NUM_TOF_L0];
+// extern CircBuff_t sensorL1Data[NUM_TOF_L1];
 
 void InitSensors();
 void InitIOExpander();
@@ -87,13 +91,11 @@ void InitLimitSwitch();
 void InitColourSensor();
 void InitIMU();
 
-Colour_t GetColour();
-
-// int IRValueA();
-// int IRValueB();
-
 void UpdateIMU();
+void UpdateTOFL0();
+void UpdateTOFL1();
 
+Colour_t GetColour();
 int CollectorPosition();
 int RampPosition();
 
