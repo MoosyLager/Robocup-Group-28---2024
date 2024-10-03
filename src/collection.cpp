@@ -1,5 +1,4 @@
 #include "collection.h"
-#include "searchAlgorithm.h"
 
 /**
  * Calibrate the collector encoder to a known position
@@ -68,6 +67,14 @@ void ActuateCollector()
     // 44:16 ratio between motor and collector
     // 2.75 motor revolutions per collector revolution
     // 11 pulses per motor revolution
+    Serial.println("Actuating Collector...");
+    int prevPos = collectionMotorPos;
+    int targetPos = prevPos - COLLECTOR_TICKS_PER_REV;
+    do {
+        SetMotorSpeed(collectionMotor, MAX_MOTOR_VAL);
+    } while ( collectionMotorPos > targetPos );
+    SetMotorSpeed(collectionMotor, MOTOR_STOP_VAL);
+    Serial.println("Collector Actuated!");
 }
 
 /**
@@ -87,9 +94,9 @@ void LiftRamp()
 /**
  * Calibrates the collector and ramp then sets the FSM state
  */
-void CalibrateCollectionSystem(RobotFSM *fsm)
-{
-    CalibrateCollector();
-    CalibrateRamp();
-    fsm->currentState = HUNTING;
-}
+// void CalibrateCollectionSystem(RobotFSM* fsm)
+// {
+//     CalibrateCollector();
+//     CalibrateRamp();
+//     fsm->currentState = HUNTING;
+// }

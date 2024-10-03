@@ -5,7 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define COLLECTOR_PULSE_PER_REV 11
+#define COLLECTOR_PULSE_PER_REV  11
+#define MOTOR_REV_PER_COLLECTION 2.75
 
 enum DriveEncoderPinAssignments {
     leftEncoderPinA = 2,
