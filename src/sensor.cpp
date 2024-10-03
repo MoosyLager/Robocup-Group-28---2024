@@ -188,8 +188,7 @@ void ReadTOFL1()
     }
 }
 
-
-VL53L0X *returnL0()
+void InitIMU()
 {
     if ( !bno.begin() ) {
         Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
