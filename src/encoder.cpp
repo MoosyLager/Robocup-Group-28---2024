@@ -1,13 +1,19 @@
 #include "encoder.h"
 
-// Position variables for the drive encoders
+volatile uint16_t PID_leftMotorPos = 0;
+volatile uint16_t PID_rightMotorPos = 0;
+
+const uint16_t Kp = 1;
+const uint16_t Ki = 0;
+const uint16_t Kd = 0;
+
 volatile unsigned int leftMotorPos = 0;
 unsigned int prevLeftMotorPos = 1;
 volatile unsigned int rightMotorPos = 0;
 unsigned int prevRightMotorPos = 1;
 
-volatile unsigned int collectionMotorPos = 0;
-unsigned int prevCollectionMotorPos = 1;
+volatile int collectionMotorPos = 0;
+int prevCollectionMotorPos = 1;
 
 // Set states for the drive encoders
 boolean leftASet = false;
@@ -75,4 +81,20 @@ void InitCollectionEncoder()
     pinMode(collectionEncoderPinB, INPUT);
 
     attachInterrupt(digitalPinToInterrupt(collectionEncoderPinA), CollectionEncoderIntHandler, CHANGE);
+}
+
+uint16_t PID_Controller(uint16_t desiredSpeed, uint16_t currentPos, uint16_t prevPos)
+{
+    /*uint16_t currentSpeed = (currentPos - prevPos) /  deltaTime;
+    uint16_t error = desiredSpeed - currentSpeed;
+
+    how to do the correct integral controller and derivative controller?
+
+    uint16_t integral = 0;
+    uint16_t derivative = 0;
+
+    integral += error;
+    derivative = currentPos - prevPos;
+
+    return (Kp * error) + (Ki * integral) + (Kd * derivative);*/
 }

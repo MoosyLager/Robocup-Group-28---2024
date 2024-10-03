@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define COLLECTOR_PULSE_PER_REV 11
+
 enum DriveEncoderPinAssignments {
     leftEncoderPinA = 2,
     leftEncoderPinB = 3,
@@ -17,13 +19,26 @@ enum CollectionMotorPinAssignments {
     collectionEncoderPinB = 33,
 };
 
+enum CollectionMotorPinAssignments {
+    collectionEncoderPinA = 32,
+    collectionEncoderPinB = 33,
+};
+
+extern volatile uint16_t PID_leftMotorPos;
+extern volatile uint16_t PID_rightMotorPos;
+
+extern const uint16_t Kp; 
+extern const uint16_t Ki;
+extern const uint16_t Kd;
+
+
 extern volatile unsigned int leftMotorPos;
 extern unsigned int prevLeftMotorPos;
 extern volatile unsigned int rightMotorPos;
 extern unsigned int prevRightMotorPos;
 
-extern volatile unsigned int collectionMotorPos;
-extern unsigned int prevCollectionMotorPos;
+extern volatile int collectionMotorPos;
+extern int prevCollectionMotorPos;
 
 extern boolean leftASet;
 extern boolean leftBSet;

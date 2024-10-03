@@ -64,14 +64,14 @@ MAIN STATE FUNCTIONS
 
 // State functions
 void handleCalibrating(RobotFSM* fsm) {
-    printf("Calibrating...\n");
+    Serial.printf("Calibrating...\n");
     // Simulate calibration completed
     // calibrationFunction();
     // if calibration is completed, change the mainstate to HUNTING
 }
 
 void handleHunting(RobotFSM* fsm) {
-    printf("Hunting for weights...\n");
+    Serial.printf("Hunting for weights...\n");
 
     switch (fsm->huntState) {
         case SEARCH:
@@ -95,8 +95,8 @@ void handleAvoiding(RobotFSM* fsm) {
 }
 
 void handleReturning(RobotFSM *fsm) {
-    printf("Returning...\n");
-    
+    Serial.printf("Returning...\n");
+
     switch (fsm->returnState) {
         case HOMESEEK:
             // handleHomeSeeking(fsm);
@@ -125,6 +125,43 @@ void handleSearching(RobotFSM* fsm) {
     // checkWeightDetection(fsm); // Changes the state to CHASE if weight is detected
 }
 
+
+
+void handleChasing(RobotFSM* fsm) {
+    /*
+    need dist threshold
+    if 
+
+    if detected on farright:
+        weightPos = ON_RIGHT
+    if detected on farleft:
+        weightPos = ON_LEFT
+    if ahead:
+        ahead control
+    if centreRight and > dist threshold:
+        weightPos = AHEAD
+    if centreLeft and > dist threshold:
+        weightPos = AHEAD
+    if both sensors:
+        calculate distance and turn accoringly, then set ahead
+
+    if AHEAD:
+        if no sensor:
+            move forward
+        if left sensor:
+            turn left
+        if right sensor:
+            turn right
+        if both sensors:
+            calculate distance and turn accoringly
+
+    if ON_RIGHT:
+        rotate CW
+    if ON_LEFT:
+        rotate CCW
+    */
+}
+
 void handleCollecting(RobotFSM* fsm) {
     // collectionMotorFunction();
     // checkCollected(); // Changes the huntstate to SEARCH if the weight is successfully collected
@@ -148,12 +185,12 @@ void handleDepositing(RobotFSM* fsm) {
     // change the huntstate to SEARCH and the returnstate to HOMESEEK
 }
 
-int main() {
-    // Initialize the FSM
-    RobotFSM robot;
-    initializeRobotFSM(&robot);
+// int main() {
+//     // Initialize the FSM
+//     RobotFSM robot;
+//     initializeRobotFSM(&robot);
 
-}
+// }
 
 /*
 Currently need:
