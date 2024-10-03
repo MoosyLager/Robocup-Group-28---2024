@@ -64,14 +64,14 @@ MAIN STATE FUNCTIONS
 
 // State functions
 void handleCalibrating(RobotFSM* fsm) {
-    printf("Calibrating...\n");
+    Serial.printf("Calibrating...\n");
     // Simulate calibration completed
     // calibrationFunction();
     // if calibration is completed, change the mainstate to HUNTING
 }
 
 void handleHunting(RobotFSM* fsm) {
-    printf("Hunting for weights...\n");
+    Serial.printf("Hunting for weights...\n");
 
     switch (fsm->huntState) {
         case SEARCH:
@@ -95,8 +95,8 @@ void handleAvoiding(RobotFSM* fsm) {
 }
 
 void handleReturning(RobotFSM *fsm) {
-    printf("Returning...\n");
-    
+    Serial.printf("Returning...\n");
+
     switch (fsm->returnState) {
         case HOMESEEK:
             // handleHomeSeeking(fsm);
@@ -185,12 +185,12 @@ void handleDepositing(RobotFSM* fsm) {
     // change the huntstate to SEARCH and the returnstate to HOMESEEK
 }
 
-int main() {
-    // Initialize the FSM
-    RobotFSM robot;
-    initializeRobotFSM(&robot);
+// int main() {
+//     // Initialize the FSM
+//     RobotFSM robot;
+//     initializeRobotFSM(&robot);
 
-}
+// }
 
 /*
 Currently need:

@@ -80,7 +80,7 @@ void InitSensors();
 void InitIOExpander();
 void InitTOFL0();
 void InitTOFL1();
-void InitLimit();
+void InitLimitSwitch();
 void InitColourSensor();
 void InitIMU();
 
@@ -92,5 +92,6 @@ int IRValueB();
 void UpdateIMU();
 
 int CollectorPosition();
+int RampPosition();
 
 #endif

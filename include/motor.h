@@ -23,7 +23,7 @@
 extern Servo leftMotor;
 extern Servo rightMotor;
 extern Servo collectionMotor;
-extern AccelStepper stepper;
+extern AccelStepper rampStepper;
 
 void SetMotorSpeed(Servo motor, uint16_t speed);
 uint16_t CheckSpeedLimits(uint16_t speed);

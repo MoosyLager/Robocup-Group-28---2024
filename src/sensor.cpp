@@ -31,7 +31,7 @@ void InitSensors()
     InitIOExpander();
     InitTOFL0();
     InitTOFL1();
-    InitLimit();
+    InitLimitSwitch();
 }
 
 /**
@@ -48,9 +48,10 @@ void InitIOExpander()
 /**
  * Initialise any limit switches
  */
-void InitLimit()
+void InitLimitSwitch()
 {
     io.pinMode(AIO_0, INPUT);
+    io.pinMode(AIO_1, INPUT);
 }
 
 /**
@@ -164,11 +165,19 @@ int IRValueB()
 }
 
 /**
- * Returns the current state of the collector limit switch
+ * Returns 0 if the collector is at the reference position
  */
 int CollectorPosition()
 {
     return io.digitalRead(AIO_0);
+}
+
+/**
+ * Returns 0 if the ramp is at the zero position
+ */
+int RampPosition()
+{
+    return io.digitalRead(AIO_1);
 }
 
 void UpdateIMU()
