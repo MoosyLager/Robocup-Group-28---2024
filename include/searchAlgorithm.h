@@ -7,6 +7,19 @@
 extern uint8_t weightsOnboard;
 extern bool finished_calibrating;
 
+typedef enum {
+    FORWARD,
+    BACKWARD,
+    CW,
+    CCW
+} Motion_t;
+
+typedef enum {
+    AHEAD,
+    ON_RIGHT,
+    ON_LEFT
+} WeightPos_t;
+
 // Main state machine
 typedef enum {
     CALIBRATING,

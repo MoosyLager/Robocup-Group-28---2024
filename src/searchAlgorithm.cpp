@@ -121,13 +121,45 @@ void checkWeightDetection(RobotFSM* fsm) {
 }
 
 void handleSearching(RobotFSM* fsm) {
-    // searchMotorFunction();
+    // searchMotorFunction(); // sets the current motion to straight ahead or if rotating, the direction to rotate
     // checkWeightDetection(fsm); // Changes the state to CHASE if weight is detected
 }
 
+
+
 void handleChasing(RobotFSM* fsm) {
-    // chasingMotorFunction();
-    // checkChased(); // Changes the state to COLLECT if the weight is successfully chased
+    /*
+    need dist threshold
+    if 
+
+    if detected on farright:
+        weightPos = ON_RIGHT
+    if detected on farleft:
+        weightPos = ON_LEFT
+    if ahead:
+        ahead control
+    if centreRight and > dist threshold:
+        weightPos = AHEAD
+    if centreLeft and > dist threshold:
+        weightPos = AHEAD
+    if both sensors:
+        calculate distance and turn accoringly, then set ahead
+
+    if AHEAD:
+        if no sensor:
+            move forward
+        if left sensor:
+            turn left
+        if right sensor:
+            turn right
+        if both sensors:
+            calculate distance and turn accoringly
+
+    if ON_RIGHT:
+        rotate CW
+    if ON_LEFT:
+        rotate CCW
+    */
 }
 
 void handleCollecting(RobotFSM* fsm) {
