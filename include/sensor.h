@@ -68,14 +68,14 @@ extern Adafruit_TCS34725 colourSensor;
 #define NUM_TOF_L0            0     // Number of VL53L0X TOF sensors
 #define NUM_TOF_L1            0     // Number of VL53L1X TOF sensors
 
-#define TOF_L0_XSHUT_1        0
-#define TOF_L0_XSHUT_1        1
-#define TOF_L0_XSHUT_1        2
-#define TOF_L0_XSHUT_1        3
-#define TOF_L1_XSHUT_1        4
-#define TOF_L1_XSHUT_1        5
-#define TOF_L1_XSHUT_1        6
-#define TOF_L1_XSHUT_1        7
+#define TOF_XSHUT_L0_1        0
+#define TOF_XSHUT_L0_2        1
+#define TOF_XSHUT_L0_3        2
+#define TOF_XSHUT_L0_4        3
+#define TOF_XSHUT_L1_1        4
+#define TOF_XSHUT_L1_2        5
+#define TOF_XSHUT_L1_3        6
+#define TOF_XSHUT_L1_4        7
 
 /**
  * IMU
