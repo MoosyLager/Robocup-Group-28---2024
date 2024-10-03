@@ -1,4 +1,5 @@
 #include "sensor.h"
+#include "circularBuf.h"
 
 SX1509 io;  // Port Expander
 
@@ -10,6 +11,22 @@ const uint8_t xShutPinsL0[8] = {0, 1};
 const uint8_t xShutPinsL1[8] = {};
 VL53L0X sensorsL0[NUM_TOF_L0];
 VL53L1X sensorsL1[NUM_TOF_L1];
+
+circularBuf_t sensorL0Data[NUM_TOF_L0];
+circularBuf_t sensorL1Data[NUM_TOF_L1];
+
+void initCircularBuffers(circularBuf_t *buffers)
+{
+    for (uint32_t i = 0; i < NUM_TOF_L0; i++) {
+        // Initialize each buffer in the array with the given size
+        circularBufTInit(&buffers[i], CIRCULAR_BUF_SIZE);
+    }
+
+    for (uint32_t i = 0; i < NUM_TOF_L1; i++) {
+        // Initialize each buffer in the array with the given size
+        circularBufTInit(&buffers[i], CIRCULAR_BUF_SIZE);
+    }
+}
 
 /**
  * IMU Data
@@ -128,10 +145,51 @@ void InitTOFL1()
     }
 }
 
-/**
- * Initialises the IMU
- */
-void InitIMU()
+void ReadTOFL0()
+{
+    for (uint8_t i = 0; i < NUM_TOF_L0; i++) {
+        // Read sensor data
+        uint16_t sensorValue = sensorsL0[i].readRangeContinuousMillimeters();
+        
+        // Write sensor data to circular buffer
+        circularBufTWrite(&sensorL0Data[i], sensorValue);
+        
+        // Calculate the average from the circular buffer
+        uint32_t avg = findBufAvg(&sensorL0Data[i]);
+        
+        // Print the average value
+        Serial.print("Sensor L0 ");
+        Serial.print(i);
+        Serial.print(" Avg: ");
+        Serial.print(avg);
+        
+        if (sensorsL0[i].timeoutOccurred()) {
+            Serial.print(" TIMEOUT");
+        }
+        Serial.print('\t');
+    }
+    Serial.println();
+}
+
+void ReadTOFL1()
+{
+    for (uint8_t i = 0; i < NUM_TOF_L1; i++) {
+        // Read sensor data
+        uint16_t sensorValue = sensorsL1[i].readRangeContinuousMillimeters();
+        
+        // Write sensor data to circular buffer
+        circularBufTWrite(&sensorL1Data[i], sensorValue);
+        
+        // Calculate the average from the circular buffer
+        uint32_t avg = findBufAvg(&sensorL1Data[i]);
+        
+        // Print the average value
+        Serial.print("Sensor L1 ");
+    }
+}
+
+
+VL53L0X *returnL0()
 {
     if ( !bno.begin() ) {
         Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");

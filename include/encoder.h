@@ -30,6 +30,11 @@ enum CollectionMotorPinAssignments {
     collectionEncoderPinB = 33,
 };
 
+enum CollectionMotorPinAssignments {
+    collectionEncoderPinA = 32,
+    collectionEncoderPinB = 33,
+};
+
 extern volatile uint16_t PID_leftMotorPos;
 extern volatile uint16_t PID_rightMotorPos;
 
