@@ -1,4 +1,5 @@
 #include "collection.h"
+#include "searchAlgorithm.h"
 
 /**
  * Calibrate the collector encoder to a known position
@@ -16,12 +17,13 @@ void CalibrateCollector()
             isCalibrated = true;
         }
     }
+    Serial.println("Collector Calibrated!");
 }
 
 /**
  * Calibrate the ramp stepper motor to a known position
  */
-void CalibrateStepper()
+void CalibrateRamp()
 {
     Serial.println("Calibraing Stepper Motor...");
     rampStepper.setSpeed(STEPPER_MAX_SPEED / 2);
@@ -34,6 +36,8 @@ void CalibrateStepper()
         }
         rampStepper.run();
     }
+
+    Serial.println("Ramp Calibrated!");
 }
 
 /**
@@ -78,4 +82,14 @@ void LowerRamp()
  */
 void LiftRamp()
 {
+}
+
+/**
+ * Calibrates the collector and ramp then sets the FSM state
+ */
+void CalibrateCollectionSystem(RobotFSM *fsm)
+{
+    CalibrateCollector();
+    CalibrateRamp();
+    fsm->currentState = HUNTING;
 }

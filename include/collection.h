@@ -10,7 +10,7 @@
 #define RAMP_LOWERED_OFFSET     0
 
 void CalibrateCollector();
-void CalibrateStepper();
+void CalibrateRamp();
 
 void ActuateCollector();
 void OpenCollector();
@@ -18,5 +18,7 @@ void CloseCollector();
 
 void LowerRamp();
 void LiftRamp();
+
+void CalibrateCollectionSystem(RobotFSM *fsm);
 
 #endif
