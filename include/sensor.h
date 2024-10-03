@@ -16,9 +16,14 @@
 #define NUM_TOF_L0            2
 #define NUM_TOF_L1            0
 
+extern uint16_t sensorL0Data[NUM_TOF_L0];
+extern uint16_t sensorL1Data[NUM_TOF_L1];
+
 void InitSensors();
 void InitTOFL0();
 void InitTOFL1();
+void ReadTOFL0();
+void ReadTOFL1();
 VL53L0X *returnL0();
 VL53L1X *returnL1();
 
