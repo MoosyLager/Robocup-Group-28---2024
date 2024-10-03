@@ -76,6 +76,9 @@ extern sensors_event_t orientationData, angVelocityData, linearAccelData, magnet
 extern Adafruit_BNO055 bno;
 extern int8_t boardTemp;
 
+extern uint16_t sensorL0Data[NUM_TOF_L0];
+extern uint16_t sensorL1Data[NUM_TOF_L1];
+
 void InitSensors();
 void InitIOExpander();
 void InitTOFL0();
