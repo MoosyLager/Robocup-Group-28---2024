@@ -41,6 +41,9 @@ void CalibrateStepper()
  */
 void OpenCollector()
 {
+    do {
+        SetMotorSpeed(collectionMotor, MAX_MOTOR_VAL);
+    } while ( collectionMotorPos != COLLECTOR_OPEN_OFFSET );
 }
 
 /**
@@ -48,6 +51,9 @@ void OpenCollector()
  */
 void CloseCollector()
 {
+    do {
+        SetMotorSpeed(collectionMotor, MAX_MOTOR_VAL);
+    } while ( collectionMotorPos != COLLECTOR_CLOSED_OFFSET );
 }
 
 /**
@@ -55,6 +61,8 @@ void CloseCollector()
  */
 void ActuateCollector()
 {
+    // 44:16 ratio between motor and collector
+    // 2.75 motor revolutions per collector revolution
 }
 
 /**
