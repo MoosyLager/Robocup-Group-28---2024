@@ -77,6 +77,70 @@ void UpdateTOFL1()
 }
 
 /**
+ * Get the average TOF value from L0 Top Left
+ */
+uint16_t GetL0TL()
+{
+    return CalculateBufferMean(&sensorL0Data[0]);
+}
+
+/**
+ * Get the average TOF value from L0 Top Right
+ */
+uint16_t GetL0TR()
+{
+    return CalculateBufferMean(&sensorL0Data[1]);
+}
+
+/**
+ * Get the average TOF value from L0 Bottom Left
+ */
+uint16_t GetL0BL()
+{
+    return CalculateBufferMean(&sensorL0Data[2]);
+}
+
+/**
+ * Get the average TOF value from L0 Bottom Right
+ */
+uint16_t GetL0BR()
+{
+    return CalculateBufferMean(&sensorL0Data[3]);
+}
+
+/**
+ * Get the average TOF value from L1 Top Left
+ */
+uint16_t GetL1TL()
+{
+    return CalculateBufferMean(&sensorL1Data[0]);
+}
+
+/**
+ * Get the average TOF value from L0 Top Right
+ */
+uint16_t GetL1TR()
+{
+    return CalculateBufferMean(&sensorL1Data[1]);
+}
+
+/**
+ * Get the average TOF value from L0 Bottom Left
+ */
+uint16_t GetL1BL()
+{
+    return CalculateBufferMean(&sensorL1Data[2]);
+}
+
+/**
+ * Get the average TOF value from L0 Bottom Right
+ */
+uint16_t GetL1BR()
+{
+    return CalculateBufferMean(&sensorL1Data[3]);
+}
+
+/**
  * Returns 0 if the collector is at the reference position
  */
 int CollectorPosition()
@@ -242,6 +306,7 @@ void InitTOFL1()
         sensorsL1[i].startContinuous(50);
     }
 }
+
 
 /**
  * Initialises the IMU

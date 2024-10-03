@@ -101,6 +101,15 @@ void UpdateIMU();
 void UpdateTOFL0();
 void UpdateTOFL1();
 
+uint16_t GetL0TL();
+uint16_t GetL0TR();
+uint16_t GetL0BL();
+uint16_t GetL0BR();
+uint16_t GetL1TL();
+uint16_t GetL1TR();
+uint16_t GetL1BL();
+uint16_t GetL1BR();
+
 Colour_t GetColour();
 int CollectorPosition();
 int RampPosition();
