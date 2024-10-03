@@ -31,7 +31,7 @@ void InitSensors()
     InitIOExpander();
     InitTOFL0();
     InitTOFL1();
-    InitLimit();
+    InitLimitSwitch();
 }
 
 /**
@@ -48,7 +48,7 @@ void InitIOExpander()
 /**
  * Initialise any limit switches
  */
-void InitLimit()
+void InitLimitSwitch()
 {
     io.pinMode(AIO_0, INPUT);
     io.pinMode(AIO_1, INPUT);
