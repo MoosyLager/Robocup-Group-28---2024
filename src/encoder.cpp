@@ -12,8 +12,8 @@ unsigned int prevLeftMotorPos = 1;
 volatile unsigned int rightMotorPos = 0;
 unsigned int prevRightMotorPos = 1;
 
-volatile unsigned int collectionMotorPos = 0;
-unsigned int prevCollectionMotorPos = 1;
+volatile int collectionMotorPos = 0;
+int prevCollectionMotorPos = 1;
 
 // Set states for the drive encoders
 boolean leftASet = false;

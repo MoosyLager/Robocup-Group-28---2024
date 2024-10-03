@@ -63,6 +63,7 @@ void ActuateCollector()
 {
     // 44:16 ratio between motor and collector
     // 2.75 motor revolutions per collector revolution
+    // 11 pulses per motor revolution
 }
 
 /**
