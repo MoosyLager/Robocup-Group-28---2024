@@ -89,8 +89,8 @@ void InitIMU();
 
 Colour_t GetColour();
 
-int IRValueA();
-int IRValueB();
+// int IRValueA();
+// int IRValueB();
 
 void UpdateIMU();
 

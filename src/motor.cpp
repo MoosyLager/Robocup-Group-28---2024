@@ -6,16 +6,14 @@
 #include "encoder.h"
 #include <elapsedMillis.h>
 
-Servo leftMotor;
-Servo rightMotor;
-Servo collectionMotor;
-AccelStepper rampStepper;
-
 Motor_t leftMotor;
 Motor_t rightMotor;
 Motor_t collectionMotor;
+AccelStepper rampStepper;
 
-
+/**
+ * Initialise the drive motors, collection motor and ramp stepper motor
+ */
 void InitMotors(Motor_t *leftMotor, Motor_t *rightMotor, Motor_t *collectionMotor) {
     // Initialize the left motor
     leftMotor->servoDriver.attach(LEFT_MOTOR_ADDRESS);
@@ -52,20 +50,9 @@ void InitMotors(Motor_t *leftMotor, Motor_t *rightMotor, Motor_t *collectionMoto
     collectionMotor->prevSampledMotorPos = 0;
     collectionMotor->currentMotorPos = 0;
     collectionMotor->targetMotorPos = 0; // Initialize target value
-    collectionMotor->targetMotorSpeed = 0; // Initialize target value
-}
+    collectionMotor->targetMotorSpeed = 0;  // Initialize target value
 
-
-void SetMotorSpeed(Motor_t *motor, signed int speed) {
-    signed int clampedSpeed = CheckSpeedLimits(speed);
-    motor->servoDriver.writeMicroseconds(clampedSpeed);
-}
-
-/**
- * Initialise the ramp stepper motor
- */
-void InitStepper()
-{
+    // Initialise the ramp stepper motor
     rampStepper = AccelStepper(1, STEPPER_DIR_PIN, STEPPER_STEP_PIN);
     rampStepper.setMaxSpeed(STEPPER_MAX_SPEED);
     rampStepper.setAcceleration(STEPPER_MAX_ACCELERATION);
@@ -73,28 +60,18 @@ void InitStepper()
 }
 
 /**
- * Initialise all connected motors
+ * Check that value is between limits and sets motor speed
  */
-void InitMotors()
+void SetMotorSpeed(Motor_t *motor, signed int speed)
 {
-    InitDriveMotors();
-    InitCollectionMotor();
-    InitStepper();
-}
-
-/**
- * Ensures a valid input then sets motor speed
- */
-void SetMotorSpeed(Servo motor, uint16_t speed)
-{
-    uint16_t clampedSpeed = CheckSpeedLimits(speed);
-    motor.writeMicroseconds(clampedSpeed);
+    signed int clampedSpeed = CheckSpeedLimits(speed);
+    motor->servoDriver.writeMicroseconds(clampedSpeed);
 }
 
 /**
  * Ensures speed is within limits
  */
-uint16_t CheckSpeedLimits(uint16_t speed)
+signed int CheckSpeedLimits(signed int speed)
 {
     if ( speed > MAX_MOTOR_VAL ) {
         // Serial.printf("Speed was out of bounds. Clamped to %u", MAX_MOTOR_VAL);

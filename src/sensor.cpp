@@ -4,6 +4,18 @@
 SX1509 io;  // Port Expander
 
 /**
+ * IMU Data
+ */
+Adafruit_BNO055 bno = Adafruit_BNO055(IMU_ID, IMU_ADDRESS, &IMU_WIRE);
+int8_t boardTemp;
+sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
+
+/**
+ * Colour Sensor Data
+ */
+Adafruit_TCS34725 colourSensor = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+
+/**
  * TOF Data
  */
 // The Arduino pin connected to the XSHUT pin of each sensor
@@ -12,10 +24,16 @@ const uint8_t xShutPinsL1[8] = {};
 VL53L0X sensorsL0[NUM_TOF_L0];
 VL53L1X sensorsL1[NUM_TOF_L1];
 
-circularBuf_t sensorL0Data[NUM_TOF_L0];
-circularBuf_t sensorL1Data[NUM_TOF_L1];
+/**
+ * ! NEED TO RETHINK THIS, IT IS CURRENTLY DOES NOT MAKE SENSE
+ */
+CircularBuff_t sensorL0Data[NUM_TOF_L0];
+CircularBuff_t sensorL1Data[NUM_TOF_L1];
 
-void initCircularBuffers(circularBuf_t *buffers)
+/**
+ * Initialise the circular buffers for the sensor data
+ */
+void initCircularBuffers(CircularBuff_t *buffers)
 {
     for (uint32_t i = 0; i < NUM_TOF_L0; i++) {
         // Initialize each buffer in the array with the given size
@@ -28,17 +46,6 @@ void initCircularBuffers(circularBuf_t *buffers)
     }
 }
 
-/**
- * IMU Data
- */
-Adafruit_BNO055 bno = Adafruit_BNO055(IMU_ID, IMU_ADDRESS, &IMU_WIRE);
-int8_t boardTemp;
-sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
-
-/**
- * Colour Sensor Data
- */
-Adafruit_TCS34725 colourSensor = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
 
 /**
  * Initialise the IO board, I2C bus and the sensor
@@ -145,6 +152,23 @@ void InitTOFL1()
     }
 }
 
+void InitIMU()
+{
+    if ( !bno.begin() ) {
+        Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+    }
+}
+
+/**
+ * Initialise the colour sensor
+ */
+void InitColourSensor()
+{
+    if ( !colourSensor.begin(COLOUR_SENSOR_ADDRESS, &COLOUR_SENSOR_WIRE) ) {
+        Serial.println("COLOUR SENSOR NOT DETECTED");
+    }
+}
+
 void ReadTOFL0()
 {
     for (uint8_t i = 0; i < NUM_TOF_L0; i++) {
@@ -188,38 +212,21 @@ void ReadTOFL1()
     }
 }
 
-void InitIMU()
-{
-    if ( !bno.begin() ) {
-        Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    }
-}
+// /**
+//  * Returns reading from IR sensor A
+//  */
+// int IRValueA()
+// {
+//     return analogRead(IR_ADDRESS_A);
+// }
 
-/**
- * Initialise the colour sensor
- */
-void InitColourSensor()
-{
-    if ( !colourSensor.begin(COLOUR_SENSOR_ADDRESS, &COLOUR_SENSOR_WIRE) ) {
-        Serial.println("COLOUR SENSOR NOT DETECTED");
-    }
-}
-
-/**
- * Returns reading from IR sensor A
- */
-int IRValueA()
-{
-    return analogRead(IR_ADDRESS_A);
-}
-
-/**
- * Returns reading from IR sensor B
- */
-int IRValueB()
-{
-    return analogRead(IR_ADDRESS_B);
-}
+// /**
+//  * Returns reading from IR sensor B
+//  */
+// int IRValueB()
+// {
+//     return analogRead(IR_ADDRESS_B);
+// }
 
 /**
  * Returns 0 if the collector is at the reference position

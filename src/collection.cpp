@@ -8,9 +8,9 @@ void CalibrateCollector()
     Serial.println("Calibrating Collector...");
     bool isCalibrated = false;
     while ( !isCalibrated ) {
-        SetMotorSpeed(collectionMotor, MAX_MOTOR_VAL);
+        SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
         if ( !CollectorPosition() ) {
-            SetMotorSpeed(collectionMotor, MOTOR_STOP_VAL);
+            SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
             collectionMotorPos = 0;
             prevCollectionMotorPos = 1;
             isCalibrated = true;
@@ -45,7 +45,7 @@ void CalibrateRamp()
 void OpenCollector()
 {
     do {
-        SetMotorSpeed(collectionMotor, MAX_MOTOR_VAL);
+        SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
     } while ( collectionMotorPos != COLLECTOR_OPEN_OFFSET );
 }
 
@@ -55,7 +55,7 @@ void OpenCollector()
 void CloseCollector()
 {
     do {
-        SetMotorSpeed(collectionMotor, MAX_MOTOR_VAL);
+        SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
     } while ( collectionMotorPos != COLLECTOR_CLOSED_OFFSET );
 }
 
@@ -71,9 +71,9 @@ void ActuateCollector()
     int prevPos = collectionMotorPos;
     int targetPos = prevPos - COLLECTOR_TICKS_PER_REV;
     do {
-        SetMotorSpeed(collectionMotor, MAX_MOTOR_VAL);
+        SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
     } while ( collectionMotorPos > targetPos );
-    SetMotorSpeed(collectionMotor, MOTOR_STOP_VAL);
+    SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
     Serial.println("Collector Actuated!");
 }
 

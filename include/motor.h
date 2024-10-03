@@ -58,6 +58,7 @@ typedef struct {
 extern Motor_t leftMotor;
 extern Motor_t rightMotor;
 extern Motor_t collectionMotor;
+extern AccelStepper rampStepper;
 
 
 void InitMotors(Motor_t *leftMotor, Motor_t *rightMotor, Motor_t *collectionMotor);

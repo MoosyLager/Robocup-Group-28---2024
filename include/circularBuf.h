@@ -10,11 +10,11 @@ typedef struct {
 	uint32_t wIndex;
 	uint32_t rIndex;
 	uint32_t *data;
-} circularBuf_t;
+} CircularBuff_t;
 
-uint32_t *circularBufTInit(circularBuf_t *buffer, uint32_t size);
-void circularBufTWrite(circularBuf_t *buffer, uint32_t entry);
-uint32_t circularBufTRead(circularBuf_t *buffer);
-void circularBufTFree(circularBuf_t *buffer);
+uint32_t *circularBufTInit(CircularBuff_t *buffer, uint32_t size);
+void circularBufTWrite(CircularBuff_t *buffer, uint32_t entry);
+uint32_t circularBufTRead(CircularBuff_t *buffer);
+void circularBufTFree(CircularBuff_t *buffer);
 
 #endif // CIRCULARBUF_H
