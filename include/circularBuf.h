@@ -6,15 +6,15 @@
 #define CIRCULAR_BUF_SIZE 10
 
 typedef struct {
-	uint32_t bufSize;
-	uint32_t wIndex;
-	uint32_t rIndex;
-	uint32_t *data;
-} CircularBuff_t;
+	uint16_t bufSize;
+	uint16_t wIndex;
+	uint16_t rIndex;
+	uint16_t *data;
+} CircBuff_t;
 
-uint32_t *circularBufTInit(CircularBuff_t *buffer, uint32_t size);
-void circularBufTWrite(CircularBuff_t *buffer, uint32_t entry);
-uint32_t circularBufTRead(CircularBuff_t *buffer);
-void circularBufTFree(CircularBuff_t *buffer);
+uint16_t *CircBuffInit(CircBuff_t *buffer, uint16_t size);
+void CircBuffWrite(CircBuff_t *buffer, uint16_t entry);
+uint16_t CircBufRead(CircBuff_t *buffer);
+void CircBuffFree(CircBuff_t *buffer);
 
 #endif // CIRCULARBUF_H

@@ -1,17 +1,17 @@
 #include "circularBuf.h"
-#include "stdlib.h"
 #include <stdint.h>
+#include <stdlib.h>
 
-uint32_t *circularBufTInit(CircularBuff_t *buffer, uint32_t size)
+uint16_t *CircBuffInit(CircBuff_t *buffer, uint16_t size)
 {
     buffer->wIndex = 0;
     buffer->rIndex = 0;
     buffer->bufSize = size;
-    buffer->data = (uint32_t *)calloc(size, sizeof(uint32_t));
+    buffer->data = new uint16_t[size];
     return buffer->data;
 }
 
-void circularBufTWrite(CircularBuff_t *buffer, uint32_t entry)
+void CircBuffWrite(CircBuff_t *buffer, uint16_t entry)
 {
     buffer->data[buffer->wIndex] = entry;
     buffer->wIndex++;
@@ -19,9 +19,9 @@ void circularBufTWrite(CircularBuff_t *buffer, uint32_t entry)
         buffer->wIndex = 0;
 }
 
-uint32_t circularBufTRead(CircularBuff_t *buffer)
+uint16_t CircBufRead(CircBuff_t *buffer)
 {
-    uint32_t entry;
+    uint16_t entry;
 
     entry = buffer->data[buffer->rIndex];
     buffer->rIndex++;
@@ -30,11 +30,11 @@ uint32_t circularBufTRead(CircularBuff_t *buffer)
     return entry;
 }
 
-void circularBufTFree(CircularBuff_t *buffer)
+void CircBuffFree(CircBuff_t *buffer)
 {
     buffer->wIndex = 0;
     buffer->rIndex = 0;
     buffer->bufSize = 0;
-    free(buffer->data);
+    delete[] buffer->data;
     buffer->data = NULL;
 }
