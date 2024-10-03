@@ -10,8 +10,6 @@
 #define COLLECTOR_CLOSED_OFFSET 0
 #define RAMP_LOWERED_OFFSET     0
 
-#define COLLECTOR_TICKS_PER_REV 6500
-
 void CalibrateCollector();
 void CalibrateRamp();
 

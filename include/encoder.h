@@ -5,9 +5,16 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define COLLECTOR_PULSE_PER_REV  11
+/**
+ * Collector encoder data
+ */
+#define COLLECTION_MOTOR_PULSE_PER_REV 11
 #define MOTOR_REV_PER_COLLECTION 2.75
+#define COLLECTOR_TICKS_PER_REV         6500
 
+/**
+ * Pins connected to drive encoder phases
+ */
 enum DriveEncoderPinAssignments {
     leftEncoderPinA = 2,
     leftEncoderPinB = 3,
@@ -15,6 +22,9 @@ enum DriveEncoderPinAssignments {
     rightEncoderPinB = 5,
 };
 
+/**
+ * Pins connected to collector encoder phases
+ */
 enum CollectionMotorPinAssignments {
     collectionEncoderPinA = 32,
     collectionEncoderPinB = 33,
