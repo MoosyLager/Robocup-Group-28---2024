@@ -1,6 +1,7 @@
 #include "sensor.h"
 
-SX1509 io;  // Port Expander
+SX1509 ioTOF;  // TOF Control - Port Expander
+SX1509 ioAIO;  // AIO control - Port Expander
 
 /**
  * IMU Data
@@ -146,7 +147,7 @@ uint16_t GetL1BR()
  */
 int CollectorPosition()
 {
-    return io.digitalRead(AIO_0);
+    return ioAIO.digitalRead(AIO_0);
 }
 
 /**
@@ -154,7 +155,7 @@ int CollectorPosition()
  */
 int RampPosition()
 {
-    return io.digitalRead(AIO_1);
+    return ioAIO.digitalRead(AIO_1);
 }
 
 /**
@@ -211,10 +212,10 @@ void InitCircularBuffers()
  */
 void InitIOExpander()
 {
-    io.begin(TOF_CONTROL_ADDRESS);
     Wire.begin();
     Wire.setClock(400000);
-    // io.begin(AIO_ADDRESS);
+    ioTOF.begin(TOF_CONTROL_ADDRESS);
+    ioAIO.begin(AIO_ADDRESS);
 }
 
 /**
@@ -222,8 +223,8 @@ void InitIOExpander()
  */
 void InitLimitSwitch()
 {
-    io.pinMode(AIO_0, INPUT);
-    io.pinMode(AIO_1, INPUT);
+    ioAIO.pinMode(AIO_0, INPUT);
+    ioAIO.pinMode(AIO_1, INPUT);
 }
 
 /**
@@ -234,14 +235,14 @@ void InitTOF()
 {
     // Disable/reset all sensors by driving their XSHUT pins low.
     for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
-        io.pinMode(xShutPinsL0[i], OUTPUT);
-        io.digitalWrite(xShutPinsL0[i], LOW);
+        ioTOF.pinMode(xShutPinsL0[i], OUTPUT);
+        ioTOF.digitalWrite(xShutPinsL0[i], LOW);
     }
 
     // Disable/reset all sensors by driving their XSHUT pins low.
     for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
-        io.pinMode(xShutPinsL1[i], OUTPUT);
-        io.digitalWrite(xShutPinsL1[i], LOW);
+        ioTOF.pinMode(xShutPinsL1[i], OUTPUT);
+        ioTOF.digitalWrite(xShutPinsL1[i], LOW);
     }
 
     // Enable, initialise, and start each sensor
@@ -250,7 +251,7 @@ void InitTOF()
         // board to pull it high. (We do NOT want to drive XSHUT high since it is
         // not level shifted.) Then wait a bit for the sensor to start up.
         // pinMode(xshutPins[i], INPUT);
-        io.digitalWrite(xShutPinsL0[i], HIGH);
+        ioTOF.digitalWrite(xShutPinsL0[i], HIGH);
         delay(10);
 
         sensorsL0[i].setTimeout(500);
@@ -275,7 +276,7 @@ void InitTOF()
         // board to pull it high. (We do NOT want to drive XSHUT high since it is
         // not level shifted.) Then wait a bit for the sensor to start up.
         // pinMode(xshutPins[i], INPUT);
-        io.digitalWrite(xShutPinsL1[i], HIGH);
+        ioTOF.digitalWrite(xShutPinsL1[i], HIGH);
         delay(10);
 
         sensorsL1[i].setTimeout(500);
@@ -316,6 +317,14 @@ void InitColourSensor()
 }
 
 /**
+ * Returns
+ */
+uint8_t BlueButtonState()
+{
+    return ioAIO.digitalRead(AIO_8);
+}
+
+/**
  * Initialise the IO board, I2C bus, circular buffers, and all sensors
  */
 void InitSensors()
@@ -328,4 +337,6 @@ void InitSensors()
     InitLimitSwitch();
     // InitIMU();
     // InitColourSensor();
+
+    ioAIO.pinMode(AIO_8, INPUT);  // Blue Button
 }
