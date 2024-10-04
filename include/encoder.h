@@ -59,5 +59,6 @@ void RightEncoderIntHandler();
 void CollectionEncoderIntHandler();
 void InitDriveEncoders();
 void InitCollectionEncoder();
+void InitEncoders();
 
 #endif
