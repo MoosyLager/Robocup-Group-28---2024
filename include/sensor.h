@@ -91,9 +91,8 @@ extern Adafruit_BNO055 bno;
 extern int8_t boardTemp;
 
 void InitSensors();
+void InitTOF();
 void InitIOExpander();
-void InitTOFL0();
-void InitTOFL1();
 void InitLimitSwitch();
 void InitColourSensor();
 void InitIMU();
@@ -101,7 +100,6 @@ void InitIMU();
 void UpdateIMU();
 void UpdateTOFL0();
 void UpdateTOFL1();
-void InitTOF();
 
 uint16_t GetL0TL();
 uint16_t GetL0TR();
