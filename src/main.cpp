@@ -4,7 +4,12 @@
 #include "sensor.h"
 #include <Arduino.h>
 
+#include <SparkFunSX1509.h>
+#include <VL53L0X.h>
+#include <Wire.h>
+
 // #include <elapsedMillis.h>
+
 
 // elapsedMillis motorDelay;
 // uint16_t motorSpeed = 1100;
@@ -13,18 +18,21 @@
 void setup()
 {
     Serial.begin(9600);
-    // delay(1000);
     // InitSensors();
-    InitMotors(&leftMotor, &rightMotor, &collectionMotor);
-    InitIOExpander();
-    InitLimitSwitch();
-    InitCollectionEncoder();
+    // InitIOExpander();
+    // InitTOFL0();
+    // InitTOFL1();
+    // InitTOF();
+    InitMotors();
 
-    CalibrateCollector();
+    Serial.println("Initialised.");
 }
 
 void loop()
 {
+    SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL)
+    // UpdateTOFL0();
+    // Serial.println(GetL0BL());
     // ReadTOFL0();
     // for ( int i = 0; i < NUM_TOF_L0; i++ ) {
     //     Serial.print("Sensor ");
