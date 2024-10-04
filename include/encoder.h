@@ -8,9 +8,9 @@
 /**
  * Collector encoder data
  */
-#define COLLECTION_MOTOR_PULSE_PER_REV 11
-#define MOTOR_REV_PER_COLLECTION 2.75
-#define COLLECTOR_TICKS_PER_REV         6500
+// #define COLLECTION_MOTOR_PULSE_PER_REV 11
+// #define MOTOR_REV_PER_COLLECTION 2.75
+#define COLLECTOR_TICKS_PER_REV 6675
 
 /**
  * Pins connected to drive encoder phases
