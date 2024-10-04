@@ -6,7 +6,7 @@ SX1509 io;  // Port Expander
  * IMU Data
  */
 Adafruit_BNO055 bno = Adafruit_BNO055(IMU_ID, IMU_ADDRESS, &IMU_WIRE);
-int8_t boardTemp;
+int8_t boardTempIMU;
 sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
 
 /**
@@ -82,20 +82,21 @@ void UpdateTOFL1()
 uint16_t GetL0TL()
 {
     return CalculateBufferMean(&sensorL0Data[0]);
-}
-
-/**
- * Get the average TOF value from L0 Top Right
- */
-uint16_t GetL0TR()
-{
-    return CalculateBufferMean(&sensorL0Data[1]);
+    // return sensorsL0[0].readRangeContinuousMillimeters();
 }
 
 /**
  * Get the average TOF value from L0 Bottom Left
  */
 uint16_t GetL0BL()
+{
+    return CalculateBufferMean(&sensorL0Data[1]);
+}
+
+/**
+ * Get the average TOF value from L0 Top Right
+ */
+uint16_t GetL0TR()
 {
     return CalculateBufferMean(&sensorL0Data[2]);
 }
@@ -117,17 +118,17 @@ uint16_t GetL1TL()
 }
 
 /**
- * Get the average TOF value from L0 Top Right
+ * Get the average TOF value from L0 Bottom Left
  */
-uint16_t GetL1TR()
+uint16_t GetL1BL()
 {
     return CalculateBufferMean(&sensorL1Data[1]);
 }
 
 /**
- * Get the average TOF value from L0 Bottom Left
+ * Get the average TOF value from L0 Top Right
  */
-uint16_t GetL1BL()
+uint16_t GetL1TR()
 {
     return CalculateBufferMean(&sensorL1Data[2]);
 }
@@ -167,7 +168,7 @@ void UpdateIMU()
     bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
     bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
     bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);
-    boardTemp = bno.getTemp();
+    boardTempIMU = bno.getTemp();
 }
 
 /**
