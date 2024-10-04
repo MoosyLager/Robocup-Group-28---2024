@@ -18,8 +18,8 @@ Adafruit_TCS34725 colourSensor = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS
  * TOF Data
  */
 // The Arduino pin connected to the XSHUT pin of each sensor
-const uint8_t xShutPinsL0[8] = {};
-const uint8_t xShutPinsL1[8] = {};
+const uint8_t xShutPinsL0[8] = {TOF_XSHUT_L0_1, TOF_XSHUT_L0_2, TOF_XSHUT_L0_3, TOF_XSHUT_L0_4};
+const uint8_t xShutPinsL1[8] = {TOF_XSHUT_L1_1, TOF_XSHUT_L1_2, TOF_XSHUT_L1_3, TOF_XSHUT_L1_4};
 VL53L0X sensorsL0[NUM_TOF_L0];
 VL53L1X sensorsL1[NUM_TOF_L1];
 CircBuff_t sensorL0Data[NUM_TOF_L0];
@@ -156,6 +156,9 @@ int RampPosition()
     return io.digitalRead(AIO_1);
 }
 
+/**
+ * Update IMU data
+ */
 void UpdateIMU()
 {
     bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
@@ -191,7 +194,7 @@ Colour_t GetColour()
 /**
  * Initialise the circular buffers for the TOF sensor data
  */
-void InitCircularBuffers(CircBuff_t *buffers)
+void InitCircularBuffers()
 {
     for ( int i = 0; i < NUM_TOF_L0; i++ ) {
         CircBuffInit(&sensorL0Data[i], CIRCULAR_BUF_SIZE);
@@ -201,27 +204,16 @@ void InitCircularBuffers(CircBuff_t *buffers)
     }
 }
 
-/**
- * Initialise the IO board, I2C bus, circular buffers, and all sensors
- */
-void InitSensors()
-{
-    InitIOExpander();
-    InitCircularBuffers();
-    InitTOFL0();
-    InitTOFL1();
-    InitLimitSwitch();
-}
 
 /**
  * Initialise the SX1509 IO Expander
  */
 void InitIOExpander()
 {
+    io.begin(TOF_CONTROL_ADDRESS);
     Wire.begin();
     Wire.setClock(400000);
-    io.begin(TOF_CONTROL_ADDRESS);
-    io.begin(AIO_ADDRESS);
+    // io.begin(AIO_ADDRESS);
 }
 
 /**
@@ -267,6 +259,71 @@ void InitTOFL0()
         sensorsL0[i].setAddress(VL53L0X_ADDRESS_START + i);
 
         sensorsL0[i].startContinuous(50);
+    }
+}
+
+void InitTOF()
+{
+    // Disable/reset all sensors by driving their XSHUT pins low.
+    for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
+        io.pinMode(xShutPinsL0[i], OUTPUT);
+        io.digitalWrite(xShutPinsL0[i], LOW);
+    }
+
+    // Disable/reset all sensors by driving their XSHUT pins low.
+    for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
+        io.pinMode(xShutPinsL1[i], OUTPUT);
+        io.digitalWrite(xShutPinsL1[i], LOW);
+    }
+
+    // Enable, initialise, and start each sensor
+    for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
+        // Stop driving this sensor's XSHUT low. This should allow the carrier
+        // board to pull it high. (We do NOT want to drive XSHUT high since it is
+        // not level shifted.) Then wait a bit for the sensor to start up.
+        // pinMode(xshutPins[i], INPUT);
+        io.digitalWrite(xShutPinsL0[i], HIGH);
+        delay(10);
+
+        sensorsL0[i].setTimeout(500);
+        if ( !sensorsL0[i].init() ) {
+            Serial.print("Failed to detect and initialise sensor L0 ");
+            Serial.print(i);
+            while ( 1 )
+                ;
+        }
+
+        // Each sensor must have its address changed to a unique value other than
+        // the default of 0x29 (except for the last one, which could be left at
+        // the default). To make it simple, we'll just count up from 0x2A.
+        sensorsL0[i].setAddress(VL53L0X_ADDRESS_START + i);
+
+        sensorsL0[i].startContinuous(50);
+    }
+
+    // Enable, initialise, and start each sensor
+    for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
+        // Stop driving this sensor's XSHUT low. This should allow the carrier
+        // board to pull it high. (We do NOT want to drive XSHUT high since it is
+        // not level shifted.) Then wait a bit for the sensor to start up.
+        // pinMode(xshutPins[i], INPUT);
+        io.digitalWrite(xShutPinsL1[i], HIGH);
+        delay(10);
+
+        sensorsL1[i].setTimeout(500);
+        if ( !sensorsL1[i].init() ) {
+            Serial.print("Failed to detect and initialise sensor L1 ");
+            Serial.print(i);
+            while ( 1 )
+                ;
+        }
+
+        // Each sensor must have its address changed to a unique value other than
+        // the default of 0x29 (except for the last one, which could be left at
+        // the default). To make it simple, we'll just count up from 0x2A.
+        sensorsL1[i].setAddress(VL53L1X_ADDRESS_START + i);
+
+        sensorsL1[i].startContinuous(50);
     }
 }
 
@@ -326,4 +383,16 @@ void InitColourSensor()
     if ( !colourSensor.begin(COLOUR_SENSOR_ADDRESS, &COLOUR_SENSOR_WIRE) ) {
         Serial.println("COLOUR SENSOR NOT DETECTED");
     }
+}
+
+/**
+ * Initialise the IO board, I2C bus, circular buffers, and all sensors
+ */
+void InitSensors()
+{
+    InitIOExpander();
+    InitCircularBuffers();
+    InitTOFL0();
+    InitTOFL1();
+    InitLimitSwitch();
 }

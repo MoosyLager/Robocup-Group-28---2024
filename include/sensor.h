@@ -65,13 +65,14 @@ extern Adafruit_TCS34725 colourSensor;
 #define TOF_CONTROL_ADDRESS   0x3F  // Port expander address for TOF control pins
 #define VL53L0X_ADDRESS_START 0x30  // Start of VL53L0X address space
 #define VL53L1X_ADDRESS_START 0x35  // Start of VL53L1X address space
-#define NUM_TOF_L0            0     // Number of VL53L0X TOF sensors
-#define NUM_TOF_L1            0     // Number of VL53L1X TOF sensors
+#define NUM_TOF_L0            4     // Number of VL53L0X TOF sensors
+#define NUM_TOF_L1            4     // Number of VL53L1X TOF sensors
 
 #define TOF_XSHUT_L0_1        0
 #define TOF_XSHUT_L0_2        1
 #define TOF_XSHUT_L0_3        2
 #define TOF_XSHUT_L0_4        3
+
 #define TOF_XSHUT_L1_1        4
 #define TOF_XSHUT_L1_2        5
 #define TOF_XSHUT_L1_3        6
@@ -100,6 +101,7 @@ void InitIMU();
 void UpdateIMU();
 void UpdateTOFL0();
 void UpdateTOFL1();
+void InitTOF();
 
 uint16_t GetL0TL();
 uint16_t GetL0TR();
@@ -113,5 +115,8 @@ uint16_t GetL1BR();
 Colour_t GetColour();
 int CollectorPosition();
 int RampPosition();
+
+extern VL53L0X sensorsL0[NUM_TOF_L0];
+extern VL53L1X sensorsL1[NUM_TOF_L1];
 
 #endif
