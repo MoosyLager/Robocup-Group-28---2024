@@ -61,7 +61,7 @@ extern Motor_t collectionMotor;
 extern AccelStepper rampStepper;
 
 
-void InitMotors(Motor_t *leftMotor, Motor_t *rightMotor, Motor_t *collectionMotor);
+void InitMotors();
 void SetMotorSpeed(Motor_t *motor, signed int speed);
 signed int CheckSpeedLimits(signed int speed);
 void findTargetMotorSpeed(uint16_t* leftMotorTarget, uint16_t* rightMotorTarget );

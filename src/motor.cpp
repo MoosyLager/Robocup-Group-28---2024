@@ -14,43 +14,44 @@ AccelStepper rampStepper;
 /**
  * Initialise the drive motors, collection motor and ramp stepper motor
  */
-void InitMotors(Motor_t *leftMotor, Motor_t *rightMotor, Motor_t *collectionMotor) {
+void InitMotors()
+{
     // Initialize the left motor
-    leftMotor->servoDriver.attach(LEFT_MOTOR_ADDRESS);
-    leftMotor->motorType = LEFT_MOTOR;
-    leftMotor->Kp = 50;  // Example gains
-    leftMotor->Ki = 1;
-    leftMotor->Kd = 0;
-    leftMotor->speedInverted = true; // Normal direction control
-    leftMotor->currentMotorSpeed = 0;
-    leftMotor->prevSampledMotorPos = 0;
-    leftMotor->currentMotorPos = 0;
-    leftMotor->targetMotorPos = 0; // Initialize target value
+    leftMotor.servoDriver.attach(LEFT_MOTOR_ADDRESS);
+    leftMotor.motorType = LEFT_MOTOR;
+    leftMotor.Kp = 50;  // Example gains
+    leftMotor.Ki = 1;
+    leftMotor.Kd = 0;
+    leftMotor.speedInverted = true;  // Normal direction control
+    leftMotor.currentMotorSpeed = 0;
+    leftMotor.prevSampledMotorPos = 0;
+    leftMotor.currentMotorPos = 0;
+    leftMotor.targetMotorPos = 0;  // Initialize target value
 
     // Initialize the right motor
-    rightMotor->servoDriver.attach(RIGHT_MOTOR_ADDRESS);
-    rightMotor->motorType = RIGHT_MOTOR;
-    rightMotor->Kp = 50;
-    rightMotor->Ki = 1;
-    rightMotor->Kd = 0;
-    rightMotor->speedInverted = false; // Inverted control for right motor
-    rightMotor->currentMotorSpeed = 0;
-    rightMotor->prevSampledMotorPos = 0;
-    rightMotor->currentMotorPos = 0;
-    rightMotor->targetMotorPos = 0; // Initialize target value
+    rightMotor.servoDriver.attach(RIGHT_MOTOR_ADDRESS);
+    rightMotor.motorType = RIGHT_MOTOR;
+    rightMotor.Kp = 50;
+    rightMotor.Ki = 1;
+    rightMotor.Kd = 0;
+    rightMotor.speedInverted = false;  // Inverted control for right motor
+    rightMotor.currentMotorSpeed = 0;
+    rightMotor.prevSampledMotorPos = 0;
+    rightMotor.currentMotorPos = 0;
+    rightMotor.targetMotorPos = 0;  // Initialize target value
 
     // Initialize the collection motor
-    collectionMotor->servoDriver.attach(COLLECTION_MOTOR_ADDRESS);
-    collectionMotor->motorType = COLLECTION_MOTOR;
-    collectionMotor->Kp = 40;
-    collectionMotor->Ki = 6;
-    collectionMotor->Kd = 0;
-    collectionMotor->speedInverted = false; // Normal control
-    collectionMotor->currentMotorSpeed = 0;
-    collectionMotor->prevSampledMotorPos = 0;
-    collectionMotor->currentMotorPos = 0;
-    collectionMotor->targetMotorPos = 0; // Initialize target value
-    collectionMotor->targetMotorSpeed = 0;  // Initialize target value
+    collectionMotor.servoDriver.attach(COLLECTION_MOTOR_ADDRESS);
+    collectionMotor.motorType = COLLECTION_MOTOR;
+    collectionMotor.Kp = 40;
+    collectionMotor.Ki = 6;
+    collectionMotor.Kd = 0;
+    collectionMotor.speedInverted = false;  // Normal control
+    collectionMotor.currentMotorSpeed = 0;
+    collectionMotor.prevSampledMotorPos = 0;
+    collectionMotor.currentMotorPos = 0;
+    collectionMotor.targetMotorPos = 0;    // Initialize target value
+    collectionMotor.targetMotorSpeed = 0;  // Initialize target value
 
     // Initialise the ramp stepper motor
     rampStepper = AccelStepper(1, STEPPER_DIR_PIN, STEPPER_STEP_PIN);
