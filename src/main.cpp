@@ -1,12 +1,4 @@
-#include "collection.h"
-#include "encoder.h"
-#include "motor.h"
-#include "sensor.h"
 #include <Arduino.h>
-
-#include <SparkFunSX1509.h>
-#include <VL53L0X.h>
-#include <Wire.h>
 
 // #include <elapsedMillis.h>
 
@@ -17,20 +9,10 @@
 
 void setup()
 {
-    Serial.begin(9600);
-    // InitSensors();
-    // InitIOExpander();
-    // InitTOFL0();
-    // InitTOFL1();
-    // InitTOF();
-    InitMotors();
-
-    Serial.println("Initialised.");
 }
 
 void loop()
 {
-    SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL)
     // UpdateTOFL0();
     // Serial.println(GetL0BL());
     // ReadTOFL0();
