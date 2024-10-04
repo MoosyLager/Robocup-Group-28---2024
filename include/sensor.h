@@ -88,12 +88,11 @@ extern Adafruit_TCS34725 colourSensor;
 
 extern sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
 extern Adafruit_BNO055 bno;
-extern int8_t boardTemp;
+extern int8_t boardTempIMU;
 
 void InitSensors();
+void InitTOF();
 void InitIOExpander();
-void InitTOFL0();
-void InitTOFL1();
 void InitLimitSwitch();
 void InitColourSensor();
 void InitIMU();
@@ -101,7 +100,6 @@ void InitIMU();
 void UpdateIMU();
 void UpdateTOFL0();
 void UpdateTOFL1();
-void InitTOF();
 
 uint16_t GetL0TL();
 uint16_t GetL0TR();
@@ -115,8 +113,5 @@ uint16_t GetL1BR();
 Colour_t GetColour();
 int CollectorPosition();
 int RampPosition();
-
-extern VL53L0X sensorsL0[NUM_TOF_L0];
-extern VL53L1X sensorsL1[NUM_TOF_L1];
 
 #endif

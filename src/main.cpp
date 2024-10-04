@@ -1,7 +1,9 @@
+#include "sensor.h"
 #include <Arduino.h>
 
-// #include <elapsedMillis.h>
+#include <elapsedMillis.h>
 
+elapsedMillis timer;
 
 // elapsedMillis motorDelay;
 // uint16_t motorSpeed = 1100;
@@ -9,6 +11,15 @@
 
 void setup()
 {
+    Serial.begin(9600);
+    InitSensors();
+
+    // Wait to populate circular buffer first
+    timer = 0;
+    while ( timer < 1000 ) {
+        UpdateTOFL0();
+        UpdateTOFL1();
+    }
 }
 
 void loop()

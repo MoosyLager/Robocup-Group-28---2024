@@ -6,7 +6,7 @@ SX1509 io;  // Port Expander
  * IMU Data
  */
 Adafruit_BNO055 bno = Adafruit_BNO055(IMU_ID, IMU_ADDRESS, &IMU_WIRE);
-int8_t boardTemp;
+int8_t boardTempIMU;
 sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
 
 /**
@@ -82,20 +82,21 @@ void UpdateTOFL1()
 uint16_t GetL0TL()
 {
     return CalculateBufferMean(&sensorL0Data[0]);
-}
-
-/**
- * Get the average TOF value from L0 Top Right
- */
-uint16_t GetL0TR()
-{
-    return CalculateBufferMean(&sensorL0Data[1]);
+    // return sensorsL0[0].readRangeContinuousMillimeters();
 }
 
 /**
  * Get the average TOF value from L0 Bottom Left
  */
 uint16_t GetL0BL()
+{
+    return CalculateBufferMean(&sensorL0Data[1]);
+}
+
+/**
+ * Get the average TOF value from L0 Top Right
+ */
+uint16_t GetL0TR()
 {
     return CalculateBufferMean(&sensorL0Data[2]);
 }
@@ -117,17 +118,17 @@ uint16_t GetL1TL()
 }
 
 /**
- * Get the average TOF value from L0 Top Right
+ * Get the average TOF value from L0 Bottom Left
  */
-uint16_t GetL1TR()
+uint16_t GetL1BL()
 {
     return CalculateBufferMean(&sensorL1Data[1]);
 }
 
 /**
- * Get the average TOF value from L0 Bottom Left
+ * Get the average TOF value from L0 Top Right
  */
-uint16_t GetL1BL()
+uint16_t GetL1TR()
 {
     return CalculateBufferMean(&sensorL1Data[2]);
 }
@@ -167,7 +168,7 @@ void UpdateIMU()
     bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
     bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
     bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);
-    boardTemp = bno.getTemp();
+    boardTempIMU = bno.getTemp();
 }
 
 /**
@@ -226,42 +227,9 @@ void InitLimitSwitch()
 }
 
 /**
- * Initialise all connected VL53L0X Sensors
+ * Initialises all connected TOF sensors
+ * Both VL53L0X and VL53L1X
  */
-void InitTOFL0()
-{
-    // Disable/reset all sensors by driving their XSHUT pins low.
-    for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
-        io.pinMode(xShutPinsL0[i], OUTPUT);
-        io.digitalWrite(xShutPinsL0[i], LOW);
-    }
-
-    // Enable, initialise, and start each sensor
-    for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
-        // Stop driving this sensor's XSHUT low. This should allow the carrier
-        // board to pull it high. (We do NOT want to drive XSHUT high since it is
-        // not level shifted.) Then wait a bit for the sensor to start up.
-        // pinMode(xshutPins[i], INPUT);
-        io.digitalWrite(xShutPinsL0[i], HIGH);
-        delay(10);
-
-        sensorsL0[i].setTimeout(500);
-        if ( !sensorsL0[i].init() ) {
-            Serial.print("Failed to detect and initialise sensor L0 ");
-            Serial.print(i);
-            while ( 1 )
-                ;
-        }
-
-        // Each sensor must have its address changed to a unique value other than
-        // the default of 0x29 (except for the last one, which could be left at
-        // the default). To make it simple, we'll just count up from 0x2A.
-        sensorsL0[i].setAddress(VL53L0X_ADDRESS_START + i);
-
-        sensorsL0[i].startContinuous(50);
-    }
-}
-
 void InitTOF()
 {
     // Disable/reset all sensors by driving their XSHUT pins low.
@@ -328,44 +296,6 @@ void InitTOF()
 }
 
 /**
- * Initialise all connected VL53L1X Sensors
- */
-void InitTOFL1()
-{
-    // Disable/reset all sensors by driving their XSHUT pins low.
-    for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
-        io.pinMode(xShutPinsL1[i], OUTPUT);
-        io.digitalWrite(xShutPinsL1[i], LOW);
-    }
-
-    // Enable, initialise, and start each sensor
-    for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
-        // Stop driving this sensor's XSHUT low. This should allow the carrier
-        // board to pull it high. (We do NOT want to drive XSHUT high since it is
-        // not level shifted.) Then wait a bit for the sensor to start up.
-        // pinMode(xshutPins[i], INPUT);
-        io.digitalWrite(xShutPinsL1[i], HIGH);
-        delay(10);
-
-        sensorsL1[i].setTimeout(500);
-        if ( !sensorsL1[i].init() ) {
-            Serial.print("Failed to detect and initialise sensor L1 ");
-            Serial.print(i);
-            while ( 1 )
-                ;
-        }
-
-        // Each sensor must have its address changed to a unique value other than
-        // the default of 0x29 (except for the last one, which could be left at
-        // the default). To make it simple, we'll just count up from 0x2A.
-        sensorsL1[i].setAddress(VL53L1X_ADDRESS_START + i);
-
-        sensorsL1[i].startContinuous(50);
-    }
-}
-
-
-/**
  * Initialises the IMU
  */
 void InitIMU()
@@ -391,8 +321,11 @@ void InitColourSensor()
 void InitSensors()
 {
     InitIOExpander();
+
     InitCircularBuffers();
-    InitTOFL0();
-    InitTOFL1();
+
+    InitTOF();
     InitLimitSwitch();
+    // InitIMU();
+    // InitColourSensor();
 }
