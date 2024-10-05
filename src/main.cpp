@@ -1,8 +1,10 @@
+#include "collection.h"
+#include "encoder.h"
+#include "motor.h"
 #include "sensor.h"
 #include <Arduino.h>
 
 #include <elapsedMillis.h>
-
 elapsedMillis timer;
 
 // elapsedMillis motorDelay;
@@ -13,17 +15,32 @@ void setup()
 {
     Serial.begin(9600);
     InitSensors();
+    InitMotors();
+    InitEncoders();
 
-    // Wait to populate circular buffer first
-    timer = 0;
-    while ( timer < 1000 ) {
-        UpdateTOFL0();
-        UpdateTOFL1();
-    }
+    // CalibrateCollector();
+    // delay(500);
+    CalibrateCollector();
 }
 
 void loop()
 {
+    if ( BlueButtonState() && timer > 1500 ) {
+        timer = 0;
+        ActuateCollector();
+    }
+    UpdateCollector();
+    if ( prevCollectionMotorPos != collectionMotorPos ) {
+        Serial.println(collectionMotorPos);
+        prevCollectionMotorPos = collectionMotorPos;
+    }
+    // if ( BlueButtonState() && (timer > 1000) ) {
+    //     timer = 0;
+    //     ActuateCollector();
+    // }
+    // Serial.println(collectionMotorPos);
+    // Serial.println(BlueButtonState());
+    // Serial.println(CollectorPosition());
     // UpdateTOFL0();
     // Serial.println(GetL0BL());
     // ReadTOFL0();
