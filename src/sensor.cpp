@@ -1,7 +1,8 @@
 #include "sensor.h"
+#include <elapsedMillis.h>
 
 SX1509 io;  // Port Expander
-
+elapsedMicros updateSensorsTimer1 = 0;
 /**
  * IMU Data
  */
@@ -63,14 +64,17 @@ void UpdateTOFL1()
 {
     for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
         // Read sensor data
+        updateSensorsTimer1 = 0;
         uint16_t sensorValue = sensorsL1[i].readRangeContinuousMillimeters();
-
         // Write sensor data to circular buffer
         CircBuffWrite(&sensorL1Data[i], sensorValue);
-
+        
         if ( sensorsL1[i].timeoutOccurred() ) {
             Serial.print(" TIMEOUT");
         }
+        uint16_t time = updateSensorsTimer1;
+        Serial.print(time);
+        Serial.print("\t");
     }
 }
 

@@ -56,6 +56,7 @@ typedef struct {
     signed long targetMotorPos;   // Target position for position control
     signed int targetMotorSpeed;  // Target speed for speed control
     bool isPositionControl;       // To switch between position and speed control
+    signed long prevTime;
 } Motor_t;
 
 extern Motor_t leftMotor;
@@ -70,7 +71,7 @@ signed int CheckSpeedLimits(signed int speed);
 void findTargetMotorSpeed(uint16_t* leftMotorTarget, uint16_t* rightMotorTarget );
 void findMotorSpeed(signed long deltaPos, signed int deltaT);
 signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long target, unsigned long deltaT);
-void PIDMotorControl(Motor_t *leftMotor, Motor_t *rightMotor, bool isPositionControl);
+void PIDMotorControl(Motor_t *motor);
 
 void moveForward(int speed);
 void moveBackward(int speed);

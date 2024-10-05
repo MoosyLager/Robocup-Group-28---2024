@@ -30,6 +30,7 @@ void InitMotors()
     leftMotor.currentMotorPos = 0;
     leftMotor.targetMotorPos = 0;  // Initialize target value
     leftMotor.isPositionControl = false;  // Start in position control mode
+    leftMotor.prevTime = 0;
 
     // Initialize the right motor
     rightMotor.servoDriver.attach(RIGHT_MOTOR_ADDRESS);
@@ -43,6 +44,7 @@ void InitMotors()
     rightMotor.currentMotorPos = 0;
     rightMotor.targetMotorPos = 0;  // Initialize target value
     rightMotor.isPositionControl = false;  // Start in position control mode
+    rightMotor.prevTime = 0;
 
     // Initialize the collection motor
     collectionMotor.servoDriver.attach(COLLECTION_MOTOR_ADDRESS);
@@ -57,6 +59,7 @@ void InitMotors()
     collectionMotor.targetMotorPos = 0;    // Initialize target value
     collectionMotor.targetMotorSpeed = 0;  // Initialize target value
     collectionMotor.isPositionControl = true;  // Start in position control mode
+    collectionMotor.prevTime = 0;
 
     // Initialise the ramp stepper motor
     rampStepper = AccelStepper(1, STEPPER_DIR_PIN, STEPPER_STEP_PIN);
@@ -134,38 +137,40 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
     return control;
 }
 
+void PIDMotorControl(Motor_t *motor) {
+    signed int deltaT = currentTime - motor->prevTime;
+    motor->prevTime = currentTime;
 
-void PIDMotorControl(Motor_t *leftMotor, Motor_t *rightMotor, bool isPositionControl) {
-    static signed long prevTime = 0;
-    signed int deltaT = currentTime - prevTime;
-    prevTime = currentTime;
+    // Get the delta (for speed calculations)
+    if (motor->motorType == LEFT_MOTOR) {
+        motor->currentMotorPos = leftMotorPos;
+    } else if (motor->motorType == RIGHT_MOTOR) {
+        motor->currentMotorPos = rightMotorPos;
+    } else if (motor->motorType == COLLECTION_MOTOR) {
+        motor->currentMotorPos = collectionMotorPos;
+    } 
+    signed long deltaPos = motor->currentMotorPos - motor->prevSampledMotorPos;
+    Serial.print(deltaPos);
 
-    // Get the deltas (for speed calculations)
-    leftMotor->currentMotorPos = leftMotorPos;
-    //rightMotor->currentMotorPos = rightMotorPos;
-    signed long leftDeltaPos = leftMotor->currentMotorPos - leftMotor->prevSampledMotorPos;
-    //signed long rightDeltaPos = rightMotor->currentMotorPos - rightMotor->prevSampledMotorPos;
-
-    // Calculate motor speeds if in speed control mode
-    findMotorSpeed(leftMotor, leftDeltaPos, deltaT);
-    Serial.print(leftMotor->targetMotorSpeed);
-    //findMotorSpeed(rightMotor, rightDeltaPos, deltaT);
+    // Calculate motor speed if in speed control mode
+    findMotorSpeed(motor, deltaPos, deltaT);
+    Serial.print(" ");
+    Serial.print(motor->currentMotorSpeed);
+    Serial.print(" ");
+    Serial.println(motor->targetMotorSpeed);
 
     // For position control, target is position, for speed control, target is speed
-    signed int leftTarget = isPositionControl ? leftMotor->targetMotorPos : leftMotor->targetMotorSpeed;
-    //signed int rightTarget = isPositionControl ? rightMotor->targetMotorPos : rightMotor->targetMotorSpeed;
+    signed int target = motor->isPositionControl ? motor->targetMotorPos : motor->targetMotorSpeed;
 
-    // Calculate PID control output for both motors
-    signed int leftMotorControl = pidMotorControl(leftMotor, isPositionControl, leftTarget, deltaT);
-    //signed int rightMotorControl = pidMotorControl(rightMotor, isPositionControl, rightTarget, deltaT);
+    // Calculate PID control output
+    signed int motorControl = pidMotorControl(motor, motor->isPositionControl, target, deltaT);
 
-    leftMotor->prevSampledMotorPos = leftMotor->currentMotorPos;
-    //rightMotor->prevSampledMotorPos = rightMotor->currentMotorPos;
-    
-    // Set motor speeds
-    SetMotorSpeed(leftMotor, leftMotorControl);
-    //SetMotorSpeed(rightMotor, rightMotorControl);
+    motor->prevSampledMotorPos = motor->currentMotorPos;
+
+    // Set motor speed
+    SetMotorSpeed(motor, motorControl);
 }
+
 
 void moveForward(int speed) {
     leftMotor.targetMotorSpeed = speed;
