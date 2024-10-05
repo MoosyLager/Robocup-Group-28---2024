@@ -10,6 +10,7 @@ extern bool finished_calibrating;
 #define LOST_WEIGHT_TIMEOUT 5000
 #define ROTATION_TIMEOUT 20000
 #define SPIN_TIMEOUT 4000
+#define EVASIVE_MANEUVER_TIMEOUT 2000
 
 typedef enum {
     FORWARD,
@@ -58,19 +59,23 @@ typedef struct {
     HuntState_t huntState;
     ReturnState_t returnState;
     int collectedWeights;
-    bool tooCloseToWall;
     bool calibrated;
     WeightPos_t weightPos;
     AvoidanceSide_t avoidanceSide;
+    bool evasiveManeuverCompleted;
 } RobotFSM;
 
 // Function prototypes
+void checkWallDistances(RobotFSM* fsm);
 void processFSM(RobotFSM* fsm);
 void initializeRobotFSM(RobotFSM* fsm);
 void handleCalibrating(RobotFSM *fsm);
+void handleSearching(RobotFSM *fsm);
 void handleHunting(RobotFSM *fsm);
 void handleAvoiding(RobotFSM *fsm);
 void handleReturning(RobotFSM *fsm);
 void checkWallProximity(RobotFSM *fsm);
+
+
 
 #endif // SEARCHALGORITHM_H

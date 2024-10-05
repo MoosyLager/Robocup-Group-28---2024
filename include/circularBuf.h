@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define CIRCULAR_BUF_SIZE 10
+#define CIRCULAR_BUF_SIZE 4
 
 typedef struct {
 	uint16_t bufSize;

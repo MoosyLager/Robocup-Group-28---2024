@@ -11,6 +11,8 @@ Motor_t rightMotor;
 Motor_t collectionMotor;
 AccelStepper rampStepper;
 
+elapsedMillis currentTime;
+
 /**
  * Initialise the drive motors, collection motor and ramp stepper motor
  */
@@ -20,7 +22,7 @@ void InitMotors()
     leftMotor.servoDriver.attach(LEFT_MOTOR_ADDRESS);
     leftMotor.motorType = LEFT_MOTOR;
     leftMotor.Kp = 100;  // Example gains
-    leftMotor.Ki = 1;
+    leftMotor.Ki = 100;
     leftMotor.Kd = 0;
     leftMotor.speedInverted = true;  // Normal direction control
     leftMotor.currentMotorSpeed = 0;
@@ -33,7 +35,7 @@ void InitMotors()
     rightMotor.servoDriver.attach(RIGHT_MOTOR_ADDRESS);
     rightMotor.motorType = RIGHT_MOTOR;
     rightMotor.Kp = 100;
-    rightMotor.Ki = 1;
+    rightMotor.Ki = 100;
     rightMotor.Kd = 0;
     rightMotor.speedInverted = false;  // Inverted control for right motor
     rightMotor.currentMotorSpeed = 0;
@@ -140,29 +142,29 @@ void PIDMotorControl(Motor_t *leftMotor, Motor_t *rightMotor, bool isPositionCon
 
     // Get the deltas (for speed calculations)
     leftMotor->currentMotorPos = leftMotorPos;
-    rightMotor->currentMotorPos = rightMotorPos;
+    //rightMotor->currentMotorPos = rightMotorPos;
     signed long leftDeltaPos = leftMotor->currentMotorPos - leftMotor->prevSampledMotorPos;
-    signed long rightDeltaPos = rightMotor->currentMotorPos - rightMotor->prevSampledMotorPos;
+    //signed long rightDeltaPos = rightMotor->currentMotorPos - rightMotor->prevSampledMotorPos;
 
     // Calculate motor speeds if in speed control mode
     findMotorSpeed(leftMotor, leftDeltaPos, deltaT);
-    findMotorSpeed(rightMotor, rightDeltaPos, deltaT);
+    Serial.print(leftMotor->targetMotorSpeed);
+    //findMotorSpeed(rightMotor, rightDeltaPos, deltaT);
 
     // For position control, target is position, for speed control, target is speed
     signed int leftTarget = isPositionControl ? leftMotor->targetMotorPos : leftMotor->targetMotorSpeed;
-    signed int rightTarget = isPositionControl ? rightMotor->targetMotorPos : rightMotor->targetMotorSpeed;
+    //signed int rightTarget = isPositionControl ? rightMotor->targetMotorPos : rightMotor->targetMotorSpeed;
 
     // Calculate PID control output for both motors
     signed int leftMotorControl = pidMotorControl(leftMotor, isPositionControl, leftTarget, deltaT);
-    signed int rightMotorControl = pidMotorControl(rightMotor, isPositionControl, rightTarget, deltaT);
+    //signed int rightMotorControl = pidMotorControl(rightMotor, isPositionControl, rightTarget, deltaT);
 
     leftMotor->prevSampledMotorPos = leftMotor->currentMotorPos;
-    rightMotor->prevSampledMotorPos = rightMotor->currentMotorPos;
+    //rightMotor->prevSampledMotorPos = rightMotor->currentMotorPos;
     
     // Set motor speeds
     SetMotorSpeed(leftMotor, leftMotorControl);
-    SetMotorSpeed(rightMotor, rightMotorControl);
-    Serial.println(' ');
+    //SetMotorSpeed(rightMotor, rightMotorControl);
 }
 
 void moveForward(int speed) {

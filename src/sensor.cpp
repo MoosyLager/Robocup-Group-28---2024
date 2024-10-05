@@ -53,7 +53,6 @@ void UpdateTOFL0()
         if ( sensorsL0[i].timeoutOccurred() ) {
             Serial.print(" TIMEOUT");
         }
-        Serial.print('\t');
     }
 }
 
@@ -72,7 +71,6 @@ void UpdateTOFL1()
         if ( sensorsL1[i].timeoutOccurred() ) {
             Serial.print(" TIMEOUT");
         }
-        Serial.print('\t');
     }
 }
 

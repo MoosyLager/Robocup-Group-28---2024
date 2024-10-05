@@ -4,39 +4,49 @@
 #include "sensor.h"
 #include <Arduino.h>
 #include "searchAlgorithm.h"
+#include <elapsedMillis.h>
 
 #include <SparkFunSX1509.h>
 #include <VL53L0X.h>
 #include <Wire.h>
 
+
+
 RobotFSM fsm;
+elapsedMicros updateSensorsTimer = 0;
+elapsedMicros updateFSM = 0;
+elapsedMicros updatePWM = 0;
 
 void setup()
 {
     Serial.begin(9600);
     InitSensors();
-    // InitMotors();
+    InitMotors();
     initializeRobotFSM(&fsm);
     Serial.println("Initialised.");
 }
 
 void loop()
 {
-    UpdateTOFL1();
-    uint16_t L1TL = GetL1TL();
-    uint16_t L1TR = GetL1TR();
-    uint16_t L1BL = GetL1BL();
-    uint16_t L1BR = GetL1BR();
-    Serial.print("L1TL: ");
-    Serial.println(L1TL);
-    Serial.print("L1TR: ");
-    Serial.println(L1TR);
-    Serial.print("L1BL: ");
-    Serial.println(L1BL);
-    Serial.print("L1BR: ");
-    Serial.println(L1BR);
-    Serial.println("-----");
-    // Serial.println(L0TL);
-    // processFSM(&fsm);
-    delay(100);
+    if (updateSensorsTimer > 300)
+    {
+        updatePWM = 0;
+        UpdateTOFL1();
+        unsigned long time1 = updatePWM;
+        UpdateTOFL0();
+        unsigned long time = updatePWM;
+        Serial.print(time1);
+        Serial.print(" ");
+        Serial.println(time - time1);
+        updateSensorsTimer = 0;
+    }
+    // if (updateFSM > 100000){
+    //     processFSM(&fsm);
+    //     updateFSM = 0;   
+    // }
+    // if (updatePWM > 10000) {
+    //     PIDMotorControl(&leftMotor, &rightMotor, leftMotor.isPositionControl);
+    //     updatePWM = 0;
+    // }
+
 }
