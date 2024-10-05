@@ -25,6 +25,12 @@ typedef enum {
     NONE
 } WeightPos_t;
 
+typedef enum {
+    LEFT,
+    RIGHT,
+    NO_WALL
+} AvoidanceSide_t;
+
 // Main state machine
 typedef enum {
     CALIBRATING,
@@ -55,9 +61,12 @@ typedef struct {
     bool tooCloseToWall;
     bool calibrated;
     WeightPos_t weightPos;
+    AvoidanceSide_t avoidanceSide;
 } RobotFSM;
 
 // Function prototypes
+void processFSM(RobotFSM* fsm);
+void initializeRobotFSM(RobotFSM* fsm);
 void handleCalibrating(RobotFSM *fsm);
 void handleHunting(RobotFSM *fsm);
 void handleAvoiding(RobotFSM *fsm);

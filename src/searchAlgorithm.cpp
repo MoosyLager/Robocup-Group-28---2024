@@ -6,19 +6,21 @@
 #include <elapsedMillis.h>
 #include "motor.h"
 #include "collection.h"
+#include "circularBuf.h"
 
 elapsedMillis weightWatchDog;
 elapsedMillis rotationCounter;
 
 void initializeRobotFSM(RobotFSM* fsm) {
-    fsm->currentState = CALIBRATING;  // Start in CALIBRATING state
-    fsm->lastMainState = CALIBRATING; // Set last state to the initial state
+    fsm->currentState = HUNTING;  // Start in CALIBRATING state
+    fsm->lastMainState = HUNTING; // Set last state to the initial state
     fsm->huntState = SEARCH;          // Start in SEARCH state
     fsm->returnState = HOMESEEK;      // Start in HOMESEEK state
     fsm->collectedWeights = 0;        // No weights collected at the start
     fsm->tooCloseToWall = false;      // Robot is not near the wall at the start
     fsm->calibrated = false;          // Robot is not calibrated at the start
     fsm->weightPos = NONE;            // No weight detected at the start
+    fsm->avoidanceSide = NO_WALL;        // No obstacle detected at the start
 }
 
 void checkWeightsOnboard(RobotFSM* fsm)
@@ -26,10 +28,33 @@ void checkWeightsOnboard(RobotFSM* fsm)
     // weightCheckFunction(fsm); changes the state to RETURNING if >= 3 weights are onboard
 }
 
-void checkWallDistance(RobotFSM* fsm)
+void checkWallDistances(RobotFSM* fsm)
 {
-    // checks the sensor values to determine if the robot is too close to the wall
+    const int numFunctions = NUM_TOF_L0 + NUM_TOF_L1;
+
+    // Iterate through each distance function and check for obstacles
+    for (int i = 0; i < numFunctions; i++) {
+        uint16_t distance = distanceFunctions[i]();  // Call the function
+        if (distance < AVOIDANCE_THRESHOLD) {
+            fsm->currentState = AVOIDING;  // Change the state if below threshold
+
+            // Determine side of detection based on the function index
+            if (i % 2 == 0) {
+                fsm->avoidanceSide = LEFT;  // L0 corresponds to the left side
+                Serial.println("LEFT");
+            } else {
+                fsm->avoidanceSide = RIGHT; // L1 corresponds to the right side
+                Serial.println("RIGHT");
+            }
+
+            return;  // Exit early since an obstacle was found
+        }
+    }
+
+    // If no obstacle is found, reset the state/side
+    fsm->avoidanceSide = NO_WALL;
 }
+
 
 void checkCalibration(RobotFSM* fsm)
 {
@@ -42,7 +67,7 @@ void processFSM(RobotFSM* fsm) {
     // If calibrated, check if robot is too close to the wall
     // If not too close to the wall, check if there are weights onboard to start HUNTING  RETURNING
     if (!fsm->currentState == CALIBRATING) {
-        checkWallDistance(fsm);
+        checkWallDistances(fsm);
     }
         
 
@@ -98,8 +123,18 @@ void handleHunting(RobotFSM* fsm) {
 }
 
 void handleAvoiding(RobotFSM* fsm) {
-    // takeAvoidingAction(fsm); // Function needs to check wall detection AND completion of evading action
-    fsm->huntState = SEARCH; // Reset the hunt state to SEARCH after avoiding
+    Serial.printf("Avoiding...\n");
+    if (fsm->avoidanceSide == LEFT) {
+        rotateCW(3000);
+    } else if (fsm->avoidanceSide == RIGHT) {
+        rotateCCW(3000);
+    } else if (fsm->avoidanceSide == NO_WALL) {
+        fsm->currentState = HUNTING;
+        fsm->huntState = SEARCH;
+    } else {
+        Serial.println("Unknown avoidance side!");
+    }
+    
 }
 
 void handleReturning(RobotFSM *fsm) {
