@@ -86,6 +86,16 @@ extern Adafruit_TCS34725 colourSensor;
 #define IMU_ADDRESS        0x28
 #define IMU_WIRE           Wire1
 
+/**
+ * Sensor thresholds
+ */
+#define AVOIDANCE_THRESHOLD  50
+#define LONG_RANGE_THRESHOLD 1000
+#define SHORT_RANGE_THRESHOLD 400
+#define COLLECTION_THRESHOLD 450 // To be tested
+#define DIFFERENCE_PERCENTAGE 30//% difference between the two sensors
+#define DIFFERENCE_ABSOLUTE 100 //mm difference between the two sensors
+
 extern sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
 extern Adafruit_BNO055 bno;
 extern int8_t boardTemp;
@@ -115,6 +125,15 @@ uint16_t GetL1BR();
 Colour_t GetColour();
 int CollectorPosition();
 int RampPosition();
+
+bool CheckAvoidance(void);
+bool detectedByPercentageDifference(uint16_t top, uint16_t bottom);
+bool detectedByAbsoluteDifference(uint16_t top, uint16_t bottom);
+bool detectedFarRight(void);
+bool detectedFarLeft(void);
+bool detectedCentreRight(void);
+bool detectedCentreLeft(void);
+bool weightDetected(void);
 
 extern VL53L0X sensorsL0[NUM_TOF_L0];
 extern VL53L1X sensorsL1[NUM_TOF_L1];

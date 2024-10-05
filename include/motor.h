@@ -30,6 +30,8 @@
 #define MAX_MOTOR_VAL       1990
 #define MOTOR_STOP_VAL      1500
 #define INTEGRAL_LIMIT      50000000
+#define POSITIONAL_CONVERSION 1273/10 //Careful about using this
+#define POSITIONAL_OFFSET 0
 
 extern elapsedMillis currentTime;
 
@@ -53,6 +55,7 @@ typedef struct {
     uint16_t Kd;                 // Derivative gain
     signed long targetMotorPos;   // Target position for position control
     signed int targetMotorSpeed;  // Target speed for speed control
+    bool isPositionControl;       // To switch between position and speed control
 } Motor_t;
 
 extern Motor_t leftMotor;
@@ -68,4 +71,11 @@ void findTargetMotorSpeed(uint16_t* leftMotorTarget, uint16_t* rightMotorTarget 
 void findMotorSpeed(signed long deltaPos, signed int deltaT);
 signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long target, unsigned long deltaT);
 void PIDMotorControl(Motor_t *leftMotor, Motor_t *rightMotor, bool isPositionControl);
+
+void moveForward(int speed);
+void moveBackward(int speed);
+void rotateCW(int speed);
+void rotateCCW(int speed);
+void moveDistance(int distance, Motor_t *motor);
+
 #endif

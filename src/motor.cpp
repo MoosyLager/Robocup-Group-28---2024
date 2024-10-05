@@ -19,7 +19,7 @@ void InitMotors()
     // Initialize the left motor
     leftMotor.servoDriver.attach(LEFT_MOTOR_ADDRESS);
     leftMotor.motorType = LEFT_MOTOR;
-    leftMotor.Kp = 50;  // Example gains
+    leftMotor.Kp = 100;  // Example gains
     leftMotor.Ki = 1;
     leftMotor.Kd = 0;
     leftMotor.speedInverted = true;  // Normal direction control
@@ -27,11 +27,12 @@ void InitMotors()
     leftMotor.prevSampledMotorPos = 0;
     leftMotor.currentMotorPos = 0;
     leftMotor.targetMotorPos = 0;  // Initialize target value
+    leftMotor.isPositionControl = false;  // Start in position control mode
 
     // Initialize the right motor
     rightMotor.servoDriver.attach(RIGHT_MOTOR_ADDRESS);
     rightMotor.motorType = RIGHT_MOTOR;
-    rightMotor.Kp = 50;
+    rightMotor.Kp = 100;
     rightMotor.Ki = 1;
     rightMotor.Kd = 0;
     rightMotor.speedInverted = false;  // Inverted control for right motor
@@ -39,6 +40,7 @@ void InitMotors()
     rightMotor.prevSampledMotorPos = 0;
     rightMotor.currentMotorPos = 0;
     rightMotor.targetMotorPos = 0;  // Initialize target value
+    rightMotor.isPositionControl = false;  // Start in position control mode
 
     // Initialize the collection motor
     collectionMotor.servoDriver.attach(COLLECTION_MOTOR_ADDRESS);
@@ -52,6 +54,7 @@ void InitMotors()
     collectionMotor.currentMotorPos = 0;
     collectionMotor.targetMotorPos = 0;    // Initialize target value
     collectionMotor.targetMotorSpeed = 0;  // Initialize target value
+    collectionMotor.isPositionControl = true;  // Start in position control mode
 
     // Initialise the ramp stepper motor
     rampStepper = AccelStepper(1, STEPPER_DIR_PIN, STEPPER_STEP_PIN);
@@ -98,13 +101,7 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
     if (isPositionControl) {
         // Position control
         error = target - motor->currentMotorPos;
-        Serial.print("Error: ");
-        Serial.print(error);
-        Serial.print(' ');
         p = motor->Kp * error;
-        Serial.print("P: ");
-        Serial.print(p / 1000);
-        Serial.print(' ');
         d = motor->Kd * (motor->currentMotorPos - motor->prevSampledMotorPos) / deltaT;
         motor->prevSampledMotorPos = motor->currentMotorPos;
     } else {
@@ -123,9 +120,6 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
         integral = -INTEGRAL_LIMIT;
     }
     motor->integral = integral;
-    Serial.print("Integral: ");
-    Serial.print(motor->integral / 1000);
-    Serial.print(' ');
 
     // Compute the control signal
     signed long control = p + motor->integral - d;
@@ -135,8 +129,6 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
     if ((motor->speedInverted)) {
         control = -control;
     }
-    Serial.print("Control: ");
-    Serial.print(control);
     return control;
 }
 
@@ -172,6 +164,41 @@ void PIDMotorControl(Motor_t *leftMotor, Motor_t *rightMotor, bool isPositionCon
     SetMotorSpeed(rightMotor, rightMotorControl);
     Serial.println(' ');
 }
+
+void moveForward(int speed) {
+    leftMotor.targetMotorSpeed = speed;
+    rightMotor.targetMotorSpeed = speed;
+    leftMotor.isPositionControl = false;
+    rightMotor.isPositionControl = false;
+}
+
+void rotateCW(int speed) {
+    leftMotor.targetMotorSpeed = speed;
+    rightMotor.targetMotorSpeed = -speed;
+    leftMotor.isPositionControl = false;
+    rightMotor.isPositionControl = false;
+}
+
+void rotateCCW(int speed) {
+    leftMotor.targetMotorSpeed = -speed;
+    rightMotor.targetMotorSpeed = speed;
+    leftMotor.isPositionControl = false;
+    rightMotor.isPositionControl = false;
+}
+
+void moveBackward(int speed) {
+    leftMotor.targetMotorSpeed = -speed;
+    rightMotor.targetMotorSpeed = -speed;
+    leftMotor.isPositionControl = false;
+    rightMotor.isPositionControl = false;
+}
+
+void moveDistance(int distance, Motor_t* motor) {
+    motor->targetMotorPos = distance;
+    motor->isPositionControl = true;
+}
+
+
 
 
 

@@ -1,7 +1,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "searchAlgorithm.h"
+#include "sensor.h"
 #include <stdio.h>
+#include <elapsedMillis.h>
+#include "motor.h"
+#include "collection.h"
+
+elapsedMillis weightWatchDog;
+elapsedMillis rotationCounter;
 
 void initializeRobotFSM(RobotFSM* fsm) {
     fsm->currentState = CALIBRATING;  // Start in CALIBRATING state
@@ -11,6 +18,7 @@ void initializeRobotFSM(RobotFSM* fsm) {
     fsm->collectedWeights = 0;        // No weights collected at the start
     fsm->tooCloseToWall = false;      // Robot is not near the wall at the start
     fsm->calibrated = false;          // Robot is not calibrated at the start
+    fsm->weightPos = NONE;            // No weight detected at the start
 }
 
 void checkWeightsOnboard(RobotFSM* fsm)
@@ -121,51 +129,73 @@ void checkWeightDetection(RobotFSM* fsm) {
 }
 
 void handleSearching(RobotFSM* fsm) {
-    // searchMotorFunction(); // sets the current motion to straight ahead or if rotating, the direction to rotate
-    // checkWeightDetection(fsm); // Changes the state to CHASE if weight is detected
+    static int currentCount = 0;
+    if (rotationCounter - currentCount > ROTATION_TIMEOUT) {
+        rotateCW(3000);
+        if (rotationCounter - currentCount > (ROTATION_TIMEOUT + SPIN_TIMEOUT)) {
+            currentCount = rotationCounter;
+        }
+    } else {
+        moveForward(3000);
+    }
+
+    if (weightDetected()) {
+        fsm->huntState = CHASE;
+    }
 }
 
 
 
 void handleChasing(RobotFSM* fsm) {
-    /*
-    need dist threshold
-    if 
+    if (weightDetected) {
+        weightWatchDog = 0;
+    } else if (weightWatchDog > LOST_WEIGHT_TIMEOUT) {
+        fsm->huntState = SEARCH;
+        fsm->weightPos = NONE;
+        weightWatchDog = 0;
+    }
 
-    if detected on farright:
-        weightPos = ON_RIGHT
-    if detected on farleft:
-        weightPos = ON_LEFT
-    if ahead:
-        ahead control
-    if centreRight and > dist threshold:
-        weightPos = AHEAD
-    if centreLeft and > dist threshold:
-        weightPos = AHEAD
-    if both sensors:
-        calculate distance and turn accoringly, then set ahead
 
-    if AHEAD:
-        if no sensor:
-            move forward
-        if left sensor:
-            turn left
-        if right sensor:
-            turn right
-        if both sensors:
-            calculate distance and turn accoringly
-
-    if ON_RIGHT:
-        rotate CW
-    if ON_LEFT:
-        rotate CCW
-    */
+    if ((detectedCentreRight() || detectedCentreLeft())) {
+        fsm->weightPos = AHEAD;
+        // Need to check the range
+    } else if (detectedFarRight()) {
+        fsm->weightPos = ON_RIGHT;
+        rotateCCW(3000);
+    } else if (detectedFarLeft()) {
+        fsm->weightPos = ON_LEFT;
+        rotateCW(3000);
+    } 
+    
+    
+    if (fsm->weightPos == AHEAD) {
+        if (!detectedFarRight() && !detectedFarLeft()) {
+            moveForward(1500);
+        } else if (detectedCentreRight()) {
+            rotateCCW(1500);
+        } else if (detectedCentreLeft()) {
+            rotateCW(1500);
+        } else {
+            moveDistance((GetL1BR() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &leftMotor);
+            moveDistance((GetL1BL() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &rightMotor);
+        }
+    }
 }
 
 void handleCollecting(RobotFSM* fsm) {
-    // collectionMotorFunction();
-    // checkCollected(); // Changes the huntstate to SEARCH if the weight is successfully collected
-    // if successul, add 1 to the collected weights also check if the robot has collected 3 weights and change the main state to RETURNING and the hunt state to SEARCH, and the return state to HOMESEEK
+    bool collectedWeight = false; // Need to change the actuator to move
+    moveForward(0);
+    ActuateCollector(); // Needs to be changes and moved into the PIDcontrol module
+    if (collectedWeight) {
+        fsm->collectedWeights++;
+        fsm->huntState = SEARCH;
+        if (fsm->collectedWeights >= 3) {
+            fsm->currentState = RETURNING;
+            fsm->returnState = HOMESEEK;
+        }
+        
+    }
+    // Need something to check the jamming of the collection motor
 }
 
 /*

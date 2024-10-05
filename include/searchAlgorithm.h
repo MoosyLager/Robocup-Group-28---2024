@@ -7,6 +7,10 @@
 extern uint8_t weightsOnboard;
 extern bool finished_calibrating;
 
+#define LOST_WEIGHT_TIMEOUT 5000
+#define ROTATION_TIMEOUT 20000
+#define SPIN_TIMEOUT 4000
+
 typedef enum {
     FORWARD,
     BACKWARD,
@@ -17,7 +21,8 @@ typedef enum {
 typedef enum {
     AHEAD,
     ON_RIGHT,
-    ON_LEFT
+    ON_LEFT, 
+    NONE
 } WeightPos_t;
 
 // Main state machine
@@ -49,9 +54,8 @@ typedef struct {
     int collectedWeights;
     bool tooCloseToWall;
     bool calibrated;
+    WeightPos_t weightPos;
 } RobotFSM;
-
-
 
 // Function prototypes
 void handleCalibrating(RobotFSM *fsm);

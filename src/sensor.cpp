@@ -396,3 +396,77 @@ void InitSensors()
     InitTOFL1();
     InitLimitSwitch();
 }
+
+/**
+ * Check minimum distance for the avoidance state
+ */
+bool CheckAvoidance(void)
+{
+    for (uint8_t i = 0; i < NUM_TOF_L0; i++) {
+        uint16_t range = CalculateBufferMean(&sensorL0Data[i]);
+        if (range < AVOIDANCE_THRESHOLD) {
+            return true;
+        }
+    }
+    for (uint8_t i = 0; i < NUM_TOF_L1; i++) {
+        uint16_t range = CalculateBufferMean(&sensorL1Data[i]);
+        if (range < AVOIDANCE_THRESHOLD) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Check the detection ranges for each double-sensor array
+ */
+bool detectedByPercentageDifference(uint16_t top, uint16_t bottom)
+{
+    int16_t diff = top - bottom;
+    return (diff * 100) > (top * DIFFERENCE_PERCENTAGE);
+}
+
+bool detectedByAbsoluteDifference(uint16_t top, uint16_t bottom)
+{
+    int16_t diff = top - bottom;
+    return ((diff) > DIFFERENCE_ABSOLUTE);
+}
+
+/**
+ * Array checking functions
+ */
+bool detectedFarRight(void)
+{
+    uint16_t top = GetL0TL();
+    uint16_t bottom = GetL0BL();
+    return detectedByPercentageDifference(top, bottom);
+}
+
+bool detectedFarLeft(void)
+{
+    uint16_t top = GetL0TR();
+    uint16_t bottom = GetL0BR();
+    return detectedByPercentageDifference(top, bottom);
+}
+
+bool detectedCentreRight(void)
+{
+    uint16_t top = GetL1TL();
+    uint16_t bottom = GetL1BL();
+    return detectedByAbsoluteDifference(top, bottom);
+}
+
+bool detectedCentreLeft(void)
+{
+    uint16_t top = GetL1TR();
+    uint16_t bottom = GetL1BR();
+    return detectedByAbsoluteDifference(top, bottom);
+}
+
+bool weightDetected(void)
+{
+    return (detectedFarLeft() || detectedFarRight() || detectedCentreLeft() || detectedCentreRight());
+}
+
+
+
