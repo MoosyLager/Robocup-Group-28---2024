@@ -18,7 +18,6 @@ Adafruit_TCS34725 colourSensor = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS
 /**
  * TOF Data
  */
-// The Arduino pin connected to the XSHUT pin of each sensor
 const uint8_t xShutPinsL0[8] = {TOF_XSHUT_L0_1, TOF_XSHUT_L0_2, TOF_XSHUT_L0_3, TOF_XSHUT_L0_4};
 const uint8_t xShutPinsL1[8] = {TOF_XSHUT_L1_1, TOF_XSHUT_L1_2, TOF_XSHUT_L1_3, TOF_XSHUT_L1_4};
 VL53L0X sensorsL0[NUM_TOF_L0];
@@ -64,17 +63,14 @@ void UpdateTOFL1()
 {
     for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
         // Read sensor data
-        updateSensorsTimer1 = 0;
-        uint16_t sensorValue = sensorsL1[i].readRangeContinuousMillimeters();
-        // Write sensor data to circular buffer
-        CircBuffWrite(&sensorL1Data[i], sensorValue);
-        
+        if ( sensorsL1[i].dataReady() ) {
+            uint16_t sensorValue = sensorsL1[i].read(false);
+            // Write sensor data to circular buffer
+            CircBuffWrite(&sensorL1Data[i], sensorValue);
+        }
         if ( sensorsL1[i].timeoutOccurred() ) {
             Serial.print(" TIMEOUT");
         }
-        uint16_t time = updateSensorsTimer1;
-        Serial.print(time);
-        Serial.print("\t");
     }
 }
 
