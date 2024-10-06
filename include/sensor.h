@@ -103,6 +103,8 @@ extern sensors_event_t orientationData, angVelocityData, linearAccelData, magnet
 extern Adafruit_BNO055 bno;
 extern int8_t boardTemp;
 
+extern VL53L0X sensorsL0[NUM_TOF_L0];
+extern VL53L1X sensorsL1[NUM_TOF_L1];
 extern CircBuff_t sensorL0Data[NUM_TOF_L0];
 extern CircBuff_t sensorL1Data[NUM_TOF_L1];
 
@@ -140,7 +142,5 @@ bool detectedCentreRight(void);
 bool detectedCentreLeft(void);
 bool weightDetected(void);
 
-extern VL53L0X sensorsL0[NUM_TOF_L0];
-extern VL53L1X sensorsL1[NUM_TOF_L1];
 
 #endif
