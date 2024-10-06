@@ -143,8 +143,10 @@ void PIDMotorControl(Motor_t *motor) {
 
     // Get the delta (for speed calculations)
     if (motor->motorType == LEFT_MOTOR) {
+        Serial.print("Left motor: ");
         motor->currentMotorPos = leftMotorPos;
     } else if (motor->motorType == RIGHT_MOTOR) {
+        Serial.print("Right motor: ");
         motor->currentMotorPos = rightMotorPos;
     } else if (motor->motorType == COLLECTION_MOTOR) {
         motor->currentMotorPos = collectionMotorPos;
@@ -153,10 +155,15 @@ void PIDMotorControl(Motor_t *motor) {
 
     // Calculate motor speed if in speed control mode
     findMotorSpeed(motor, deltaPos, deltaT);
+    Serial.print(" Current motor speed: ");
+    Serial.print(motor->currentMotorSpeed);
 
     // For position control, target is position, for speed control, target is speed
     signed int target = motor->isPositionControl ? motor->targetMotorPos : motor->targetMotorSpeed;
-
+    Serial.print(" Target: ");
+    Serial.print(target);
+    if (motor->motorType == RIGHT_MOTOR) {
+        Serial.println(" ");
     // Calculate PID control output
     signed int motorControl = pidMotorControl(motor, motor->isPositionControl, target, deltaT);
 

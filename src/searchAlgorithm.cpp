@@ -104,7 +104,7 @@ void checkWallDistances(RobotFSM* fsm)
         uint16_t distance = distanceFunctions[i]();  // Call the function
         // Could change this to test both sensors top and bottom
         if (distance < AVOIDANCE_THRESHOLD) {
-            
+            fsm->weightPos = NONE;  // Reset the weight position if an obstacle is found
             fsm->evasiveManeuverCompleted = false;
             fsm->currentState = AVOIDING;  // Change the state if below threshold
 
@@ -133,10 +133,10 @@ void handleAvoiding(RobotFSM* fsm)
     Serial.println("Avoiding");
     if (!(fsm->evasiveManeuverCompleted)) {
         if (onLeft) {
-            rotateCW(3000);
+            rotateCW(1500);
             // Or Other avoidance maneuver
         } else if (!onLeft) {
-            rotateCCW(3000);
+            rotateCCW(1500);
             // Or Other avoidance maneuver
         } 
     }
@@ -203,6 +203,7 @@ void handleChasing(RobotFSM* fsm) {
     if (weightDetected()) {
         weightWatchDog = 0;
     } else if (weightWatchDog > LOST_WEIGHT_TIMEOUT) {
+        Serial.println("Lost weight");
         fsm->huntState = SEARCH;
         fsm->weightPos = NONE;
         weightWatchDog = 0;
@@ -220,25 +221,18 @@ void handleChasing(RobotFSM* fsm) {
         fsm->weightPos = ON_LEFT;
         Serial.println("Left");
         rotateCW(800);
-    } 
+    } // Could abstract this to the weight detection function
     
     
     if (fsm->weightPos == AHEAD) {
         if (!detectedCentreRight() && !detectedCentreLeft()) {
-            moveForward(600);
+            moveForward(200);
         } else if (detectedCentreRight()) {
             rotateCCW(200);
         } else if (detectedCentreLeft()) {
             rotateCW(200);
         } else {
-            moveDistance((GetL1BR() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &leftMotor);
-            moveDistance((GetL1BL() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &rightMotor);
-            // if (atWeight) {
-            //     moveForward(0);
-            // }
-            // // TO CHANGE TO THE IMU CONDITION
-            // // THEN CHANGE huntstate to collect
-            // ActuateCollector();
+            Serial.println("Weight in sights!");
         }
     }
 }

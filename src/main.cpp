@@ -55,12 +55,12 @@ void loop()
         processFSM(&fsm);
         updateFSM = 0;
     }
-    if (updatePWM > 51) {
-        // UpdateMotors();
-        updatePWM = 0;
-        PIDMotorControl(&leftMotor);
-        PIDMotorControl(&rightMotor);
-    }
+    // if (updatePWM > 51) {
+    //     // UpdateMotors();
+    //     updatePWM = 0;
+    //     PIDMotorControl(&leftMotor);
+    //     PIDMotorControl(&rightMotor);
+    // }
     if (updateSensorsTimer > 31) {
         UpdateTOFL0();
         UpdateTOFL1();

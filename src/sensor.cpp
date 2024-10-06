@@ -60,7 +60,7 @@ void UpdateTOFL0()
 {
     for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
         // Read sensor data
-        uint16_t sensorValue = sensorsL0[i].readRangeContinuousMillimeters();
+        uint16_t sensorValue = sensorsL0[i].readRangeContinuousMillimeters() * SHORT_RANGE_MULTIPLIER;
 
         // Write sensor data to circular buffer
         CircBuffWrite(&sensorL0Data[i], sensorValue);
