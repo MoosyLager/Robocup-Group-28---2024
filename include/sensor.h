@@ -129,6 +129,10 @@ uint16_t GetL1TR();
 uint16_t GetL1BL();
 uint16_t GetL1BR();
 
+float GetOrientationX();
+float GetOrientationY();
+float GetOrientationZ();
+
 Colour_t GetColour();
 int CollectorPosition();
 int RampPosition();
