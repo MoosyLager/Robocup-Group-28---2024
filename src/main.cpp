@@ -27,28 +27,27 @@ void setup()
     // InitMotors();
     // InitEncoders();
     // CalibrateCollector();
-
     initializeRobotFSM(&fsm);
-    Serial.println("Initialised.");
 }
 
 void loop()
 {
     UpdateIMU();
-    float acc4 = GetAccelerationForward();
-    float forwardPos = findPos(acc4, timer);
     if (updateSensorsTimer > 50) {
-        float acc5 = GetAccelerationSideways();
-        float acc6 = GetAccelerationUpwards();
-        Serial.print("Forward Pos: ");
-        Serial.print(forwardPos);
-        Serial.print(" Forward: ");
-        Serial.print(acc4);
-        Serial.print(" Sideways: ");
-        Serial.print(acc5);
-        Serial.print(" Upwards: ");
-        Serial.println(acc6);
-
+        float acc = GetOrientationPitch();
+        Serial.print("Pitch: ");
+        Serial.print(acc);
+        float acc2 = GetOrientationRoll();
+        Serial.print(" Roll: ");
+        Serial.print(acc2);
+        float acc3 = GetOrientationYaw();
+        Serial.print(" Yaw: ");
+        Serial.print(acc3);
+        
+        if (checkTargetHeading(fsm.targetHeading)) {
+            Serial.print("At target heading");
+        }
+        Serial.println();
         updateSensorsTimer = 0;
     }
 }

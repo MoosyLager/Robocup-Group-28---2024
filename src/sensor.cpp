@@ -219,15 +219,15 @@ void UpdateIMU()
 /**
  * Returns the current X-rotation from the IMU
  */
-float GetOrientationX()
+float GetOrientationPitch()
 {
-    return orientationData.orientation.x;
+    return orientationData.orientation.z;
 }
 
 /**
  * Returns the current Y-rotation from the IMU
  */
-float GetOrientationY()
+float GetOrientationRoll()
 {
     return orientationData.orientation.y;
 }
@@ -235,9 +235,9 @@ float GetOrientationY()
 /**
  * Returns the current Z-rotation from the IMU
  */
-float GetOrientationZ()
+float GetOrientationYaw()
 {
-    return orientationData.orientation.z;
+    return orientationData.orientation.x;
 }
 
 float GetAccelerationForward()
@@ -495,9 +495,9 @@ bool weightDetected(void)
     return (detectedFarLeft() || detectedFarRight() || detectedCentreLeft() || detectedCentreRight());
 }
 
-bool atTargetHeading(int targetHeading)
+bool checkTargetHeading(int targetHeading)
 {
-    int currentHeading = GetFilteredOrientationYaw();
+    int currentHeading = GetOrientationYaw();
     int error = targetHeading - currentHeading;
     if (error > 180) {
         error = error - 360;

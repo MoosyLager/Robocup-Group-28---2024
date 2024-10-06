@@ -131,20 +131,13 @@ uint16_t GetL1BL();
 uint16_t GetL1BR();
 
  
-float GetFilteredOrientationPitch();
-float GetFilteredOrientationRoll();
-float GetFilteredOrientationYaw();
+float GetOrientationPitch();
+float GetOrientationRoll();
+float GetOrientationYaw();
 float GetAccelerationSideways();
 float GetAccelerationUpwards();
 float GetAccelerationForward();
 
-float GetOrientationX();
-float GetOrientationY();
-float GetOrientationZ();
-
-float GetAccelerationForward();
-float GetAccelerationSideways();
-float GetAccelerationUpwards();
 
 Colour_t GetColour();
 int CollectorPosition();
@@ -159,7 +152,7 @@ bool detectedFarLeft(void);
 bool detectedCentreRight(void);
 bool detectedCentreLeft(void);
 bool weightDetected(void);
-bool atTargetHeading(uint16_t targetHeading);
+bool checkTargetHeading(int targetHeading);
 float findPos(float acceleration, float currentTime);
 
 

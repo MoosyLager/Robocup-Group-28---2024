@@ -120,11 +120,11 @@ void checkWallDistances(RobotFSM* fsm)
             // Determine side of detection based on the function index
             if (i % 2 == 0) {
                 fsm->avoidanceSide = LEFT;  // L0 corresponds to the left side
-                fsm->targetHeading = GetFilteredOrientationYaw() + 60;
+                fsm->targetHeading = GetOrientationYaw() + 60;
                 onLeft = true;
             } else {
                 fsm->avoidanceSide = RIGHT; // L1 corresponds to the right side
-                fsm->targetHeading = GetFilteredOrientationYaw() - 60;
+                fsm->targetHeading = GetOrientationYaw() - 60;
                 onLeft = false;
             }
             return;  // Exit early since an obstacle was found
@@ -150,7 +150,7 @@ void handleAvoiding(RobotFSM* fsm)
         } 
     }
     // Rotation Condition Met
-    if (atTargetHeading(fsm->targetHeading) && (fsm->avoidanceSide == NO_WALL)) {
+    if (checkTargetHeading(fsm->targetHeading) && (fsm->avoidanceSide == NO_WALL)) {
         fsm->evasiveManeuverCompleted = true;
         fsm->currentState = fsm->lastMainState;
         avoidanceTimer = 0;
@@ -193,10 +193,10 @@ void handleSearching(RobotFSM* fsm) {
     if (rotationCounter - currentCount > ROTATION_TIMEOUT) {
         completeRotation = true;
         currentCount = rotationCounter;
-        fsm->targetHeading = GetFilteredOrientationYaw() + 345;
+        fsm->targetHeading = GetOrientationYaw() + 345;
     } 
 
-    if (completeRotation && !atTargetHeading(fsm->targetHeading)) {
+    if (completeRotation && !checkTargetHeading(fsm->targetHeading)) {
         rotateCW(3000);
     } else {
         moveForward(1500);
