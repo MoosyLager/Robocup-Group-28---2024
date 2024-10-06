@@ -1,4 +1,31 @@
 #include "collection.h"
+#include <elapsedMillis.h>
+
+int collectorTarget;
+int prevCollectorPos;
+bool collectorActuating = false;
+elapsedMillis collectionMotorTimer;
+
+/**
+ * Update the collection motor speed if needed
+ */
+void UpdateCollector()
+{
+    if ( collectorActuating ) {
+        if ( collectionMotorTimer > COLLECTOR_UPDATE_RATE_MS ) {
+            collectionMotorTimer = 0;
+
+            if ( collectionMotorPos > collectorTarget ) {
+                SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
+            } else {
+                SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
+
+                collectorActuating = false;
+                Serial.println("Collector Target Reached!");
+            }
+        }
+    }
+}
 
 /**
  * Calibrate the collector encoder to a known position
@@ -68,13 +95,12 @@ void ActuateCollector()
     // 2.75 motor revolutions per collector revolution
     // 11 pulses per motor revolution
     Serial.println("Actuating Collector...");
-    int prevPos = collectionMotorPos;
-    int targetPos = prevPos - COLLECTOR_TICKS_PER_REV;
-    do {
-        SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
-    } while ( collectionMotorPos > targetPos );
-    SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
-    Serial.println("Collector Actuated!");
+    prevCollectionMotorPos = collectionMotorPos;
+    collectorTarget = prevCollectionMotorPos - COLLECTOR_TICKS_PER_REV;
+    SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
+
+    collectionMotorTimer = 0;
+    collectorActuating = true;
 }
 
 void ActuateCollectorContinuous()

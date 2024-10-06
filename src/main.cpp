@@ -6,11 +6,13 @@
 #include "searchAlgorithm.h"
 #include <elapsedMillis.h>
 
+#include <elapsedMillis.h>
+elapsedMillis timer;
+elapsedMicros updatePWM;
+
 #include <SparkFunSX1509.h>
 #include <VL53L0X.h>
 #include <Wire.h>
-
-
 
 RobotFSM fsm;
 elapsedMicros updateSensorsTimer = 0;
@@ -23,6 +25,9 @@ void setup()
     Serial.begin(9600);
     InitSensors();
     InitMotors();
+    InitEncoders();
+    CalibrateCollector();
+    delay(500);
     initializeRobotFSM(&fsm);
     Serial.println("Initialised.");
     leftMotor.targetMotorSpeed = 1500;
@@ -31,22 +36,8 @@ void setup()
 
 void loop()
 {
-    // if (updateSensorsTimer > 300)
-    // {
-    //     updatePWM = 0;
-    //     UpdateTOFL1();
-    //     unsigned long time1 = updatePWM;
-    //     UpdateTOFL0();
-    //     unsigned long time = updatePWM;
-    //     Serial.print(time1);
-    //     Serial.print(" ");
-    //     Serial.println(time - time1);
-    //     updateSensorsTimer = 0;
-    // }
-    // if (updateFSM > 100000){
-    //     processFSM(&fsm);
-    //     updateFSM = 0;   
-    // }
+    SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
+    
     if (updatePWM > 100000) {
         PIDMotorControl(&leftMotor);
         updatePWM = 0;
@@ -54,8 +45,4 @@ void loop()
         Serial.print(" ");
         Serial.println(rightMotorPos);
     }
-    //if (changePWM > 2000) {
-    // moveForward(1000);
-    //}
-
 }

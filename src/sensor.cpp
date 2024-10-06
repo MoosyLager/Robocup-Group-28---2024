@@ -1,13 +1,16 @@
 #include "sensor.h"
 #include <elapsedMillis.h>
 
+SX1509 ioTOF;  // TOF Control - Port Expander
+SX1509 ioAIO;  // AIO control - Port Expander
+
 SX1509 io;  // Port Expander
 elapsedMicros updateSensorsTimer1 = 0;
 /**
  * IMU Data
  */
 Adafruit_BNO055 bno = Adafruit_BNO055(IMU_ID, IMU_ADDRESS, &IMU_WIRE);
-int8_t boardTemp;
+int8_t boardTempIMU;
 sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
 
 /**
@@ -148,7 +151,7 @@ uint16_t GetL1TR()
 }
 
 /**
- * Get the average TOF value from L0 Bottom Left
+ * Get the average TOF value from L1 Bottom Left
  */
 uint16_t GetL1BL()
 {
@@ -176,7 +179,7 @@ uint16_t GetL1BR()
  */
 int CollectorPosition()
 {
-    return io.digitalRead(AIO_0);
+    return ioAIO.digitalRead(AIO_0);
 }
 
 /**
@@ -184,7 +187,7 @@ int CollectorPosition()
  */
 int RampPosition()
 {
-    return io.digitalRead(AIO_1);
+    return ioAIO.digitalRead(AIO_1);
 }
 
 /**
@@ -198,7 +201,7 @@ void UpdateIMU()
     bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
     bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
     bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);
-    boardTemp = bno.getTemp();
+    boardTempIMU = bno.getTemp();
 }
 
 /**
@@ -243,10 +246,8 @@ void InitIOExpander()
 {
     Wire.begin();
     Wire.setClock(400000);
-    Wire1.begin();
-    Wire1.setClock(400000);
-    io.begin(TOF_CONTROL_ADDRESS);
-    // io.begin(AIO_ADDRESS);
+    ioTOF.begin(TOF_CONTROL_ADDRESS);
+    ioAIO.begin(AIO_ADDRESS);
 }
 
 /**
@@ -254,22 +255,26 @@ void InitIOExpander()
  */
 void InitLimitSwitch()
 {
-    io.pinMode(AIO_0, INPUT);
-    io.pinMode(AIO_1, INPUT);
+    ioAIO.pinMode(AIO_0, INPUT);
+    ioAIO.pinMode(AIO_1, INPUT);
 }
 
+/**
+ * Initialises all connected TOF sensors
+ * Both VL53L0X and VL53L1X
+ */
 void InitTOF()
 {
     // Disable/reset all sensors by driving their XSHUT pins low.
     for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
-        io.pinMode(xShutPinsL0[i], OUTPUT);
-        io.digitalWrite(xShutPinsL0[i], LOW);
+        ioTOF.pinMode(xShutPinsL0[i], OUTPUT);
+        ioTOF.digitalWrite(xShutPinsL0[i], LOW);
     }
 
     // Disable/reset all sensors by driving their XSHUT pins low.
     for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
-        io.pinMode(xShutPinsL1[i], OUTPUT);
-        io.digitalWrite(xShutPinsL1[i], LOW);
+        ioTOF.pinMode(xShutPinsL1[i], OUTPUT);
+        ioTOF.digitalWrite(xShutPinsL1[i], LOW);
     }
 
     // Enable, initialise, and start each sensor
@@ -278,7 +283,7 @@ void InitTOF()
         // board to pull it high. (We do NOT want to drive XSHUT high since it is
         // not level shifted.) Then wait a bit for the sensor to start up.
         // pinMode(xshutPins[i], INPUT);
-        io.digitalWrite(xShutPinsL0[i], HIGH);
+        ioTOF.digitalWrite(xShutPinsL0[i], HIGH);
         delay(10);
 
         sensorsL0[i].setTimeout(500);
@@ -303,7 +308,7 @@ void InitTOF()
         // board to pull it high. (We do NOT want to drive XSHUT high since it is
         // not level shifted.) Then wait a bit for the sensor to start up.
         // pinMode(xshutPins[i], INPUT);
-        io.digitalWrite(xShutPinsL1[i], HIGH);
+        ioTOF.digitalWrite(xShutPinsL1[i], HIGH);
         delay(10);
 
         sensorsL1[i].setTimeout(500);
@@ -322,7 +327,6 @@ void InitTOF()
         sensorsL1[i].startContinuous(50);
     }
 }
-
 
 /**
  * Initialises the IMU
@@ -345,12 +349,28 @@ void InitColourSensor()
 }
 
 /**
+ * Returns
+ */
+uint8_t BlueButtonState()
+{
+    return ioAIO.digitalRead(AIO_8);
+}
+
+/**
  * Initialise the IO board, I2C bus, circular buffers, and all sensors
  */
 void InitSensors()
 {
     InitIOExpander();
+
     InitCircularBuffers();
+
+    InitTOF();
+    InitLimitSwitch();
+    // InitIMU();
+    // InitColourSensor();
+
+    ioAIO.pinMode(AIO_8, INPUT);  // Blue Button
     InitTOF();
     // InitLimitSwitch();
     InitIMU();

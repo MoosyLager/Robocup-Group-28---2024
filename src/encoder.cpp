@@ -64,25 +64,6 @@ void CollectionEncoderIntHandler()
     collectionMotorPos += (collectionASet == collectionBSet) ? +1 : -1;
 }
 
-void InitDriveEncoders()
-{
-    pinMode(leftEncoderPinA, INPUT);  // Set encoder pins as inputs
-    pinMode(leftEncoderPinB, INPUT);
-    pinMode(rightEncoderPinA, INPUT);
-    pinMode(rightEncoderPinB, INPUT);
-
-    attachInterrupt(digitalPinToInterrupt(leftEncoderPinA), LeftEncoderIntHandler, CHANGE);  // Set up an interrupt for each encoder
-    attachInterrupt(digitalPinToInterrupt(rightEncoderPinA), RightEncoderIntHandler, CHANGE);
-}
-
-void InitCollectionEncoder()
-{
-    pinMode(collectionEncoderPinA, INPUT);
-    pinMode(collectionEncoderPinB, INPUT);
-
-    attachInterrupt(digitalPinToInterrupt(collectionEncoderPinA), CollectionEncoderIntHandler, CHANGE);
-}
-
 uint16_t PID_Controller(uint16_t desiredSpeed, uint16_t currentPos, uint16_t prevPos)
 {
     /*uint16_t currentSpeed = (currentPos - prevPos) /  deltaTime;
@@ -97,4 +78,38 @@ uint16_t PID_Controller(uint16_t desiredSpeed, uint16_t currentPos, uint16_t pre
     derivative = currentPos - prevPos;
 
     return (Kp * error) + (Ki * integral) + (Kd * derivative);*/
+}
+
+/**
+ * Initialise the drive motor encoders
+ */
+void InitDriveEncoders()
+{
+    pinMode(leftEncoderPinA, INPUT);  // Set encoder pins as inputs
+    pinMode(leftEncoderPinB, INPUT);
+    pinMode(rightEncoderPinA, INPUT);
+    pinMode(rightEncoderPinB, INPUT);
+
+    attachInterrupt(digitalPinToInterrupt(leftEncoderPinA), LeftEncoderIntHandler, CHANGE);  // Set up an interrupt for each encoder
+    attachInterrupt(digitalPinToInterrupt(rightEncoderPinA), RightEncoderIntHandler, CHANGE);
+}
+
+/**
+ * Initialise the collection motor encoder
+ */
+void InitCollectionEncoder()
+{
+    pinMode(collectionEncoderPinA, INPUT);
+    pinMode(collectionEncoderPinB, INPUT);
+
+    attachInterrupt(digitalPinToInterrupt(collectionEncoderPinA), CollectionEncoderIntHandler, CHANGE);
+}
+
+/**
+ * Initialise all encoders
+ */
+void InitEncoders()
+{
+    InitDriveEncoders();
+    InitCollectionEncoder();
 }
