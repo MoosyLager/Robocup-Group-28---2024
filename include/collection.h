@@ -10,6 +10,8 @@
 #define COLLECTOR_CLOSED_OFFSET 0
 #define RAMP_LOWERED_OFFSET     0
 
+#define COLLECTOR_UPDATE_RATE_MS 50
+
 void CalibrateCollector();
 void CalibrateRamp();
 
@@ -19,6 +21,8 @@ void CloseCollector();
 
 void LowerRamp();
 void LiftRamp();
+
+void UpdateCollector();
 
 // void CalibrateCollectionSystem(RobotFSM* fsm);
 
