@@ -180,7 +180,7 @@ void moveForward(int speed) {
 }
 
 void rotateCW(int speed) {
-    leftMotor.targetMotorSpeed = speed;
+    leftMotor.targetMotorSpeed = 0;
     rightMotor.targetMotorSpeed = -speed;
     leftMotor.isPositionControl = false;
     rightMotor.isPositionControl = false;
@@ -188,7 +188,7 @@ void rotateCW(int speed) {
 
 void rotateCCW(int speed) {
     leftMotor.targetMotorSpeed = -speed;
-    rightMotor.targetMotorSpeed = speed;
+    rightMotor.targetMotorSpeed = 0;
     leftMotor.isPositionControl = false;
     rightMotor.isPositionControl = false;
 }

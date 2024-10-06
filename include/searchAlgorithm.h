@@ -56,6 +56,7 @@ typedef enum {
 typedef struct {
     MainState_t currentState;
     MainState_t lastMainState;  // To track the last state (HUNTING or RETURNING)
+    MainState_t previousState;
     HuntState_t huntState;
     ReturnState_t returnState;
     int collectedWeights;

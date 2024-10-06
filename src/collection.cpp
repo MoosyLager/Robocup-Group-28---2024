@@ -77,6 +77,11 @@ void ActuateCollector()
     Serial.println("Collector Actuated!");
 }
 
+void ActuateCollectorContinuous()
+{
+    
+}
+
 /**
  * Set the ramp to the lowered position
  */

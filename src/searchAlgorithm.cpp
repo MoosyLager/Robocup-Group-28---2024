@@ -17,6 +17,7 @@ bool onLeft = false;
 void initializeRobotFSM(RobotFSM* fsm) {
     fsm->currentState = HUNTING;  // Start in CALIBRATING state
     fsm->lastMainState = HUNTING; // Set last state to the initial state
+    fsm->previousState = HUNTING; // Set previous state to the initial state
     fsm->huntState = SEARCH;          // Start in SEARCH state
     fsm->returnState = HOMESEEK;      // Start in HOMESEEK state
     fsm->collectedWeights = 0;        // No weights collected at the start
@@ -46,6 +47,12 @@ void processFSM(RobotFSM* fsm) {
     // Checks if robot is calibrated
     // If calibrated, check if robot is too close to the wall
     // If not too close to the wall, check if there are weights onboard to start HUNTING  RETURNING
+    if (fsm->currentState != fsm->previousState) {
+            leftMotor.integral = 0;  // Reset left motor PID integral error
+            rightMotor.integral = 0; // Reset right motor PID integral error
+            fsm->previousState = fsm->currentState;  // Update the last state
+        }
+
     if (!fsm->currentState == CALIBRATING) {
         checkWallDistances(fsm);
     }
@@ -82,13 +89,12 @@ void handleCalibrating(RobotFSM* fsm) {
 }
 
 void handleHunting(RobotFSM* fsm) {
-    Serial.println("Hunting");
     switch (fsm->huntState) {
         case SEARCH:
             handleSearching(fsm);
             break;
         case CHASE:
-            // handleChasing(fsm);
+            handleChasing(fsm);
             break;
         case COLLECT:
             // handleCollecting(fsm);
@@ -105,6 +111,7 @@ void checkWallDistances(RobotFSM* fsm)
     // Iterate through each distance function and check for obstacles
     for (int i = 0; i < numFunctions; i++) {
         uint16_t distance = distanceFunctions[i]();  // Call the function
+        // Could change this to test both sensors top and bottom
         if (distance < AVOIDANCE_THRESHOLD) {
             
             fsm->evasiveManeuverCompleted = false;
@@ -140,8 +147,8 @@ void handleAvoiding(RobotFSM* fsm)
             // Or Other avoidance maneuver
         } 
     }
-
-    if (avoidanceTimer > EVASIVE_MANEUVER_TIMEOUT && fsm->avoidanceSide == NO_WALL) {
+    // Rotation Condition Met
+    if (/*RotationConditionMet &&*/ fsm->avoidanceSide == NO_WALL) {
         fsm->evasiveManeuverCompleted = true;
         fsm->currentState = fsm->lastMainState;
         avoidanceTimer = 0;
@@ -152,7 +159,7 @@ void handleReturning(RobotFSM *fsm) {
 
     switch (fsm->returnState) {
         case HOMESEEK:
-            // handleHomeSeeking(fsm);
+            handleHomeSeeking(fsm);
             break;
         case DEPOSIT:
             // handleDepositing(fsm);
@@ -174,23 +181,21 @@ void checkWeightDetection(RobotFSM* fsm) {
 
 void handleSearching(RobotFSM* fsm) {
     Serial.println("Searching");
-    static int currentCount = 0;
+
+    static elapsedMillis currentCount = 0;
+    bool rotationComplete = false;
+
     if (weightDetected()) {
         fsm->huntState = CHASE;
     }
-    /*if (rotationCounter - currentCount > ROTATION_TIMEOUT) {
+    if (rotationCounter - currentCount > ROTATION_TIMEOUT) {
         rotateCW(3000);
-        if (rotationCounter - currentCount > (ROTATION_TIMEOUT + SPIN_TIMEOUT)) {
-            currentCount = rotationCounter;
-        }
+        // if (rotationComplete(uint16_t targetHeading, uint16_t currentHeading)) {
+        //     currentCount = rotationCounter;
+        // } CURRENTLY WAITING ON THE IMU
     } else {
-    */
-    moveForward(1500);
-    //}
-
-    // if (weightDetected()) {
-    //     fsm->huntState = CHASE;
-    // }
+    moveForward(3000);
+    }
 }
 
 
@@ -227,6 +232,8 @@ void handleChasing(RobotFSM* fsm) {
         } else {
             moveDistance((GetL1BR() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &leftMotor);
             moveDistance((GetL1BL() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &rightMotor);
+            // TO CHANGE TO THE IMU CONDITION
+            // THEN CHANGE huntstate to collect
         }
     }
 }
@@ -240,36 +247,56 @@ void handleCollecting(RobotFSM* fsm) {
         fsm->huntState = SEARCH;
         if (fsm->collectedWeights >= 3) {
             fsm->currentState = RETURNING;
+            fsm->lastMainState = RETURNING;
             fsm->returnState = HOMESEEK;
         }
         
     }
     // Need something to check the jamming of the collection motor
+    /*
+    if (collectionJammed()) {
+        reverseToOpenJam();
+    }*/
 }
 
 /*
 RETURNING SUB-STATE FUNCTIONS
 */
-
 void handleHomeSeeking(RobotFSM* fsm) {
     // homeSeekMotorFunction();
-    // change the current return state to DEPOSIT if home is reached
+    // error = desiredHeading - currentHeading;
+
+    // if (error > 180) {
+    //     error = error - 360;
+    // } else if (error < -180) {
+    //     error = error + 360;
+    // }
+
+    // if (error > 0) {
+    //     // Drive forward and turn right
+    // } else if (error < 0) {
+    //     // Drive forward and turn left
+    // }
+
+    // if (colorDetected()) {
+    //     fsm->returnState = DEPOSIT;
+    // }
+
 }
 
 void handleDepositing(RobotFSM* fsm) {
     // depositMotorFunction();
-
-    // If successful, reset the collected weights to 0 also:
-    // change the current mainstate to SEARCHING
-    // change the huntstate to SEARCH and the returnstate to HOMESEEK
+    // TIMER DELAY
+    bool weightsDeposited = false;
+    // Set collection acutation to open
+    if (weightsDeposited) {
+        fsm->currentState = HUNTING;
+        fsm->lastMainState = HUNTING;
+        fsm->huntState = SEARCH;
+        fsm->returnState = HOMESEEK;
+        fsm->collectedWeights = 0;
+    }
 }
-
-// int main() {
-//     // Initialize the FSM
-//     RobotFSM robot;
-//     initializeRobotFSM(&robot);
-
-// }
 
 /*
 Currently need:
@@ -283,7 +310,6 @@ MOTOR FUNCTIONS:
 
 SENSOR FUNCTIONS:
 - weightDetectionFunction()
-- checkChased()
 - checkCollected()
 - calibrationFunction()
 - checkWallDistance()
