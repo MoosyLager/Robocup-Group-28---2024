@@ -72,9 +72,11 @@ void processFSM(RobotFSM* fsm);
 void initializeRobotFSM(RobotFSM* fsm);
 void handleCalibrating(RobotFSM *fsm);
 void handleSearching(RobotFSM *fsm);
+void handleChasing(RobotFSM *fsm);
 void handleHunting(RobotFSM *fsm);
 void handleAvoiding(RobotFSM *fsm);
 void handleReturning(RobotFSM *fsm);
+void handleHomeSeeking(RobotFSM *fsm); 
 void checkWallProximity(RobotFSM *fsm);
 
 

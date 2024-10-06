@@ -64,22 +64,6 @@ void CollectionEncoderIntHandler()
     collectionMotorPos += (collectionASet == collectionBSet) ? +1 : -1;
 }
 
-uint16_t PID_Controller(uint16_t desiredSpeed, uint16_t currentPos, uint16_t prevPos)
-{
-    /*uint16_t currentSpeed = (currentPos - prevPos) /  deltaTime;
-    uint16_t error = desiredSpeed - currentSpeed;
-
-    how to do the correct integral controller and derivative controller?
-
-    uint16_t integral = 0;
-    uint16_t derivative = 0;
-
-    integral += error;
-    derivative = currentPos - prevPos;
-
-    return (Kp * error) + (Ki * integral) + (Kd * derivative);*/
-}
-
 /**
  * Initialise the drive motor encoders
  */

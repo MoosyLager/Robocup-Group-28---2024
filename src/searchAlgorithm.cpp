@@ -48,10 +48,9 @@ void processFSM(RobotFSM* fsm) {
     // If calibrated, check if robot is too close to the wall
     // If not too close to the wall, check if there are weights onboard to start HUNTING  RETURNING
     if (fsm->currentState != fsm->previousState) {
-            leftMotor.integral = 0;  // Reset left motor PID integral error
-            rightMotor.integral = 0; // Reset right motor PID integral error
-            fsm->previousState = fsm->currentState;  // Update the last state
-        }
+        // State edge detection
+        fsm->previousState = fsm->currentState;  // Update the last state
+    }
 
     if (!fsm->currentState == CALIBRATING) {
         checkWallDistances(fsm);
@@ -232,17 +231,22 @@ void handleChasing(RobotFSM* fsm) {
         } else {
             moveDistance((GetL1BR() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &leftMotor);
             moveDistance((GetL1BL() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &rightMotor);
+            if (atWeight) {
+                moveForward(0);
+            }
             // TO CHANGE TO THE IMU CONDITION
             // THEN CHANGE huntstate to collect
+            ActuateCollector();
         }
     }
 }
 
 void handleCollecting(RobotFSM* fsm) {
-    bool collectedWeight = false; // Need to change the actuator to move
+    static bool collectingWeight = false; // Need to change the actuator to move
+
     moveForward(0);
-    ActuateCollector(); // Needs to be changes and moved into the PIDcontrol module
-    if (collectedWeight) {
+
+    if (!collectorActuating) {
         fsm->collectedWeights++;
         fsm->huntState = SEARCH;
         if (fsm->collectedWeights >= 3) {
@@ -250,9 +254,8 @@ void handleCollecting(RobotFSM* fsm) {
             fsm->lastMainState = RETURNING;
             fsm->returnState = HOMESEEK;
         }
-        
     }
-    // Need something to check the jamming of the collection motor
+
     /*
     if (collectionJammed()) {
         reverseToOpenJam();

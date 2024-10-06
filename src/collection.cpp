@@ -4,7 +4,9 @@
 int collectorTarget;
 int prevCollectorPos;
 bool collectorActuating = false;
+bool weightCollected = false;
 elapsedMillis collectionMotorTimer;
+elapsedMillis collectionWatchDog;
 
 /**
  * Update the collection motor speed if needed
@@ -101,11 +103,6 @@ void ActuateCollector()
 
     collectionMotorTimer = 0;
     collectorActuating = true;
-}
-
-void ActuateCollectorContinuous()
-{
-    
 }
 
 /**

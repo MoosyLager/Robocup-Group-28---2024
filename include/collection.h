@@ -12,6 +12,9 @@
 
 #define COLLECTOR_UPDATE_RATE_MS 50
 
+extern bool collectorActuating;
+extern bool weightCollected;
+
 void CalibrateCollector();
 void CalibrateRamp();
 

@@ -8,7 +8,6 @@
 
 #include <elapsedMillis.h>
 elapsedMillis timer;
-elapsedMicros updatePWM;
 
 #include <SparkFunSX1509.h>
 #include <VL53L0X.h>
