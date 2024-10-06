@@ -208,9 +208,11 @@ void InitCircularBuffers()
  */
 void InitIOExpander()
 {
-    io.begin(TOF_CONTROL_ADDRESS);
     Wire.begin();
     Wire.setClock(400000);
+    Wire1.begin();
+    Wire1.setClock(400000);
+    io.begin(TOF_CONTROL_ADDRESS);
     // io.begin(AIO_ADDRESS);
 }
 
@@ -317,7 +319,8 @@ void InitSensors()
     InitIOExpander();
     InitCircularBuffers();
     InitTOF();
-    InitLimitSwitch();
+    // InitLimitSwitch();
+    InitIMU();
 }
 
 /**
