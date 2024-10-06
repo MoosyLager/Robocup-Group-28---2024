@@ -1,5 +1,17 @@
 #include "sensor.h"
 #include <elapsedMillis.h>
+#include "circularBuf.h"
+
+#define IMU_BUF_SIZE 10  // Adjust the size as needed for smoothing
+
+CircBuffFloat_t imuBufferForward;
+CircBuffFloat_t imuBufferSideways;
+CircBuffFloat_t imuBufferVertical;
+
+CircBuffFloat_t imuBufferYaw;
+CircBuffFloat_t imuBufferPitch;
+CircBuffFloat_t imuBufferRoll;
+
 
 SX1509 ioTOF;  // TOF Control - Port Expander
 SX1509 ioAIO;  // AIO control - Port Expander
@@ -228,6 +240,23 @@ float GetOrientationZ()
     return orientationData.orientation.z;
 }
 
+float GetAccelerationForward()
+{
+    return linearAccelData.acceleration.y;
+}
+
+float GetAccelerationSideways()
+{
+    return linearAccelData.acceleration.x;
+}
+
+float GetAccelerationUpwards()
+{
+    return linearAccelData.acceleration.z;
+}
+
+
+
 /**
  * Reads the colours of the suface under the colour sensor
  */
@@ -250,7 +279,7 @@ Colour_t GetColour()
 }
 
 /**
- * Initialise the circular buffers for the TOF sensor data
+ * Initialise the circular buffers for the TOF sensor data and the IMU data
  */
 void InitCircularBuffers()
 {
@@ -260,6 +289,7 @@ void InitCircularBuffers()
     for ( int i = 0; i < NUM_TOF_L1; i++ ) {
         CircBuffInit(&sensorL1Data[i], CIRCULAR_BUF_SIZE);
     }
+    Serial.println("TOF Circular Buffers Initialised");
 }
 
 
@@ -390,13 +420,12 @@ void InitSensors()
     InitCircularBuffers();
 
     InitTOF();
-    InitLimitSwitch();
-    // InitIMU();
-    // InitColourSensor();
+    InitColourSensor();
 
     ioAIO.pinMode(AIO_8, INPUT);  // Blue Button
-    InitTOF();
-    // InitLimitSwitch();
+    // InitTOF();
+
+    InitLimitSwitch();
     InitIMU();
 }
 
@@ -466,5 +495,49 @@ bool weightDetected(void)
     return (detectedFarLeft() || detectedFarRight() || detectedCentreLeft() || detectedCentreRight());
 }
 
+bool atTargetHeading(int targetHeading)
+{
+    int currentHeading = GetFilteredOrientationYaw();
+    int error = targetHeading - currentHeading;
+    if (error > 180) {
+        error = error - 360;
+    } else if (error < -180) {
+        error = error + 360;
+    }
+    return (error < 5 && error > -5);
+}
 
+float findPos(float acceleration, float currentTime)
+{
+    // Static variables to retain state between function calls
+    static float velocity = 0.0f;  // Current velocity estimate
+    static float position = 0.0f;  // Current position estimate
+    static float prevAccel = 0.0f; // Previous acceleration value
+    static float prevTime = 0.0f;  // Previous timestamp
+    static bool firstCall = true;  // To handle the first call where no previous data exists
+
+    // Handle the first call to initialize prevTime and prevAccel
+    if (firstCall) {
+        prevTime = currentTime;
+        prevAccel = acceleration;
+        firstCall = false;
+        return position; // No position change on the first call
+    }
+
+    // Calculate time difference (delta time)
+    float deltaTime = (currentTime - prevTime) / 1000000;
+
+    // Integration step to update velocity using the trapezoidal rule
+    float averageAccel = (acceleration + prevAccel) / 2.0f;
+    velocity += averageAccel * deltaTime;
+
+    // Integration step to update position
+    position += velocity * deltaTime;
+
+    // Update previous values for next iteration
+    prevAccel = acceleration;
+    prevTime = currentTime;
+
+    return position;  // Return the current position estimate
+}
 

@@ -5,16 +5,15 @@
 #include <Arduino.h>
 #include "searchAlgorithm.h"
 #include <elapsedMillis.h>
-
-#include <elapsedMillis.h>
-elapsedMillis timer;
-
 #include <SparkFunSX1509.h>
 #include <VL53L0X.h>
 #include <Wire.h>
 
+
+
 RobotFSM fsm;
-elapsedMicros updateSensorsTimer = 0;
+elapsedMicros timer;
+elapsedMillis updateSensorsTimer = 0;
 elapsedMicros updateFSM = 0;
 elapsedMicros updatePWM = 0;
 elapsedMillis changePWM = 0;
@@ -22,26 +21,34 @@ elapsedMillis changePWM = 0;
 void setup()
 {
     Serial.begin(9600);
+    delay(1000);
     InitSensors();
-    InitMotors();
-    InitEncoders();
-    CalibrateCollector();
-    delay(500);
+    InitCircularBuffers();
+    // InitMotors();
+    // InitEncoders();
+    // CalibrateCollector();
+
     initializeRobotFSM(&fsm);
     Serial.println("Initialised.");
-    leftMotor.targetMotorSpeed = 1500;
-    rightMotor.targetMotorSpeed = 1500;
 }
 
 void loop()
 {
-    SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
-    
-    if (updatePWM > 100000) {
-        PIDMotorControl(&leftMotor);
-        updatePWM = 0;
-        Serial.print(leftMotorPos);
-        Serial.print(" ");
-        Serial.println(rightMotorPos);
+    UpdateIMU();
+    float acc4 = GetAccelerationForward();
+    float forwardPos = findPos(acc4, timer);
+    if (updateSensorsTimer > 50) {
+        float acc5 = GetAccelerationSideways();
+        float acc6 = GetAccelerationUpwards();
+        Serial.print("Forward Pos: ");
+        Serial.print(forwardPos);
+        Serial.print(" Forward: ");
+        Serial.print(acc4);
+        Serial.print(" Sideways: ");
+        Serial.print(acc5);
+        Serial.print(" Upwards: ");
+        Serial.println(acc6);
+
+        updateSensorsTimer = 0;
     }
 }

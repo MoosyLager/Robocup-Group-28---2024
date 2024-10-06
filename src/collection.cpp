@@ -32,7 +32,7 @@ void UpdateCollector()
 /**
  * Calibrate the collector encoder to a known position
  */
-void CalibrateCollector()
+void CalibrateCollector(void)
 {
     Serial.println("Calibrating Collector...");
     bool isCalibrated = false;

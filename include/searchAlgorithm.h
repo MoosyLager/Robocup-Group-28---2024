@@ -64,6 +64,7 @@ typedef struct {
     WeightPos_t weightPos;
     AvoidanceSide_t avoidanceSide;
     bool evasiveManeuverCompleted;
+    int targetHeading;
 } RobotFSM;
 
 // Function prototypes
@@ -78,6 +79,7 @@ void handleAvoiding(RobotFSM *fsm);
 void handleReturning(RobotFSM *fsm);
 void handleHomeSeeking(RobotFSM *fsm); 
 void checkWallProximity(RobotFSM *fsm);
+
 
 
 

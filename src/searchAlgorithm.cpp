@@ -25,6 +25,7 @@ void initializeRobotFSM(RobotFSM* fsm) {
     fsm->weightPos = NONE;            // No weight detected at the start
     fsm->avoidanceSide = NO_WALL;        // No obstacle detected at the start
     fsm->evasiveManeuverCompleted = false;  // Evasive maneuver not completed at the start
+    fsm->targetHeading = 0;
 }
 
 void checkWeightsOnboard(RobotFSM* fsm)
@@ -119,9 +120,11 @@ void checkWallDistances(RobotFSM* fsm)
             // Determine side of detection based on the function index
             if (i % 2 == 0) {
                 fsm->avoidanceSide = LEFT;  // L0 corresponds to the left side
+                fsm->targetHeading = GetFilteredOrientationYaw() + 60;
                 onLeft = true;
             } else {
                 fsm->avoidanceSide = RIGHT; // L1 corresponds to the right side
+                fsm->targetHeading = GetFilteredOrientationYaw() - 60;
                 onLeft = false;
             }
             return;  // Exit early since an obstacle was found
@@ -147,7 +150,7 @@ void handleAvoiding(RobotFSM* fsm)
         } 
     }
     // Rotation Condition Met
-    if (/*RotationConditionMet &&*/ fsm->avoidanceSide == NO_WALL) {
+    if (atTargetHeading(fsm->targetHeading) && (fsm->avoidanceSide == NO_WALL)) {
         fsm->evasiveManeuverCompleted = true;
         fsm->currentState = fsm->lastMainState;
         avoidanceTimer = 0;
@@ -182,18 +185,22 @@ void handleSearching(RobotFSM* fsm) {
     Serial.println("Searching");
 
     static elapsedMillis currentCount = 0;
-    bool rotationComplete = false;
+    bool completeRotation = true;
 
     if (weightDetected()) {
         fsm->huntState = CHASE;
     }
     if (rotationCounter - currentCount > ROTATION_TIMEOUT) {
+        completeRotation = true;
+        currentCount = rotationCounter;
+        fsm->targetHeading = GetFilteredOrientationYaw() + 345;
+    } 
+
+    if (completeRotation && !atTargetHeading(fsm->targetHeading)) {
         rotateCW(3000);
-        // if (rotationComplete(uint16_t targetHeading, uint16_t currentHeading)) {
-        //     currentCount = rotationCounter;
-        // } CURRENTLY WAITING ON THE IMU
     } else {
-    moveForward(3000);
+        moveForward(1500);
+        completeRotation = false;
     }
 }
 
@@ -211,7 +218,6 @@ void handleChasing(RobotFSM* fsm) {
 
     if ((detectedCentreRight() || detectedCentreLeft())) {
         fsm->weightPos = AHEAD;
-        // Need to check the range
     } else if (detectedFarRight()) {
         fsm->weightPos = ON_RIGHT;
         rotateCCW(3000);
@@ -231,12 +237,12 @@ void handleChasing(RobotFSM* fsm) {
         } else {
             moveDistance((GetL1BR() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &leftMotor);
             moveDistance((GetL1BL() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &rightMotor);
-            if (atWeight) {
-                moveForward(0);
-            }
-            // TO CHANGE TO THE IMU CONDITION
-            // THEN CHANGE huntstate to collect
-            ActuateCollector();
+            // if (atWeight) {
+            //     moveForward(0);
+            // }
+            // // TO CHANGE TO THE IMU CONDITION
+            // // THEN CHANGE huntstate to collect
+            // ActuateCollector();
         }
     }
 }

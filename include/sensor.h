@@ -115,6 +115,7 @@ void InitIOExpander();
 void InitLimitSwitch();
 void InitColourSensor();
 void InitIMU();
+void InitCircularBuffers();
 
 void UpdateIMU();
 void UpdateTOFL0();
@@ -129,9 +130,21 @@ uint16_t GetL1TR();
 uint16_t GetL1BL();
 uint16_t GetL1BR();
 
+ 
+float GetFilteredOrientationPitch();
+float GetFilteredOrientationRoll();
+float GetFilteredOrientationYaw();
+float GetAccelerationSideways();
+float GetAccelerationUpwards();
+float GetAccelerationForward();
+
 float GetOrientationX();
 float GetOrientationY();
 float GetOrientationZ();
+
+float GetAccelerationForward();
+float GetAccelerationSideways();
+float GetAccelerationUpwards();
 
 Colour_t GetColour();
 int CollectorPosition();
@@ -146,6 +159,8 @@ bool detectedFarLeft(void);
 bool detectedCentreRight(void);
 bool detectedCentreLeft(void);
 bool weightDetected(void);
+bool atTargetHeading(uint16_t targetHeading);
+float findPos(float acceleration, float currentTime);
 
 
-#endif
+#endif // SENSOR_H
