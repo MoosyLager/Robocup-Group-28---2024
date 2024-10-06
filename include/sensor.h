@@ -93,7 +93,7 @@ extern Adafruit_TCS34725 colourSensor;
 #define LONG_RANGE_THRESHOLD 1000
 #define SHORT_RANGE_THRESHOLD 400
 #define COLLECTION_THRESHOLD 450 // To be tested
-#define DIFFERENCE_PERCENTAGE 30//% difference between the two sensors
+#define DIFFERENCE_PERCENTAGE 60//% difference between the two sensors
 #define DIFFERENCE_ABSOLUTE 100 //mm difference between the two sensors
 
 typedef uint16_t (*DistanceFunction)();  // Function pointer type for distance functions

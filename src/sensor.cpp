@@ -79,7 +79,12 @@ void UpdateTOFL1()
  */
 uint16_t GetL0TL()
 {
-    return CalculateBufferMean(&sensorL0Data[2]);
+    uint16_t mean = CalculateBufferMean(&sensorL0Data[2]);
+    if (mean > SHORT_RANGE_THRESHOLD) {
+        mean =  SHORT_RANGE_THRESHOLD;
+    }
+    return mean;
+
 }
 
 /**
@@ -87,7 +92,11 @@ uint16_t GetL0TL()
  */
 uint16_t GetL0TR()
 {
-    return CalculateBufferMean(&sensorL0Data[0]);
+    uint16_t mean = CalculateBufferMean(&sensorL0Data[0]);
+    if (mean > SHORT_RANGE_THRESHOLD) {
+        mean =  SHORT_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -95,7 +104,11 @@ uint16_t GetL0TR()
  */
 uint16_t GetL0BL()
 {
-    return CalculateBufferMean(&sensorL0Data[3]);
+    uint16_t mean = CalculateBufferMean(&sensorL0Data[3]);
+    if (mean > SHORT_RANGE_THRESHOLD) {
+        mean =  SHORT_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -103,7 +116,11 @@ uint16_t GetL0BL()
  */
 uint16_t GetL0BR()
 {
-    return CalculateBufferMean(&sensorL0Data[1]);
+    uint16_t mean = CalculateBufferMean(&sensorL0Data[1]);
+    if (mean > SHORT_RANGE_THRESHOLD) {
+        mean =  SHORT_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -111,7 +128,11 @@ uint16_t GetL0BR()
  */
 uint16_t GetL1TL()
 {
-    return CalculateBufferMean(&sensorL1Data[2]);
+    uint16_t mean = CalculateBufferMean(&sensorL1Data[2]);
+    if (mean > LONG_RANGE_THRESHOLD) {
+        mean =  LONG_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -119,7 +140,11 @@ uint16_t GetL1TL()
  */
 uint16_t GetL1TR()
 {
-    return CalculateBufferMean(&sensorL1Data[0]);
+    uint16_t mean = CalculateBufferMean(&sensorL1Data[0]);
+    if (mean > LONG_RANGE_THRESHOLD) {
+        mean =  LONG_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -127,7 +152,11 @@ uint16_t GetL1TR()
  */
 uint16_t GetL1BL()
 {
-    return CalculateBufferMean(&sensorL1Data[3]);
+    uint16_t mean = CalculateBufferMean(&sensorL1Data[3]);
+    if (mean > LONG_RANGE_THRESHOLD) {
+        mean =  LONG_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -135,7 +164,11 @@ uint16_t GetL1BL()
  */
 uint16_t GetL1BR()
 {
-    return CalculateBufferMean(&sensorL1Data[1]);
+    uint16_t mean =  CalculateBufferMean(&sensorL1Data[1]);
+    if (mean > LONG_RANGE_THRESHOLD) {
+        mean =  LONG_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
