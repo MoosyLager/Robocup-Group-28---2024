@@ -20,19 +20,25 @@ elapsedMicros updatePWM = 0;
 void setup()
 {
     Serial.begin(9600);
-    delay(1000);
+    // delay(1000);
     InitSensors();
-    InitCircularBuffers();
-    InitMotors();
-    InitEncoders();
-    // CalibrateCollector();
-    initializeRobotFSM(&fsm);
-    delay(10000);
-    Serial.println("Setup complete");
+    // InitCircularBuffers();
+    // InitMotors();
+    // InitEncoders();
+    // initializeRobotFSM(&fsm);
+    // delay(10000);
+    // Serial.println("Setup complete");
+    for ( int i = 0; i < 100; i++ ) {
+        UpdateTOFL0();
+        UpdateTOFL1();
+    }
 }
 
 void loop()
 {
+    Serial.println(GetL0BR());
+    UpdateTOFL0();
+    UpdateTOFL1();
     // UpdateIMU();
     // if (updateSensorsTimer > 50) {
     //     float acc = GetOrientationPitch();
@@ -51,21 +57,23 @@ void loop()
     //     Serial.println();
     //     updateSensorsTimer = 0;
     // }
-    if (updateFSM > 47) {
-        processFSM(&fsm);
-        updateFSM = 0;
-    }
+
+    // if (updateFSM > 47) {
+    //     processFSM(&fsm);
+    //     updateFSM = 0;
+    // }
+
     // if (updatePWM > 51) {
     //     // UpdateMotors();
     //     updatePWM = 0;
     //     PIDMotorControl(&leftMotor);
     //     PIDMotorControl(&rightMotor);
     // }
-    if (updateSensorsTimer > 31) {
-        UpdateTOFL0();
-        UpdateTOFL1();
-        UpdateIMU();
-        updateSensorsTimer = 0;
-    }
 
+    // if (updateSensorsTimer > 31) {
+    //     UpdateTOFL0();
+    //     UpdateTOFL1();
+    //     UpdateIMU();
+    //     updateSensorsTimer = 0;
+    // }
 }
