@@ -164,6 +164,7 @@ void PIDMotorControl(Motor_t *motor) {
     Serial.print(target);
     if (motor->motorType == RIGHT_MOTOR) {
         Serial.println(" ");
+    }
     // Calculate PID control output
     signed int motorControl = pidMotorControl(motor, motor->isPositionControl, target, deltaT);
 
