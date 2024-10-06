@@ -202,6 +202,30 @@ void UpdateIMU()
 }
 
 /**
+ * Returns the current X-rotation from the IMU
+ */
+float GetOrientationX()
+{
+    return orientationData.orientation.x;
+}
+
+/**
+ * Returns the current Y-rotation from the IMU
+ */
+float GetOrientationY()
+{
+    return orientationData.orientation.y;
+}
+
+/**
+ * Returns the current Z-rotation from the IMU
+ */
+float GetOrientationZ()
+{
+    return orientationData.orientation.z;
+}
+
+/**
  * Reads the colours of the suface under the colour sensor
  */
 Colour_t GetColour()
