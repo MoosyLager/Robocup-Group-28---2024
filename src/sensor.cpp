@@ -507,37 +507,3 @@ bool checkTargetHeading(int targetHeading)
     return (error < 5 && error > -5);
 }
 
-float findPos(float acceleration, float currentTime)
-{
-    // Static variables to retain state between function calls
-    static float velocity = 0.0f;  // Current velocity estimate
-    static float position = 0.0f;  // Current position estimate
-    static float prevAccel = 0.0f; // Previous acceleration value
-    static float prevTime = 0.0f;  // Previous timestamp
-    static bool firstCall = true;  // To handle the first call where no previous data exists
-
-    // Handle the first call to initialize prevTime and prevAccel
-    if (firstCall) {
-        prevTime = currentTime;
-        prevAccel = acceleration;
-        firstCall = false;
-        return position; // No position change on the first call
-    }
-
-    // Calculate time difference (delta time)
-    float deltaTime = (currentTime - prevTime) / 1000000;
-
-    // Integration step to update velocity using the trapezoidal rule
-    float averageAccel = (acceleration + prevAccel) / 2.0f;
-    velocity += averageAccel * deltaTime;
-
-    // Integration step to update position
-    position += velocity * deltaTime;
-
-    // Update previous values for next iteration
-    prevAccel = acceleration;
-    prevTime = currentTime;
-
-    return position;  // Return the current position estimate
-}
-
