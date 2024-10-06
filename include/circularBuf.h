@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define CIRCULAR_BUF_SIZE 4
+#define CIRCULAR_BUF_SIZE 3
 #define IMU_BUF_SIZE 10
 
 typedef struct {

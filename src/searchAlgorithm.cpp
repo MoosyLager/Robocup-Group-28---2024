@@ -28,15 +28,6 @@ void initializeRobotFSM(RobotFSM* fsm) {
     fsm->targetHeading = 0;
 }
 
-void checkWeightsOnboard(RobotFSM* fsm)
-{
-    // weightCheckFunction(fsm); changes the state to RETURNING if >= 3 weights are onboard
-}
-
-/**
- * Working function, checks whether the wall is detected by the sensors
- */
-
 
 void checkCalibration(RobotFSM* fsm)
 {
@@ -185,21 +176,23 @@ void handleSearching(RobotFSM* fsm) {
     Serial.println("Searching");
 
     static elapsedMillis currentCount = 0;
-    bool completeRotation = true;
+    static bool completeRotation = false;
 
     if (weightDetected()) {
         fsm->huntState = CHASE;
+        Serial.println("Weight Detected");
     }
     if (rotationCounter - currentCount > ROTATION_TIMEOUT) {
+        Serial.println("Rotating");
         completeRotation = true;
         currentCount = rotationCounter;
         fsm->targetHeading = GetOrientationYaw() + 345;
     } 
 
     if (completeRotation && !checkTargetHeading(fsm->targetHeading)) {
-        rotateCW(3000);
+        rotateCW(1000);
     } else {
-        moveForward(1500);
+        moveForward(800);
         completeRotation = false;
     }
 }
@@ -218,22 +211,25 @@ void handleChasing(RobotFSM* fsm) {
 
     if ((detectedCentreRight() || detectedCentreLeft())) {
         fsm->weightPos = AHEAD;
+        Serial.println("Ahead");
     } else if (detectedFarRight()) {
         fsm->weightPos = ON_RIGHT;
-        rotateCCW(3000);
+        Serial.println("Right");
+        rotateCCW(800);
     } else if (detectedFarLeft()) {
         fsm->weightPos = ON_LEFT;
-        rotateCW(3000);
+        Serial.println("Left");
+        rotateCW(800);
     } 
     
     
     if (fsm->weightPos == AHEAD) {
-        if (!detectedFarRight() && !detectedFarLeft()) {
-            moveForward(1500);
+        if (!detectedCentreRight() && !detectedCentreLeft()) {
+            moveForward(600);
         } else if (detectedCentreRight()) {
-            rotateCCW(1500);
+            rotateCCW(200);
         } else if (detectedCentreLeft()) {
-            rotateCW(1500);
+            rotateCW(200);
         } else {
             moveDistance((GetL1BR() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &leftMotor);
             moveDistance((GetL1BL() * POSITIONAL_CONVERSION) + POSITIONAL_OFFSET, &rightMotor);

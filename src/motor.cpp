@@ -150,14 +150,9 @@ void PIDMotorControl(Motor_t *motor) {
         motor->currentMotorPos = collectionMotorPos;
     } 
     signed long deltaPos = motor->currentMotorPos - motor->prevSampledMotorPos;
-    Serial.print(deltaPos);
 
     // Calculate motor speed if in speed control mode
     findMotorSpeed(motor, deltaPos, deltaT);
-    Serial.print(" ");
-    Serial.print(motor->currentMotorSpeed);
-    Serial.print(" ");
-    Serial.println(motor->targetMotorSpeed);
 
     // For position control, target is position, for speed control, target is speed
     signed int target = motor->isPositionControl ? motor->targetMotorPos : motor->targetMotorSpeed;
@@ -180,7 +175,7 @@ void moveForward(int speed) {
 }
 
 void rotateCW(int speed) {
-    leftMotor.targetMotorSpeed = 0;
+    leftMotor.targetMotorSpeed = speed / 3;
     rightMotor.targetMotorSpeed = -speed;
     leftMotor.isPositionControl = false;
     rightMotor.isPositionControl = false;
@@ -188,7 +183,7 @@ void rotateCW(int speed) {
 
 void rotateCCW(int speed) {
     leftMotor.targetMotorSpeed = -speed;
-    rightMotor.targetMotorSpeed = 0;
+    rightMotor.targetMotorSpeed = speed / 2;
     leftMotor.isPositionControl = false;
     rightMotor.isPositionControl = false;
 }

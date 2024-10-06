@@ -89,7 +89,7 @@ extern Adafruit_TCS34725 colourSensor;
 /**
  * Sensor thresholds
  */
-#define AVOIDANCE_THRESHOLD  50
+#define AVOIDANCE_THRESHOLD  75
 #define LONG_RANGE_THRESHOLD 1000
 #define SHORT_RANGE_THRESHOLD 400
 #define COLLECTION_THRESHOLD 450 // To be tested
