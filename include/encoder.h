@@ -8,10 +8,9 @@
 /**
  * Collector encoder data
  */
-// #define COLLECTION_MOTOR_PULSE_PER_REV 11
-// #define MOTOR_REV_PER_COLLECTION 2.75
-#define COLLECTOR_TICKS_PER_REV 6675
-#define ENCODER_TO_DISTANCE 3000
+#define COLLECTOR_TICKS_PER_REV 6800
+#define ENCODER_MAX_VAL         2147483647
+#define ENCODER_MIN_VAL         -2147483648
 
 /**
  * Pins connected to drive encoder phases

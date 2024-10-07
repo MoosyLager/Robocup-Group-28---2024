@@ -403,7 +403,7 @@ void InitColourSensor()
 }
 
 /**
- * Returns
+ * Returns 1 if the blue button is pressed and 0 otherwise
  */
 uint8_t BlueButtonState()
 {
@@ -421,12 +421,10 @@ void InitSensors()
 
     InitTOF();
     InitColourSensor();
-
-    ioAIO.pinMode(AIO_8, INPUT);  // Blue Button
-    // InitTOF();
-
     InitLimitSwitch();
     InitIMU();
+
+    ioAIO.pinMode(AIO_8, INPUT);  // Blue Button
 }
 
 /**

@@ -6,11 +6,13 @@
 #include "searchAlgorithm.h"
 #include "sensor.h"
 
-#define COLLECTOR_OPEN_OFFSET   0
-#define COLLECTOR_CLOSED_OFFSET 0
+#define COLLECTOR_OPEN_OFFSET    -400
+#define COLLECTOR_CLOSED_OFFSET  2000
 #define RAMP_LOWERED_OFFSET     0
 
-#define COLLECTOR_UPDATE_RATE_MS 50
+#define COLLECTOR_UPDATE_RATE_MS 10
+
+#define COLLECTOR_STOP_THRESHOLD 10
 
 extern bool collectorActuating;
 extern bool weightCollected;
@@ -18,7 +20,7 @@ extern bool weightCollected;
 void CalibrateCollector();
 void CalibrateRamp();
 
-void ActuateCollector();
+void CollectWeight();
 void OpenCollector();
 void CloseCollector();
 
@@ -27,6 +29,6 @@ void LiftRamp();
 
 void UpdateCollector();
 
-// void CalibrateCollectionSystem(RobotFSM* fsm);
+void CalibrateCollectionSystem(RobotFSM* fsm);
 
 #endif
