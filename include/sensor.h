@@ -78,6 +78,10 @@ extern Adafruit_TCS34725 colourSensor;
 #define TOF_XSHUT_L1_3        6
 #define TOF_XSHUT_L1_4        7
 
+#define TOF_L1_ROI_X          16   // Width of the ROI (Max 16)
+#define TOF_L1_ROI_Y          4    // Height of the ROI (Max 16)
+#define TOF_L1_ROI_CENTRE     199  // SPAD number of the centre (refer to datasheet - default 199)
+
 /**
  * IMU
  */

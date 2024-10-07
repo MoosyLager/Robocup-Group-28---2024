@@ -378,6 +378,10 @@ void InitTOF()
         // the default). To make it simple, we'll just count up from 0x2A.
         sensorsL1[i].setAddress(VL53L1X_ADDRESS_START + i);
 
+        // Set ROI size and centre on each sensor
+        sensorsL1[i].setROISize(TOF_L1_ROI_X, TOF_L1_ROI_Y);
+        sensorsL1[i].setROICenter(TOF_L1_ROI_CENTRE);
+
         sensorsL1[i].startContinuous(50);
     }
 }

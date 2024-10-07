@@ -11,6 +11,7 @@
 #define COLLECTOR_TICKS_PER_REV 6800
 #define ENCODER_MAX_VAL         2147483647
 #define ENCODER_MIN_VAL         -2147483648
+#define ENCODER_TO_DISTANCE     3000
 
 /**
  * Pins connected to drive encoder phases
