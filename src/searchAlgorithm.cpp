@@ -201,7 +201,7 @@ void handleSearching(RobotFSM* fsm) {
     if (completeRotation && !checkTargetHeading(fsm->targetHeading)) {
         rotateCW(1000);
     } else {
-        moveForward(800);
+        moveForward(1500);
         completeRotation = false;
     }
 }

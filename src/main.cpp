@@ -25,7 +25,7 @@ void setup()
     InitMotors();
     InitEncoders();
     initializeRobotFSM(&fsm);
-    delay(5000);
+    delay(7000);
     Serial.println("Setup complete");
     // for ( int i = 0; i < 100; i++ ) {
     //     UpdateTOFL0();
@@ -84,22 +84,22 @@ void loop()
     if (updateFSM > 47) {
         processFSM(&fsm);
         updateFSM = 0;
-        Serial.print("Left Motor Target: ");
-        Serial.print(leftMotor.targetMotorSpeed);
-        Serial.print(" Right Motor Target: ");
-        Serial.println(rightMotor.targetMotorSpeed);
-        Serial.print(" Left Motor Speed: ");
-        Serial.print(leftMotor.currentMotorSpeed);
-        Serial.print(" Right Motor Speed: ");
-        Serial.println(rightMotor.currentMotorSpeed);
+        // Serial.print("Left Motor Target: ");
+        // Serial.print(leftMotor.targetMotorSpeed);
+        // Serial.print(" Right Motor Target: ");
+        // Serial.println(rightMotor.targetMotorSpeed);
+        // Serial.print(" Left Motor Speed: ");
+        // Serial.print(leftMotor.currentMotorSpeed);
+        // Serial.print(" Right Motor Speed: ");
+        // Serial.println(rightMotor.currentMotorSpeed);
     }
 
-    if (updatePWM > 51) {
-        // UpdateMotors();
-        updatePWM = 0;
-        PIDMotorControl(&leftMotor);
-        PIDMotorControl(&rightMotor);
-    }
+    // if (updatePWM > 51) {
+    //     // UpdateMotors();
+    //     updatePWM = 0;
+    //     PIDMotorControl(&leftMotor);
+    //     PIDMotorControl(&rightMotor);
+    // }
 
     if (updateSensorsTimer > 31) {
         UpdateTOFL0();

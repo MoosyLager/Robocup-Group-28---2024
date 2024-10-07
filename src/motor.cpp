@@ -21,8 +21,8 @@ void InitMotors()
     // Initialize the left motor
     leftMotor.servoDriver.attach(LEFT_MOTOR_ADDRESS);
     leftMotor.motorType = LEFT_MOTOR;
-    leftMotor.Kp = 100;  // Example gains
-    leftMotor.Ki = 100;
+    leftMotor.Kp = 50;  // Example gains
+    leftMotor.Ki = 10;
     leftMotor.Kd = 0;
     leftMotor.speedInverted = true;  // Normal direction control
     leftMotor.currentMotorSpeed = 0;
@@ -35,8 +35,8 @@ void InitMotors()
     // Initialize the right motor
     rightMotor.servoDriver.attach(RIGHT_MOTOR_ADDRESS);
     rightMotor.motorType = RIGHT_MOTOR;
-    rightMotor.Kp = 100;
-    rightMotor.Ki = 100;
+    rightMotor.Kp = 50;
+    rightMotor.Ki = 10;
     rightMotor.Kd = 0;
     rightMotor.speedInverted = false;  // Inverted control for right motor
     rightMotor.currentMotorSpeed = 0;
