@@ -7,8 +7,9 @@
 extern uint8_t weightsOnboard;
 extern bool finished_calibrating;
 
-#define LOST_WEIGHT_TIMEOUT 5000
+#define LOST_WEIGHT_TIMEOUT 500000
 #define ROTATION_TIMEOUT 20000
+#define ROTATION_FAILURE_TIMEOUT 5000
 #define SPIN_TIMEOUT 4000
 #define EVASIVE_MANEUVER_TIMEOUT 4000
 

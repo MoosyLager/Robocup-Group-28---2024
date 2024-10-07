@@ -153,6 +153,7 @@ void handleAvoiding(RobotFSM* fsm)
     } else if (avoidanceTimer > EVASIVE_MANEUVER_TIMEOUT) {
         Serial.println("Avoidance timeout");
         fsm->evasiveManeuverCompleted = true;
+        fsm->targetHeading = truncateHeading(GetOrientationYaw());
         avoidanceTimer = 0;
     }
 }
@@ -184,26 +185,34 @@ void checkWeightDetection(RobotFSM* fsm) {
 void handleSearching(RobotFSM* fsm) {
     Serial.println("Searching");
 
-    static elapsedMillis currentCount = 0;
+    static int currentCount = 0;
     static bool completeRotation = false;
 
     if (weightDetected()) {
         fsm->huntState = CHASE;
         Serial.println("Weight Detected");
     }
-    if (rotationCounter - currentCount > ROTATION_TIMEOUT) {
-        Serial.println("Rotating");
-        completeRotation = true;
-        currentCount = rotationCounter;
-        fsm->targetHeading = GetOrientationYaw() + 345;
-    } 
-
     if (completeRotation && !checkTargetHeading(fsm->targetHeading)) {
         rotateCW(1000);
+        if (rotationCounter - currentCount > ROTATION_FAILURE_TIMEOUT) {
+            Serial.println("Failed to rotate, resetting");
+            completeRotation = false;
+            currentCount = rotationCounter;
+            fsm->targetHeading = GetOrientationYaw();
+        }
     } else {
         moveForward(1500);
         completeRotation = false;
     }
+    if (rotationCounter - currentCount > ROTATION_TIMEOUT) {
+        Serial.println("Rotating");
+        completeRotation = true;
+        currentCount = rotationCounter;
+        int targetHead = GetOrientationYaw() + 345;
+        fsm->targetHeading = truncateHeading(targetHead);
+        // Checks whether target heading is in the range 0-360
+        
+    } 
 }
 
 
@@ -240,21 +249,30 @@ void handleChasing(RobotFSM* fsm) {
         } else if (detectedCentreLeft( ) && !detectedCentreRight()) {
             rotateCW(200);
         } else {
-            Serial.println("Weight in sights!");
+            Serial.print("Weight in sights!: ");
             if (!linedUp) {
                 if (GetL1BL() > GetL1BR()) {
                     rotateCW(200);
+                    Serial.println("Rotating CW!");
                 } else {
                     rotateCCW(200);
+                    Serial.println("Rotating CCW!");
                 }
                 rangeLeft = GetL1BL();
+                Serial.print("Range Left: ");
+                Serial.println(rangeLeft);
                 rangeRight = GetL1BR();
+                Serial.print("Range Right: ");
+                Serial.println(rangeRight);
                 linedUp = isLinedUp(rangeLeft, rangeRight);
             } else {
+                Serial.println("Is lined up!");
                 if (!calculatedDist) {
                     double s = 230 + rangeLeft + rangeRight;
                     int area = sqrt(s*(s-rangeLeft)*(s-rangeRight)*(s-230));
                     int dist = 2 * area / 230;
+                    Serial.print("Distance to travel: ");
+                    Serial.println(dist);
                     leftMotor.targetMotorPos = dist * ENCODER_TO_DISTANCE  + leftMotor.currentMotorPos;
                     rightMotor.targetMotorPos = dist * ENCODER_TO_DISTANCE + rightMotor.currentMotorPos;
                     fsm->distToTravel = dist;

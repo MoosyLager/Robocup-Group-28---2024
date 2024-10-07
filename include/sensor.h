@@ -90,10 +90,10 @@ extern Adafruit_TCS34725 colourSensor;
  * Sensor thresholds
  */
 #define AVOIDANCE_THRESHOLD  50
-#define LONG_RANGE_THRESHOLD 800
+#define LONG_RANGE_THRESHOLD 600
 #define SHORT_RANGE_THRESHOLD 600
 #define COLLECTION_THRESHOLD 450 // To be tested
-#define DIFFERENCE_PERCENTAGE 35//% difference between the two sensors
+#define DIFFERENCE_PERCENTAGE 20//% difference between the two sensors
 #define DIFFERENCE_ABSOLUTE 100 //mm difference between the two sensors
 #define SHORT_RANGE_MULTIPLIER 1.5
 #define CENTRAL_THRESHOLD 15
@@ -156,6 +156,7 @@ bool detectedCentreLeft(void);
 bool weightDetected(void);
 bool checkTargetHeading(int targetHeading);
 bool isLinedUp(int rangeLeft, int rangeRight);
+int truncateHeading(int heading);
 
 
 #endif // SENSOR_H

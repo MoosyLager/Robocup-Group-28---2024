@@ -83,11 +83,9 @@ void SetMotorSpeed(Motor_t *motor, signed int speed)
 signed int CheckSpeedLimits(signed int speed)
 {
     if ( speed > MAX_MOTOR_VAL ) {
-        // Serial.printf("Speed was out of bounds. Clamped to %u", MAX_MOTOR_VAL);
         return MAX_MOTOR_VAL;
     }
     if ( speed < MIN_MOTOR_VAL ) {
-        // Serial.printf("Speed was out of bounds. Clamped to %u", MIN_MOTOR_VAL);
         return MIN_MOTOR_VAL;
     }
     return speed;
