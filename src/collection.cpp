@@ -4,9 +4,16 @@
 int collectorTarget;
 int prevCollectorPos;
 bool collectorActuating = false;
+bool collectingWeight = false;
 bool weightCollected = false;
-elapsedMillis collectionMotorTimer;
 elapsedMillis collectionWatchDog;
+
+/**
+ * Calculates the error between the current collector position and its target postion
+ */
+// uint32_t CollectorError(uint32_t current, uint32_t target)
+// {
+// }
 
 /**
  * Update the collection motor speed if needed
@@ -14,16 +21,36 @@ elapsedMillis collectionWatchDog;
 void UpdateCollector()
 {
     if ( collectorActuating ) {
-        if ( collectionMotorTimer > COLLECTOR_UPDATE_RATE_MS ) {
-            collectionMotorTimer = 0;
+        int32_t wrappedCurrect = collectionMotorPos & COLLECTOR_TICKS_PER_REV;
+        int32_t wrappedTarget = collectorTarget & COLLECTOR_TICKS_PER_REV;
+        int32_t difference = wrappedTarget - wrappedCurrect;
 
-            if ( collectionMotorPos > collectorTarget ) {
-                SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
-            } else {
+        Serial.println(difference);
+
+        if ( collectingWeight ) {
+            if ( abs(difference) < COLLECTOR_STOP_THRESHOLD ) {
                 SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
-
                 collectorActuating = false;
-                Serial.println("Collector Target Reached!");
+                collectingWeight = false;
+                Serial.println("Collection Complete!");
+            } else {
+                SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
+            }
+        } else {
+            if ( difference > COLLECTOR_TICKS_PER_REV / 2 ) {
+                difference -= COLLECTOR_TICKS_PER_REV;
+            } else if ( difference < -COLLECTOR_TICKS_PER_REV / 2 ) {
+                difference += COLLECTOR_TICKS_PER_REV;
+            }
+
+            if ( abs(difference) < COLLECTOR_STOP_THRESHOLD ) {
+                SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
+                Serial.println("Collection Complete!");
+                collectorActuating = false;
+            } else if ( difference > 0 ) {
+                SetMotorSpeed(&collectionMotor, MIN_MOTOR_VAL);
+            } else {
+                SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
             }
         }
     }
@@ -73,9 +100,9 @@ void CalibrateRamp()
  */
 void OpenCollector()
 {
-    do {
-        SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
-    } while ( collectionMotorPos != COLLECTOR_OPEN_OFFSET );
+    Serial.println("Opening Collector...");
+    collectorTarget = 0 + COLLECTOR_OPEN_OFFSET;
+    collectorActuating = true;
 }
 
 /**
@@ -83,26 +110,23 @@ void OpenCollector()
  */
 void CloseCollector()
 {
-    do {
-        SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
-    } while ( collectionMotorPos != COLLECTOR_CLOSED_OFFSET );
+    Serial.println("Closing Collector...");
+    prevCollectionMotorPos = collectionMotorPos;
+    collectorTarget = prevCollectionMotorPos + COLLECTOR_CLOSED_OFFSET;
+    collectorActuating = true;
 }
 
 /**
  * Actuate the collector through a full rotation and move to the closed position
  */
-void ActuateCollector()
+void CollectWeight()
 {
-    // 44:16 ratio between motor and collector
-    // 2.75 motor revolutions per collector revolution
-    // 11 pulses per motor revolution
     Serial.println("Actuating Collector...");
+    SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
     prevCollectionMotorPos = collectionMotorPos;
     collectorTarget = prevCollectionMotorPos - COLLECTOR_TICKS_PER_REV;
-    SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
-
-    collectionMotorTimer = 0;
     collectorActuating = true;
+    collectingWeight = true;
 }
 
 /**
