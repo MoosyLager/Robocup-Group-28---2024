@@ -9,13 +9,6 @@ bool weightCollected = false;
 elapsedMillis collectionWatchDog;
 
 /**
- * Calculates the error between the current collector position and its target postion
- */
-// uint32_t CollectorError(uint32_t current, uint32_t target)
-// {
-// }
-
-/**
  * Update the collection motor speed if needed
  */
 void UpdateCollector()
@@ -146,9 +139,9 @@ void LiftRamp()
 /**
  * Calibrates the collector and ramp then sets the FSM state
  */
-// void CalibrateCollectionSystem(RobotFSM* fsm)
-// {
-//     CalibrateCollector();
-//     CalibrateRamp();
-//     fsm->currentState = HUNTING;
-// }
+void CalibrateCollectionSystem(RobotFSM* fsm)
+{
+    CalibrateCollector();
+    CalibrateRamp();
+    fsm->currentState = HUNTING;
+}

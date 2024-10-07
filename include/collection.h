@@ -29,6 +29,6 @@ void LiftRamp();
 
 void UpdateCollector();
 
-// void CalibrateCollectionSystem(RobotFSM* fsm);
+void CalibrateCollectionSystem(RobotFSM* fsm);
 
 #endif
