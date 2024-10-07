@@ -11,6 +11,7 @@
 // #define COLLECTION_MOTOR_PULSE_PER_REV 11
 // #define MOTOR_REV_PER_COLLECTION 2.75
 #define COLLECTOR_TICKS_PER_REV 6675
+#define ENCODER_TO_DISTANCE 3000
 
 /**
  * Pins connected to drive encoder phases

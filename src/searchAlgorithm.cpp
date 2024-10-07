@@ -3,6 +3,7 @@
 #include "searchAlgorithm.h"
 #include "sensor.h"
 #include <stdio.h>
+#include <math.h>
 #include <elapsedMillis.h>
 #include "motor.h"
 #include "collection.h"
@@ -26,6 +27,7 @@ void initializeRobotFSM(RobotFSM* fsm) {
     fsm->avoidanceSide = NO_WALL;        // No obstacle detected at the start
     fsm->evasiveManeuverCompleted = false;  // Evasive maneuver not completed at the start
     fsm->targetHeading = 0;
+    fsm->distToTravel = 0;
 }
 
 
@@ -107,11 +109,11 @@ void checkWallDistances(RobotFSM* fsm)
             fsm->weightPos = NONE;  // Reset the weight position if an obstacle is found
             fsm->evasiveManeuverCompleted = false;
             fsm->currentState = AVOIDING;  // Change the state if below threshold
-
+            avoidanceTimer = 0;
             // Determine side of detection based on the function index
             if (i % 2 == 0) {
                 fsm->avoidanceSide = LEFT;  // L0 corresponds to the left side
-                fsm->targetHeading = GetOrientationYaw() + 60;
+                fsm->targetHeading = GetOrientationYaw() + 60   ;
                 onLeft = true;
             } else {
                 fsm->avoidanceSide = RIGHT; // L1 corresponds to the right side
@@ -130,7 +132,6 @@ void checkWallDistances(RobotFSM* fsm)
 
 void handleAvoiding(RobotFSM* fsm) 
 {
-    Serial.println("Avoiding");
     if (!(fsm->evasiveManeuverCompleted)) {
         if (onLeft) {
             rotateCW(1500);
@@ -139,11 +140,19 @@ void handleAvoiding(RobotFSM* fsm)
             rotateCCW(1500);
             // Or Other avoidance maneuver
         } 
+        Serial.println("Avoiding");
+    } else {
+        fsm->currentState = fsm->lastMainState;
+        fsm->huntState = SEARCH;
     }
     // Rotation Condition Met
-    if (checkTargetHeading(fsm->targetHeading) && (fsm->avoidanceSide == NO_WALL)) {
+    if ((checkTargetHeading(fsm->targetHeading) && (fsm->avoidanceSide == NO_WALL))) {
+        Serial.println("Evasive maneuver completed");
         fsm->evasiveManeuverCompleted = true;
-        fsm->currentState = fsm->lastMainState;
+        avoidanceTimer = 0;
+    } else if (avoidanceTimer > EVASIVE_MANEUVER_TIMEOUT) {
+        Serial.println("Avoidance timeout");
+        fsm->evasiveManeuverCompleted = true;
         avoidanceTimer = 0;
     }
 }
@@ -200,14 +209,12 @@ void handleSearching(RobotFSM* fsm) {
 
 
 void handleChasing(RobotFSM* fsm) {
-    if (weightDetected()) {
-        weightWatchDog = 0;
-    } else if (weightWatchDog > LOST_WEIGHT_TIMEOUT) {
-        Serial.println("Lost weight");
-        fsm->huntState = SEARCH;
-        fsm->weightPos = NONE;
-        weightWatchDog = 0;
-    }
+
+    static double rangeLeft = 0;
+    static double rangeRight = 0;
+
+    static bool linedUp = false;
+    static bool calculatedDist = false;
 
 
     if ((detectedCentreRight() || detectedCentreLeft())) {
@@ -221,25 +228,59 @@ void handleChasing(RobotFSM* fsm) {
         fsm->weightPos = ON_LEFT;
         Serial.println("Left");
         rotateCW(800);
-    } // Could abstract this to the weight detection function
-    
+    } else {
+        Serial.println("Currently no weight seen");// Could abstract this to the weight detection function
+    }
     
     if (fsm->weightPos == AHEAD) {
         if (!detectedCentreRight() && !detectedCentreLeft()) {
             moveForward(200);
-        } else if (detectedCentreRight()) {
+        } else if (detectedCentreRight() && !detectedCentreLeft()) {
             rotateCCW(200);
-        } else if (detectedCentreLeft()) {
+        } else if (detectedCentreLeft( ) && !detectedCentreRight()) {
             rotateCW(200);
         } else {
             Serial.println("Weight in sights!");
+            if (!linedUp) {
+                if (GetL1BL() > GetL1BR()) {
+                    rotateCW(200);
+                } else {
+                    rotateCCW(200);
+                }
+                rangeLeft = GetL1BL();
+                rangeRight = GetL1BR();
+                linedUp = isLinedUp(rangeLeft, rangeRight);
+            } else {
+                if (!calculatedDist) {
+                    double s = 230 + rangeLeft + rangeRight;
+                    int area = sqrt(s*(s-rangeLeft)*(s-rangeRight)*(s-230));
+                    int dist = 2 * area / 230;
+                    leftMotor.targetMotorPos = dist * ENCODER_TO_DISTANCE  + leftMotor.currentMotorPos;
+                    rightMotor.targetMotorPos = dist * ENCODER_TO_DISTANCE + rightMotor.currentMotorPos;
+                    fsm->distToTravel = dist;
+                    calculatedDist = true;
+                } else {
+                    moveForward(200);
+                    if (leftMotor.currentMotorPos >= leftMotor.targetMotorPos && rightMotor.currentMotorPos >= rightMotor.targetMotorPos) {
+                        fsm->huntState = COLLECT;
+                    }
+                }
+            }
         }
     }
+
+    if (weightDetected()) {
+        weightWatchDog = 0;
+    } else if (weightWatchDog > LOST_WEIGHT_TIMEOUT) {
+        Serial.println("Lost weight");
+        fsm->huntState = SEARCH;
+        fsm->weightPos = NONE;
+        weightWatchDog = 0;
+    } 
 }
 
 void handleCollecting(RobotFSM* fsm) {
-    static bool collectingWeight = false; // Need to change the actuator to move
-
+    // Need to change the actuator to move
     moveForward(0);
 
     if (!collectorActuating) {

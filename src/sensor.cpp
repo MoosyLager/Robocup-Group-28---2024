@@ -507,3 +507,6 @@ bool checkTargetHeading(int targetHeading)
     return (error < 5 && error > -5);
 }
 
+bool isLinedUp(int rangeLeft, int rangeRight) {
+    return ((rangeLeft - rangeRight < CENTRAL_THRESHOLD) || (rangeRight - rangeLeft < CENTRAL_THRESHOLD));
+}
