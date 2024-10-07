@@ -15,30 +15,53 @@ RobotFSM fsm;
 elapsedMicros timer;
 elapsedMillis updateSensorsTimer = 0;
 elapsedMillis updateFSM = 0;
-elapsedMicros updatePWM = 0;
+elapsedMillis updatePWM = 0;
 
 void setup()
 {
     Serial.begin(9600);
     // delay(1000);
     InitSensors();
-    // InitCircularBuffers();
-    // InitMotors();
-    // InitEncoders();
-    // initializeRobotFSM(&fsm);
-    // delay(10000);
-    // Serial.println("Setup complete");
-    for ( int i = 0; i < 100; i++ ) {
-        UpdateTOFL0();
-        UpdateTOFL1();
-    }
+    InitMotors();
+    InitEncoders();
+    initializeRobotFSM(&fsm);
+    delay(7000);
+    Serial.println("Setup complete");
+    // for ( int i = 0; i < 100; i++ ) {
+    //     UpdateTOFL0();
+    //     UpdateTOFL1();
+    // }
 }
 
 void loop()
 {
-    Serial.println(GetL0BR());
-    UpdateTOFL0();
-    UpdateTOFL1();
+    // Serial.print("Centre Left: ");
+    // Serial.print(detectedCentreLeft());
+    // Serial.print(" Centre Right: ");
+    // Serial.print(detectedCentreRight());
+    // Serial.print(" Far Left: ");
+    // Serial.print(detectedFarLeft());
+    // Serial.print(" Far Right");
+    // Serial.println(detectedFarRight());
+    // UpdateTOFL0();
+    // UpdateTOFL1();
+
+    // Serial.print("L0TL: ");
+    // Serial.print(GetL0TL());
+    // Serial.print(" L0TR: ");
+    // Serial.print(GetL0TR());
+    // Serial.print(" L0BL: ");
+    // Serial.print(GetL0BL());
+    // Serial.print(" L0BR: ");
+    // Serial.println(GetL0BR());
+    // Serial.print("L1TL: ");
+    // Serial.print(GetL1TL());
+    // Serial.print(" L1TR: ");
+    // Serial.print(GetL1TR());
+    // Serial.print(" L1BL: ");
+    // Serial.print(GetL1BL());
+    // Serial.print(" L1BR: ");
+    // Serial.println(GetL1BR());
     // UpdateIMU();
     // if (updateSensorsTimer > 50) {
     //     float acc = GetOrientationPitch();
@@ -58,10 +81,18 @@ void loop()
     //     updateSensorsTimer = 0;
     // }
 
-    // if (updateFSM > 47) {
-    //     processFSM(&fsm);
-    //     updateFSM = 0;
-    // }
+    if (updateFSM > 47) {
+        processFSM(&fsm);
+        updateFSM = 0;
+        // Serial.print("Left Motor Target: ");
+        // Serial.print(leftMotor.targetMotorSpeed);
+        // Serial.print(" Right Motor Target: ");
+        // Serial.println(rightMotor.targetMotorSpeed);
+        // Serial.print(" Left Motor Speed: ");
+        // Serial.print(leftMotor.currentMotorSpeed);
+        // Serial.print(" Right Motor Speed: ");
+        // Serial.println(rightMotor.currentMotorSpeed);
+    }
 
     // if (updatePWM > 51) {
     //     // UpdateMotors();
@@ -70,10 +101,10 @@ void loop()
     //     PIDMotorControl(&rightMotor);
     // }
 
-    // if (updateSensorsTimer > 31) {
-    //     UpdateTOFL0();
-    //     UpdateTOFL1();
-    //     UpdateIMU();
-    //     updateSensorsTimer = 0;
-    // }
+    if (updateSensorsTimer > 31) {
+        UpdateTOFL0();
+        UpdateTOFL1();
+        UpdateIMU();
+        updateSensorsTimer = 0;
+    }
 }

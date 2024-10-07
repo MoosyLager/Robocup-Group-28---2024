@@ -10,7 +10,8 @@ extern bool finished_calibrating;
 #define LOST_WEIGHT_TIMEOUT 5000
 #define ROTATION_TIMEOUT 20000
 #define SPIN_TIMEOUT 4000
-#define EVASIVE_MANEUVER_TIMEOUT 2000
+#define EVASIVE_MANEUVER_TIMEOUT 4000
+
 
 typedef enum {
     FORWARD,
@@ -65,6 +66,7 @@ typedef struct {
     AvoidanceSide_t avoidanceSide;
     bool evasiveManeuverCompleted;
     int targetHeading;
+    int distToTravel;
 } RobotFSM;
 
 // Function prototypes

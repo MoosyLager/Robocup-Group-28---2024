@@ -478,18 +478,31 @@ bool detectedCentreRight(void)
 {
     uint16_t top = GetL1TL();
     uint16_t bottom = GetL1BL();
+    Serial.print("Right Top: ");
+    Serial.print(top);
+    Serial.print(" Bottom: ");
+    Serial.println(bottom);
     return detectedByAbsoluteDifference(top, bottom);
 }
 
 bool detectedCentreLeft(void)
 {
     uint16_t top = GetL1TR();
+    Serial.print("Left Top: ");
+    Serial.print(top);
+    Serial.print(" Bottom: ");
     uint16_t bottom = GetL1BR();
+    Serial.println(bottom);
     return detectedByAbsoluteDifference(top, bottom);
 }
 
 bool weightDetected(void)
 {
+
+    Serial.print(" Detected Centre Left: ");
+    Serial.print(detectedCentreLeft());
+    Serial.print(" Detected Centre Right: ");
+    Serial.print(detectedCentreRight());
     return (detectedFarLeft() || detectedFarRight() || detectedCentreLeft() || detectedCentreRight());
 }
 
@@ -505,3 +518,6 @@ bool checkTargetHeading(int targetHeading)
     return (error < 5 && error > -5);
 }
 
+bool isLinedUp(int rangeLeft, int rangeRight) {
+    return ((rangeLeft - rangeRight < CENTRAL_THRESHOLD) || (rangeRight - rangeLeft < CENTRAL_THRESHOLD));
+}

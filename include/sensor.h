@@ -89,13 +89,14 @@ extern Adafruit_TCS34725 colourSensor;
 /**
  * Sensor thresholds
  */
-#define AVOIDANCE_THRESHOLD  75
-#define LONG_RANGE_THRESHOLD 1000
-#define SHORT_RANGE_THRESHOLD 400
+#define AVOIDANCE_THRESHOLD  50
+#define LONG_RANGE_THRESHOLD 800
+#define SHORT_RANGE_THRESHOLD 600
 #define COLLECTION_THRESHOLD 450 // To be tested
-#define DIFFERENCE_PERCENTAGE 60//% difference between the two sensors
+#define DIFFERENCE_PERCENTAGE 35//% difference between the two sensors
 #define DIFFERENCE_ABSOLUTE 100 //mm difference between the two sensors
 #define SHORT_RANGE_MULTIPLIER 1.5
+#define CENTRAL_THRESHOLD 15
 
 typedef uint16_t (*DistanceFunction)();  // Function pointer type for distance functions
 extern DistanceFunction distanceFunctions[];
@@ -154,7 +155,7 @@ bool detectedCentreRight(void);
 bool detectedCentreLeft(void);
 bool weightDetected(void);
 bool checkTargetHeading(int targetHeading);
-float findPos(float acceleration, float currentTime);
+bool isLinedUp(int rangeLeft, int rangeRight);
 
 
 #endif // SENSOR_H
