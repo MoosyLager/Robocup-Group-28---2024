@@ -1,13 +1,13 @@
+#include "searchAlgorithm.h"
+#include "circularBuf.h"
+#include "collection.h"
+#include "motor.h"
+#include "sensor.h"
+#include <elapsedMillis.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "searchAlgorithm.h"
-#include "sensor.h"
 #include <stdio.h>
-#include <math.h>
-#include <elapsedMillis.h>
-#include "motor.h"
-#include "collection.h"
-#include "circularBuf.h"
 
 elapsedMillis weightWatchDog;
 elapsedMillis rotationCounter;
