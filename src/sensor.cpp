@@ -468,10 +468,6 @@ bool detectedFarLeft(void)
 {
     uint16_t top = GetL0TL();
     uint16_t bottom = GetL0BL();
-    Serial.print("Right Top 0: ");
-    Serial.print(top);
-    Serial.print(" Bottom: ");
-    Serial.print(bottom);
     bool detected = detectedByPercentageDifference(top, bottom);
     Serial.print(" Far Left Detected: ");
     Serial.println(detected);
@@ -482,10 +478,6 @@ bool detectedFarRight(void)
 {
     uint16_t top = GetL0TR();
     uint16_t bottom = GetL0BR();
-    Serial.print("Left Top 0: ");
-    Serial.print(top);
-    Serial.print(" Bottom: ");
-    Serial.print(bottom);
     bool detected = detectedByPercentageDifference(top, bottom);
     Serial.print(" Far Right Detected: ");
     Serial.println(detected);
@@ -494,8 +486,8 @@ bool detectedFarRight(void)
 
 bool detectedCentreRight(void)
 {
-    uint16_t top = GetL1TL();
-    uint16_t bottom = GetL1BL();
+    uint16_t top = GetL1TR();
+    uint16_t bottom = GetL1BR();
     Serial.print("Right Top 1: ");
     Serial.print(top);
     Serial.print(" Bottom: ");
@@ -508,8 +500,8 @@ bool detectedCentreRight(void)
 
 bool detectedCentreLeft(void)
 {
-    uint16_t top = GetL1TR();
-    uint16_t bottom = GetL1BR();
+    uint16_t top = GetL1TL();
+    uint16_t bottom = GetL1BL();
     Serial.print("Left Top 1: ");
     Serial.print(top);
     Serial.print(" Bottom: ");
@@ -545,7 +537,10 @@ bool checkTargetHeading(int targetHeading)
 }
 
 bool isLinedUp(int rangeLeft, int rangeRight) {
-    return ((rangeLeft - rangeRight < CENTRAL_THRESHOLD) || (rangeRight - rangeLeft < CENTRAL_THRESHOLD));
+    int diff = abs(rangeLeft - rangeRight);
+    Serial.print("Diff: ");
+    Serial.println(diff);
+    return (abs(rangeLeft - rangeRight) < CENTRAL_THRESHOLD);
 }
 
 int truncateHeading(int heading) {

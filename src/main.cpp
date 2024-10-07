@@ -81,7 +81,7 @@ void loop()
     //     updateSensorsTimer = 0;
     // }
 
-    if (updateFSM > 47) {
+    if (updateFSM > 71) {
         processFSM(&fsm);
         updateFSM = 0;
         Serial.println("--------------------");

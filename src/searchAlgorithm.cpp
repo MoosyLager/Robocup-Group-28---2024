@@ -221,6 +221,7 @@ void handleChasing(RobotFSM* fsm) {
 
     static double rangeLeft = 0;
     static double rangeRight = 0;
+    static int distToTravel = 0;
 
     static bool linedUp = false;
     static bool calculatedDist = false;
@@ -251,37 +252,37 @@ void handleChasing(RobotFSM* fsm) {
         } else {
             Serial.print("Weight in sights!: ");
             if (!linedUp) {
-                if (GetL1BL() > GetL1BR()) {
+                rangeLeft = GetL1BL();
+                rangeRight = GetL1BR();
+                if (rangeLeft > rangeRight) {
                     rotateCW(200);
                     Serial.println("Rotating CW!");
                 } else {
                     rotateCCW(200);
                     Serial.println("Rotating CCW!");
                 }
-                rangeLeft = GetL1BL();
-                Serial.print("Range Left: ");
-                Serial.println(rangeLeft);
-                rangeRight = GetL1BR();
-                Serial.print("Range Right: ");
-                Serial.println(rangeRight);
                 linedUp = isLinedUp(rangeLeft, rangeRight);
             } else {
                 Serial.println("Is lined up!");
+                Serial.println(isLinedUp(rangeLeft, rangeRight));
                 if (!calculatedDist) {
                     double s = 230 + rangeLeft + rangeRight;
                     int area = sqrt(s*(s-rangeLeft)*(s-rangeRight)*(s-230));
-                    int dist = 2 * area / 230;
+                    distToTravel = 2 * area / 230;
                     Serial.print("Distance to travel: ");
-                    Serial.println(dist);
-                    leftMotor.targetMotorPos = dist * ENCODER_TO_DISTANCE  + leftMotor.currentMotorPos;
-                    rightMotor.targetMotorPos = dist * ENCODER_TO_DISTANCE + rightMotor.currentMotorPos;
-                    fsm->distToTravel = dist;
+                    Serial.println(distToTravel);
+                    leftMotor.targetMotorPos = distToTravel * ENCODER_PER_DISTANCE  + leftMotor.currentMotorPos + ;
+                    rightMotor.targetMotorPos = distToTravel * ENCODER_PER_DISTANCE + rightMotor.currentMotorPos;
+                    fsm->distToTravel = distToTravel;
                     calculatedDist = true;
                 } else {
                     moveForward(200);
-                    if (leftMotor.currentMotorPos >= leftMotor.targetMotorPos && rightMotor.currentMotorPos >= rightMotor.targetMotorPos) {
+                    if (leftMotor.currentMotorPos >= leftMotor.targetMotorPos || rightMotor.currentMotorPos >= rightMotor.targetMotorPos) { // Might have to change to current
                         fsm->huntState = COLLECT;
+                    
                     }
+                Serial.print("Distance to travel: ");
+                Serial.println(distToTravel);
                 }
             }
         }
