@@ -6,10 +6,11 @@
 #include <Arduino.h>
 #include <elapsedMillis.h>
 
-elapsedMillis updateFSM;
-elapsedMillis updatePWM;
+elapsedMillis updateFSMTimer;
+elapsedMillis updatePWMTimer;
 elapsedMillis updateSensorsTimer;
-
+elapsedMillis buttonTimer;
+bool notSet = true;
 RobotFSM fsm;
 
 // elapsedMillis timer;
@@ -25,6 +26,17 @@ void setup()
     for ( int i = 0; i < 2 * CIRCULAR_BUF_SIZE; i++ ) {
         UpdateTOFL0();
         UpdateTOFL1();
+    }
+
+    while (notSet) {
+        Serial.println("Calibrating IMU");
+        float heading = GetOrientationYaw();
+        if (heading != 0) {
+            initialHeading = heading;
+            targetHeading = initialHeading - 180;
+            fsm.targetHeading = truncateHeading(targetHeading);
+            notSet = false;
+        }
     }
 
     Serial.println("Setup complete");

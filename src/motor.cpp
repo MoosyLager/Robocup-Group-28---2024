@@ -6,6 +6,8 @@
 #include "encoder.h"
 #include <elapsedMillis.h>
 
+bool pwmOn = false;
+
 Motor_t leftMotor;
 Motor_t rightMotor;
 Motor_t collectionMotor;
@@ -164,7 +166,9 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
 }
 
 void PIDMotorControl(Motor_t *motor) {
-    
+    if (!pwmOn) {
+        return;
+    }
     signed int deltaT = currentTime - motor->prevTime;
     motor->prevTime = currentTime;
 

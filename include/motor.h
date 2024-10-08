@@ -35,6 +35,7 @@
 #define POSITIONAL_OFFSET 0
 
 extern elapsedMillis currentTime;
+extern bool pwmOn;
 
 typedef enum {
     LEFT_MOTOR,

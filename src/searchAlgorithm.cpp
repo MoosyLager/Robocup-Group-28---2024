@@ -14,6 +14,7 @@ elapsedMillis rotationCounter;
 elapsedMillis moduleCounter;
 elapsedMillis avoidanceTimer;
 elapsedMillis collectionJawsWatchDog;
+float initialHeading = 0;
 bool onLeft = false;
 
 void initializeRobotFSM(RobotFSM* fsm)
@@ -49,9 +50,19 @@ void processFSM(RobotFSM* fsm)
         fsm->previousState = fsm->currentState;  // Update the last state
     }
 
+    /**
+     * if (colour sensor is on home):
+     *  if weights onboard >= 1;
+     *   fsm->currentState = RETURNING;
+     *   fsm->returnState = HOMESEEK;
+     *  else: 
+     *  fsm->targetHeading = GetOrientationYaw() - 180;
+     *  fsm->currentState = AVOIDING;
+     */
+
     if ( !fsm->currentState == CALIBRATING ) {
         checkWallDistancesTop(fsm);
-    }
+    } 
 
 
     switch ( fsm->currentState ) {
@@ -414,24 +425,6 @@ void handleCollecting(RobotFSM * fsm)
             }
         }
     }
-
-    
-//     if (collectionJawsWatchDog > COLLECTION_TIMEOUT) {
-//         timeOut = true;
-//         // Needs a way to get out of the stuck weight
-//         Serial.println("Stuck weight");
-//         if ((abs(collectionMotor.targetMotorPos - collectionMotor.currentMotorPos - COLLECTOR_TICKS_PER_REV)) > COLLECTOR_STOP_THRESHOLD) {
-//             SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
-//         } else {
-//             SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
-//             atLimit = false;
-//             collectorActuating = false;
-//             fsm->huntState = SEARCH;
-//             fsm->currentState = HUNTING;
-//             fsm->lastMainState = HUNTING;
-//             collectionJawsWatchDog = 0;
-//         }
-//     }
 }
 
 /*
@@ -439,7 +432,12 @@ RETURNING SUB-STATE FUNCTIONS
 */
 void handleHomeSeeking(RobotFSM * fsm)
 {
-    //Randomly Navigate
+    float heading_error = truncateHeading(targetHeading - GetOrientationYaw());
+    leftMotor.targetMotorSpeed = 1800 + heading_error * 10;
+    rightMotor.targetMotorSpeed = 1800 - heading_error * 10;
+    if ( abs(heading_error) < 5 && colourSensor == HOME ) {
+        fsm->returnState = DEPOSIT;
+    }
 }
 
 void handleDepositing(RobotFSM * fsm)

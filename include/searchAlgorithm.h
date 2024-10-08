@@ -6,6 +6,8 @@
 
 extern uint8_t weightsOnboard;
 extern bool finished_calibrating;
+extern float initialHeading;
+extern float targetHeading;
 
 #define LOST_WEIGHT_TIMEOUT 7500
 #define ROTATION_TIMEOUT 20000

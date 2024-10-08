@@ -518,14 +518,11 @@ uint8_t BlueButtonState()
 void InitSensors()
 {
     InitIOExpander();
-
     InitCircularBuffers();
-
     InitTOF();
     InitColourSensor();
     InitLimitSwitch();
     InitIMU();
-
     ioAIO.pinMode(AIO_8, INPUT);  // Blue Button
 }
 
