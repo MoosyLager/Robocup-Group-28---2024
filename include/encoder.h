@@ -8,7 +8,7 @@
 /**
  * Collector encoder data
  */
-#define COLLECTOR_TICKS_PER_REV 6800
+#define COLLECTOR_TICKS_PER_REV 6600
 #define ENCODER_MAX_VAL         2147483647
 #define ENCODER_MIN_VAL         -2147483648
 #define ENCODER_PER_REV     3000

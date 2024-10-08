@@ -219,7 +219,6 @@ void handleSearching(RobotFSM* fsm)
     }
 }
 
-
 void handleChasing(RobotFSM* fsm)
 {
 
@@ -278,90 +277,89 @@ void handleChasing(RobotFSM* fsm)
                     distToTravel = 2 * area / 230;
                     Serial.print("Distance to travel: ");
                     Serial.println(distToTravel);
-                    leftMotor.targetMotorPos = distToTravel * ENCODER_PER_DISTANCE + leftMotor.currentMotorPos;
-                    rightMotor.targetMotorPos = distToTravel * ENCODER_PER_DISTANCE + rightMotor.currentMotorPos;
+                    leftMotor.targetMotorPos = distToTravel * ENCODER_PER_DIST + leftMotor.currentMotorPos;
+                    rightMotor.targetMotorPos = distToTravel * ENCODER_PER_DIST + rightMotor.currentMotorPos;
                     fsm->distToTravel = distToTravel;
                     calculatedDist = true;
                 } else {
                     moveForward(200);
                     if ( leftMotor.currentMotorPos >= leftMotor.targetMotorPos || rightMotor.currentMotorPos >= rightMotor.targetMotorPos ) {  // Might have to change to current
                         fsm->huntState = COLLECT;
-
-                        //                 }
-                        //             Serial.print("Distance to travel: ");
-                        //             Serial.println(distToTravel);
-                        //             }
-                        //         }
-                        //     }
-                        // }
-
-                        // if (weightDetected()) {
-                        //     weightWatchDog = 0;
-                        // } else if (weightWatchDog > LOST_WEIGHT_TIMEOUT) {
-                        //     Serial.println("Lost weight");
-                        //     fsm->huntState = SEARCH;
-                        //     fsm->weightPos = NONE;
-                        //     weightWatchDog = 0;
-                        // }
                     }
+                    Serial.print("Distance to travel: ");
+                    Serial.println(distToTravel);
+                }
+            }
+        }
+    }
 
-                    void handleCollecting(RobotFSM * fsm)
-                    {
-                        // Need to change the actuator to move
-                        moveForward(0);
+    if ( weightDetected() ) {
+        weightWatchDog = 0;
+    } else if ( weightWatchDog > LOST_WEIGHT_TIMEOUT ) {
+        Serial.println("Lost weight");
+        fsm->huntState = SEARCH;
+        fsm->weightPos = NONE;
+        weightWatchDog = 0;
+    }
+}
 
-                        if ( !collectorActuating ) {
-                            fsm->collectedWeights++;
-                            fsm->huntState = SEARCH;
-                            if ( fsm->collectedWeights >= 3 ) {
-                                fsm->currentState = RETURNING;
-                                fsm->lastMainState = RETURNING;
-                                fsm->returnState = HOMESEEK;
-                            }
-                        }
+void handleCollecting(RobotFSM* fsm)
+{
+    // Need to change the actuator to move
+    moveForward(0);
 
-                        /*
-                        if (collectionJammed()) {
-                            reverseToOpenJam();
-                        }*/
-                    }
+    if ( !collectorActuating ) {
+        fsm->collectedWeights++;
+        fsm->huntState = SEARCH;
+        if ( fsm->collectedWeights >= 3 ) {
+            fsm->currentState = RETURNING;
+            fsm->lastMainState = RETURNING;
+            fsm->returnState = HOMESEEK;
+        }
+    }
 
-                    /*
-                    RETURNING SUB-STATE FUNCTIONS
-                    */
-                    void handleHomeSeeking(RobotFSM * fsm)
-                    {
-                        // homeSeekMotorFunction();
-                        // error = desiredHeading - currentHeading;
+    /*
+    if (collectionJammed()) {
+        reverseToOpenJam();
+    }*/
+}
 
-                        // if (error > 180) {
-                        //     error = error - 360;
-                        // } else if (error < -180) {
-                        //     error = error + 360;
-                        // }
+/*
+RETURNING SUB-STATE FUNCTIONS
+*/
+void handleHomeSeeking(RobotFSM* fsm)
+{
+    // homeSeekMotorFunction();
+    // error = desiredHeading - currentHeading;
 
-                        // if (error > 0) {
-                        //     // Drive forward and turn right
-                        // } else if (error < 0) {
-                        //     // Drive forward and turn left
-                        // }
+    // if (error > 180) {
+    //     error = error - 360;
+    // } else if (error < -180) {
+    //     error = error + 360;
+    // }
 
-                        // if (colorDetected()) {
-                        //     fsm->returnState = DEPOSIT;
-                        // }
-                    }
+    // if (error > 0) {
+    //     // Drive forward and turn right
+    // } else if (error < 0) {
+    //     // Drive forward and turn left
+    // }
 
-                    void handleDepositing(RobotFSM * fsm)
-                    {
-                        // depositMotorFunction();
-                        // TIMER DELAY
-                        bool weightsDeposited = false;
-                        // Set collection acutation to open
-                        if ( weightsDeposited ) {
-                            fsm->currentState = HUNTING;
-                            fsm->lastMainState = HUNTING;
-                            fsm->huntState = SEARCH;
-                            fsm->returnState = HOMESEEK;
-                            fsm->collectedWeights = 0;
-                        }
-                    }
+    // if (colorDetected()) {
+    //     fsm->returnState = DEPOSIT;
+    // }
+}
+
+void handleDepositing(RobotFSM* fsm)
+{
+    // depositMotorFunction();
+    // TIMER DELAY
+    bool weightsDeposited = false;
+    // Set collection acutation to open
+    if ( weightsDeposited ) {
+        fsm->currentState = HUNTING;
+        fsm->lastMainState = HUNTING;
+        fsm->huntState = SEARCH;
+        fsm->returnState = HOMESEEK;
+        fsm->collectedWeights = 0;
+    }
+}

@@ -6,11 +6,10 @@
 #include "searchAlgorithm.h"
 #include "sensor.h"
 
-#define COLLECTOR_OPEN_OFFSET    -400
-#define COLLECTOR_CLOSED_OFFSET  2000
+#define COLLECTOR_OPEN_OFFSET      -100
+#define COLLECTOR_CLOSED_OFFSET    100
+#define COLLECTOR_ACTUATING_OFFSET 100
 #define RAMP_LOWERED_OFFSET     0
-
-#define COLLECTOR_UPDATE_RATE_MS 10
 
 #define COLLECTOR_STOP_THRESHOLD 10
 
@@ -30,13 +29,5 @@ void LiftRamp();
 void UpdateCollector();
 
 void CalibrateCollectionSystem(RobotFSM* fsm);
-
-enum CalibrationState {
-    CALIBRATION_START,
-    CALIBRATION_RUNNING,
-    CALIBRATION_DONE
-};
-
-extern CalibrationState rampCalibration;
 
 #endif

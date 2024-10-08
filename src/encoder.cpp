@@ -13,7 +13,7 @@ volatile unsigned int rightMotorPos = 0;
 unsigned int prevRightMotorPos = 1;
 
 volatile int collectionMotorPos = 0;
-int prevCollectionMotorPos = 1;
+volatile int prevCollectionMotorPos = 1;
 
 // Set states for the drive encoders
 boolean leftASet = false;
@@ -54,6 +54,7 @@ void RightEncoderIntHandler()
 // Collection motor encoder interrupt handler
 void CollectionEncoderIntHandler()
 {
+    prevCollectionMotorPos = collectionMotorPos;
     // Test transition
     collectionASet = digitalRead(collectionEncoderPinA) == HIGH;
     // and adjust counter + if A leads B

@@ -1,6 +1,13 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
+#include <AccelStepper.h>
+#include <Arduino.h>
+#include <Servo.h>
+#include <elapsedMillis.h>
+#include <stdbool.h>
+#include <stdint.h>
+
 #define LEFT_MOTOR_ADDRESS  0
 #define RIGHT_MOTOR_ADDRESS 1
 #define COLLECTION_MOTOR_ADDRESS 7
@@ -14,12 +21,6 @@
 #define MAX_MOTOR_VAL       1990
 #define MOTOR_STOP_VAL      1500
 
-#include <AccelStepper.h>
-#include <Arduino.h>
-#include <Servo.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <elapsedMillis.h>
 
 #define LEFT_MOTOR_ADDRESS  0
 #define RIGHT_MOTOR_ADDRESS 1
