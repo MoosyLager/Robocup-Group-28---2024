@@ -11,6 +11,8 @@ Motor_t rightMotor;
 Motor_t collectionMotor;
 AccelStepper rampStepper;
 
+elapsedMillis currentTime;
+
 /**
  * Initialise the drive motors, collection motor and ramp stepper motor
  */
@@ -19,26 +21,32 @@ void InitMotors()
     // Initialize the left motor
     leftMotor.servoDriver.attach(LEFT_MOTOR_ADDRESS);
     leftMotor.motorType = LEFT_MOTOR;
-    leftMotor.Kp = 50;  // Example gains
-    leftMotor.Ki = 1;
+    leftMotor.Kp = 93;  // Example gains
+    leftMotor.Ki = 12;
     leftMotor.Kd = 0;
+    leftMotor.integral = -1500000;
     leftMotor.speedInverted = true;  // Normal direction control
     leftMotor.currentMotorSpeed = 0;
     leftMotor.prevSampledMotorPos = 0;
     leftMotor.currentMotorPos = 0;
     leftMotor.targetMotorPos = 0;  // Initialize target value
+    leftMotor.isPositionControl = false;  // Start in position control mode
+    leftMotor.prevTime = 0;
 
     // Initialize the right motor
     rightMotor.servoDriver.attach(RIGHT_MOTOR_ADDRESS);
     rightMotor.motorType = RIGHT_MOTOR;
-    rightMotor.Kp = 50;
-    rightMotor.Ki = 1;
+    rightMotor.Kp = 93;
+    rightMotor.Ki = 12;
     rightMotor.Kd = 0;
+    rightMotor.integral = 1500000;
     rightMotor.speedInverted = false;  // Inverted control for right motor
     rightMotor.currentMotorSpeed = 0;
     rightMotor.prevSampledMotorPos = 0;
     rightMotor.currentMotorPos = 0;
     rightMotor.targetMotorPos = 0;  // Initialize target value
+    rightMotor.isPositionControl = false;  // Start in position control mode
+    rightMotor.prevTime = 0;
 
     // Initialize the collection motor
     collectionMotor.servoDriver.attach(COLLECTION_MOTOR_ADDRESS);
@@ -52,9 +60,11 @@ void InitMotors()
     collectionMotor.currentMotorPos = 0;
     collectionMotor.targetMotorPos = 0;    // Initialize target value
     collectionMotor.targetMotorSpeed = 0;  // Initialize target value
+    collectionMotor.isPositionControl = true;  // Start in position control mode
+    collectionMotor.prevTime = 0;
 
     // Initialise the ramp stepper motor
-    rampStepper = AccelStepper(1, STEPPER_DIR_PIN, STEPPER_STEP_PIN);
+    rampStepper = AccelStepper(AccelStepper::DRIVER, STEPPER_STEP_PIN, STEPPER_DIR_PIN);
     rampStepper.setMaxSpeed(STEPPER_MAX_SPEED);
     rampStepper.setAcceleration(STEPPER_MAX_ACCELERATION);
     rampStepper.setCurrentPosition(0);
@@ -75,11 +85,9 @@ void SetMotorSpeed(Motor_t *motor, signed int speed)
 signed int CheckSpeedLimits(signed int speed)
 {
     if ( speed > MAX_MOTOR_VAL ) {
-        // Serial.printf("Speed was out of bounds. Clamped to %u", MAX_MOTOR_VAL);
         return MAX_MOTOR_VAL;
     }
     if ( speed < MIN_MOTOR_VAL ) {
-        // Serial.printf("Speed was out of bounds. Clamped to %u", MIN_MOTOR_VAL);
         return MIN_MOTOR_VAL;
     }
     return speed;
@@ -98,13 +106,7 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
     if (isPositionControl) {
         // Position control
         error = target - motor->currentMotorPos;
-        Serial.print("Error: ");
-        Serial.print(error);
-        Serial.print(' ');
         p = motor->Kp * error;
-        Serial.print("P: ");
-        Serial.print(p / 1000);
-        Serial.print(' ');
         d = motor->Kd * (motor->currentMotorPos - motor->prevSampledMotorPos) / deltaT;
         motor->prevSampledMotorPos = motor->currentMotorPos;
     } else {
@@ -116,16 +118,14 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
     }
 
     // Integral control (updated to use per-motor integral)
-    signed int integral = motor->integral +  motor->Ki * error;
+    signed int integral = motor->integral + motor->Ki * error;
+    
     if (integral > INTEGRAL_LIMIT) {
         integral = INTEGRAL_LIMIT;
     } else if (integral < -INTEGRAL_LIMIT) {
         integral = -INTEGRAL_LIMIT;
     }
     motor->integral = integral;
-    Serial.print("Integral: ");
-    Serial.print(motor->integral / 1000);
-    Serial.print(' ');
 
     // Compute the control signal
     signed long control = p + motor->integral - d;
@@ -135,43 +135,91 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
     if ((motor->speedInverted)) {
         control = -control;
     }
-    Serial.print("Control: ");
-    Serial.print(control);
+    if (motor->motorType == LEFT_MOTOR) {
+        // Serial.print("LEFT MOTOR: ");
+        // Serial.print("Error: ");
+        // Serial.print(error);
+        // Serial.print(" P: ");
+        // Serial.print(p / 1000); ;
+        // Serial.print(" D: ");
+        // Serial.print(d / 1000);
+        // Serial.print(" I: ");
+        // Serial.print(motor->integral / 1000);
+        // Serial.print(" Control: ");
+        // Serial.println(control);
+    } else if (motor->motorType == RIGHT_MOTOR) {
+        // Serial.print("RIGHT MOTOR: ");
+        // Serial.print("Error: ");
+        // Serial.print(error);
+        // Serial.print(" P: ");
+        // Serial.print(p / 1000);
+        // Serial.print(" D: ");
+        // Serial.print(d / 1000);
+        // Serial.print(" I: ");
+        // Serial.print(motor->integral / 1000);
+        // Serial.print(" Control: ");
+        // Serial.println(control);
+    }
     return control;
 }
 
+void PIDMotorControl(Motor_t *motor) {
+    signed int deltaT = currentTime - motor->prevTime;
+    motor->prevTime = currentTime;
 
-void PIDMotorControl(Motor_t *leftMotor, Motor_t *rightMotor, bool isPositionControl) {
-    static signed long prevTime = 0;
-    signed int deltaT = currentTime - prevTime;
-    prevTime = currentTime;
-
-    // Get the deltas (for speed calculations)
-    leftMotor->currentMotorPos = leftMotorPos;
-    rightMotor->currentMotorPos = rightMotorPos;
-    signed long leftDeltaPos = leftMotor->currentMotorPos - leftMotor->prevSampledMotorPos;
-    signed long rightDeltaPos = rightMotor->currentMotorPos - rightMotor->prevSampledMotorPos;
-
-    // Calculate motor speeds if in speed control mode
-    findMotorSpeed(leftMotor, leftDeltaPos, deltaT);
-    findMotorSpeed(rightMotor, rightDeltaPos, deltaT);
+    // Get the delta (for speed calculations)
+    if (motor->motorType == LEFT_MOTOR) {
+        motor->currentMotorPos = leftMotorPos;
+    } else if (motor->motorType == RIGHT_MOTOR) {
+        motor->currentMotorPos = rightMotorPos;
+    } else if (motor->motorType == COLLECTION_MOTOR) {
+        motor->currentMotorPos = collectionMotorPos;
+    } 
+    signed long deltaPos = motor->currentMotorPos - motor->prevSampledMotorPos;
+    // Calculate motor speed if in speed control mode
+    findMotorSpeed(motor, deltaPos, deltaT);
 
     // For position control, target is position, for speed control, target is speed
-    signed int leftTarget = isPositionControl ? leftMotor->targetMotorPos : leftMotor->targetMotorSpeed;
-    signed int rightTarget = isPositionControl ? rightMotor->targetMotorPos : rightMotor->targetMotorSpeed;
+    signed int target = motor->isPositionControl ? motor->targetMotorPos : motor->targetMotorSpeed;
 
-    // Calculate PID control output for both motors
-    signed int leftMotorControl = pidMotorControl(leftMotor, isPositionControl, leftTarget, deltaT);
-    signed int rightMotorControl = pidMotorControl(rightMotor, isPositionControl, rightTarget, deltaT);
+    // Calculate PID control output
+    signed int motorControl = pidMotorControl(motor, motor->isPositionControl, target, deltaT);
 
-    leftMotor->prevSampledMotorPos = leftMotor->currentMotorPos;
-    rightMotor->prevSampledMotorPos = rightMotor->currentMotorPos;
-    
-    // Set motor speeds
-    SetMotorSpeed(leftMotor, leftMotorControl);
-    SetMotorSpeed(rightMotor, rightMotorControl);
-    Serial.println(' ');
+    motor->prevSampledMotorPos = motor->currentMotorPos;
+
+    // Set motor speed
+    SetMotorSpeed(motor, motorControl);
 }
+
+
+void moveForward(int speed) {
+    leftMotor.targetMotorSpeed = speed;
+    rightMotor.targetMotorSpeed = speed;
+    leftMotor.isPositionControl = false;
+    rightMotor.isPositionControl = false;
+}
+
+void rotateCW(int speed) {
+    leftMotor.targetMotorSpeed = speed / 3;
+    rightMotor.targetMotorSpeed = -speed;
+    leftMotor.isPositionControl = false;
+    rightMotor.isPositionControl = false;
+}
+
+void rotateCCW(int speed) {
+    leftMotor.targetMotorSpeed = -speed;
+    rightMotor.targetMotorSpeed = speed / 2;
+    leftMotor.isPositionControl = false;
+    rightMotor.isPositionControl = false;
+}
+void move(int speedL, int speedR) {
+    leftMotor.targetMotorSpeed = speedL;
+    rightMotor.targetMotorSpeed = speedR;
+    leftMotor.isPositionControl = false;
+    rightMotor.isPositionControl = false;
+}
+
+
 
 
 

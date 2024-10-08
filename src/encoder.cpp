@@ -13,7 +13,7 @@ volatile unsigned int rightMotorPos = 0;
 unsigned int prevRightMotorPos = 1;
 
 volatile int collectionMotorPos = 0;
-int prevCollectionMotorPos = 1;
+volatile int prevCollectionMotorPos = 1;
 
 // Set states for the drive encoders
 boolean leftASet = false;
@@ -54,6 +54,7 @@ void RightEncoderIntHandler()
 // Collection motor encoder interrupt handler
 void CollectionEncoderIntHandler()
 {
+    prevCollectionMotorPos = collectionMotorPos;
     // Test transition
     collectionASet = digitalRead(collectionEncoderPinA) == HIGH;
     // and adjust counter + if A leads B
@@ -64,6 +65,9 @@ void CollectionEncoderIntHandler()
     collectionMotorPos += (collectionASet == collectionBSet) ? +1 : -1;
 }
 
+/**
+ * Initialise the drive motor encoders
+ */
 void InitDriveEncoders()
 {
     pinMode(leftEncoderPinA, INPUT);  // Set encoder pins as inputs
@@ -75,6 +79,9 @@ void InitDriveEncoders()
     attachInterrupt(digitalPinToInterrupt(rightEncoderPinA), RightEncoderIntHandler, CHANGE);
 }
 
+/**
+ * Initialise the collection motor encoder
+ */
 void InitCollectionEncoder()
 {
     pinMode(collectionEncoderPinA, INPUT);
@@ -83,18 +90,11 @@ void InitCollectionEncoder()
     attachInterrupt(digitalPinToInterrupt(collectionEncoderPinA), CollectionEncoderIntHandler, CHANGE);
 }
 
-uint16_t PID_Controller(uint16_t desiredSpeed, uint16_t currentPos, uint16_t prevPos)
+/**
+ * Initialise all encoders
+ */
+void InitEncoders()
 {
-    /*uint16_t currentSpeed = (currentPos - prevPos) /  deltaTime;
-    uint16_t error = desiredSpeed - currentSpeed;
-
-    how to do the correct integral controller and derivative controller?
-
-    uint16_t integral = 0;
-    uint16_t derivative = 0;
-
-    integral += error;
-    derivative = currentPos - prevPos;
-
-    return (Kp * error) + (Ki * integral) + (Kd * derivative);*/
+    InitDriveEncoders();
+    InitCollectionEncoder();
 }

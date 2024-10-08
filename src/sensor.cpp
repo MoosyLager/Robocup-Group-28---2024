@@ -1,7 +1,23 @@
 #include "sensor.h"
+#include <elapsedMillis.h>
+#include "circularBuf.h"
+
+#define IMU_BUF_SIZE 10  // Adjust the size as needed for smoothing
+
+CircBuffFloat_t imuBufferForward;
+CircBuffFloat_t imuBufferSideways;
+CircBuffFloat_t imuBufferVertical;
+
+CircBuffFloat_t imuBufferYaw;
+CircBuffFloat_t imuBufferPitch;
+CircBuffFloat_t imuBufferRoll;
+
+
+SX1509 ioTOF;  // TOF Control - Port Expander
+SX1509 ioAIO;  // AIO control - Port Expander
 
 SX1509 io;  // Port Expander
-
+elapsedMicros updateSensorsTimer1 = 0;
 /**
  * IMU Data
  */
@@ -12,12 +28,15 @@ sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerD
 /**
  * Colour Sensor Data
  */
-Adafruit_TCS34725 colourSensor = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+Adafruit_TCS34725 colourSensor = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_300MS, TCS34725_GAIN_4X);
+elapsedMillis colourTimer;
+Colour_t homeColour;
+Colour_t arenaColour;
+Colour_t enemyColour;
 
 /**
  * TOF Data
  */
-// The Arduino pin connected to the XSHUT pin of each sensor
 const uint8_t xShutPinsL0[8] = {TOF_XSHUT_L0_1, TOF_XSHUT_L0_2, TOF_XSHUT_L0_3, TOF_XSHUT_L0_4};
 const uint8_t xShutPinsL1[8] = {TOF_XSHUT_L1_1, TOF_XSHUT_L1_2, TOF_XSHUT_L1_3, TOF_XSHUT_L1_4};
 VL53L0X sensorsL0[NUM_TOF_L0];
@@ -45,7 +64,7 @@ void UpdateTOFL0()
 {
     for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
         // Read sensor data
-        uint16_t sensorValue = sensorsL0[i].readRangeContinuousMillimeters();
+        uint16_t sensorValue = sensorsL0[i].readRangeContinuousMillimeters() * SHORT_RANGE_MULTIPLIER;
 
         // Write sensor data to circular buffer
         CircBuffWrite(&sensorL0Data[i], sensorValue);
@@ -53,7 +72,6 @@ void UpdateTOFL0()
         if ( sensorsL0[i].timeoutOccurred() ) {
             Serial.print(" TIMEOUT");
         }
-        Serial.print('\t');
     }
 }
 
@@ -64,15 +82,14 @@ void UpdateTOFL1()
 {
     for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
         // Read sensor data
-        uint16_t sensorValue = sensorsL1[i].readRangeContinuousMillimeters();
-
-        // Write sensor data to circular buffer
-        CircBuffWrite(&sensorL1Data[i], sensorValue);
-
-        if ( sensorsL0[i].timeoutOccurred() ) {
+        if ( sensorsL1[i].dataReady() ) {
+            uint16_t sensorValue = sensorsL1[i].read(false);
+            // Write sensor data to circular buffer
+            CircBuffWrite(&sensorL1Data[i], sensorValue);
+        }
+        if ( sensorsL1[i].timeoutOccurred() ) {
             Serial.print(" TIMEOUT");
         }
-        Serial.print('\t');
     }
 }
 
@@ -81,16 +98,12 @@ void UpdateTOFL1()
  */
 uint16_t GetL0TL()
 {
-    return CalculateBufferMean(&sensorL0Data[0]);
-    // return sensorsL0[0].readRangeContinuousMillimeters();
-}
+    uint16_t mean = CalculateBufferMean(&sensorL0Data[2]);
+    if (mean > SHORT_RANGE_THRESHOLD) {
+        mean =  SHORT_RANGE_THRESHOLD;
+    }
+    return mean;
 
-/**
- * Get the average TOF value from L0 Bottom Left
- */
-uint16_t GetL0BL()
-{
-    return CalculateBufferMean(&sensorL0Data[1]);
 }
 
 /**
@@ -98,7 +111,23 @@ uint16_t GetL0BL()
  */
 uint16_t GetL0TR()
 {
-    return CalculateBufferMean(&sensorL0Data[2]);
+    uint16_t mean = CalculateBufferMean(&sensorL0Data[0]);
+    if (mean > SHORT_RANGE_THRESHOLD) {
+        mean =  SHORT_RANGE_THRESHOLD;
+    }
+    return mean;
+}
+
+/**
+ * Get the average TOF value from L0 Bottom Left
+ */
+uint16_t GetL0BL()
+{
+    uint16_t mean = CalculateBufferMean(&sensorL0Data[3]);
+    if (mean > SHORT_RANGE_THRESHOLD) {
+        mean =  SHORT_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -106,7 +135,11 @@ uint16_t GetL0TR()
  */
 uint16_t GetL0BR()
 {
-    return CalculateBufferMean(&sensorL0Data[3]);
+    uint16_t mean = CalculateBufferMean(&sensorL0Data[1]);
+    if (mean > SHORT_RANGE_THRESHOLD) {
+        mean =  SHORT_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -114,15 +147,11 @@ uint16_t GetL0BR()
  */
 uint16_t GetL1TL()
 {
-    return CalculateBufferMean(&sensorL1Data[0]);
-}
-
-/**
- * Get the average TOF value from L0 Bottom Left
- */
-uint16_t GetL1BL()
-{
-    return CalculateBufferMean(&sensorL1Data[1]);
+    uint16_t mean = CalculateBufferMean(&sensorL1Data[2]);
+    if (mean > LONG_RANGE_THRESHOLD) {
+        mean =  LONG_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -130,7 +159,23 @@ uint16_t GetL1BL()
  */
 uint16_t GetL1TR()
 {
-    return CalculateBufferMean(&sensorL1Data[2]);
+    uint16_t mean = CalculateBufferMean(&sensorL1Data[0]);
+    if (mean > LONG_RANGE_THRESHOLD) {
+        mean =  LONG_RANGE_THRESHOLD;
+    }
+    return mean;
+}
+
+/**
+ * Get the average TOF value from L1 Bottom Left
+ */
+uint16_t GetL1BL()
+{
+    uint16_t mean = CalculateBufferMean(&sensorL1Data[3]);
+    if (mean > LONG_RANGE_THRESHOLD) {
+        mean =  LONG_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -138,7 +183,11 @@ uint16_t GetL1TR()
  */
 uint16_t GetL1BR()
 {
-    return CalculateBufferMean(&sensorL1Data[3]);
+    uint16_t mean =  CalculateBufferMean(&sensorL1Data[1]);
+    if (mean > LONG_RANGE_THRESHOLD) {
+        mean =  LONG_RANGE_THRESHOLD;
+    }
+    return mean;
 }
 
 /**
@@ -146,7 +195,7 @@ uint16_t GetL1BR()
  */
 int CollectorPosition()
 {
-    return io.digitalRead(AIO_0);
+    return ioAIO.digitalRead(AIO_0);
 }
 
 /**
@@ -154,7 +203,7 @@ int CollectorPosition()
  */
 int RampPosition()
 {
-    return io.digitalRead(AIO_1);
+    return ioAIO.digitalRead(AIO_1);
 }
 
 /**
@@ -172,28 +221,165 @@ void UpdateIMU()
 }
 
 /**
- * Reads the colours of the suface under the colour sensor
+ * Returns the current X-rotation from the IMU
  */
-Colour_t GetColour()
+float GetOrientationPitch()
 {
-    uint16_t red, green, blue, clear;
-    Colour_t colour;
-
-    colourSensor.setInterrupt(false);
-    delay(60);
-    colourSensor.getRawData(&red, &green, &blue, &clear);
-    colourSensor.setInterrupt(true);
-
-    colour.R = red;
-    colour.G = blue;
-    colour.B = green;
-    colour.C = clear;
-
-    return colour;
+    return orientationData.orientation.z;
 }
 
 /**
- * Initialise the circular buffers for the TOF sensor data
+ * Returns the current Y-rotation from the IMU
+ */
+float GetOrientationRoll()
+{
+    return orientationData.orientation.y;
+}
+
+/**
+ * Returns the current Z-rotation from the IMU
+ */
+float GetOrientationYaw()
+{
+    return orientationData.orientation.x;
+}
+
+/**
+ * Returns the current linear acceleration in the longitudinal direction
+ */
+float GetAccelerationForward()
+{
+    return linearAccelData.acceleration.y;
+}
+
+/**
+ * Returns the current linear acceleration in the tranverse direction
+ */
+float GetAccelerationSideways()
+{
+    return linearAccelData.acceleration.x;
+}
+
+/**
+ * Returns the current linear acceleration in the z-direction
+ */
+float GetAccelerationUpwards()
+{
+    return linearAccelData.acceleration.z;
+}
+
+/**
+ * Reads the raw colour value of the sensor with no delay
+ */
+void GetRawColourData(uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c)
+{
+    *c = colourSensor.read16(TCS34725_CDATAL);
+    *r = colourSensor.read16(TCS34725_RDATAL);
+    *g = colourSensor.read16(TCS34725_GDATAL);
+    *b = colourSensor.read16(TCS34725_BDATAL);
+}
+
+/**
+ * updates the colour sensor values
+ */
+ColourType_t ReadColour()
+{
+    static bool firstRead = true;
+    static bool secondRead = false;
+
+    static Colour_t firstColour(-1, -1, -1, -1);
+    static Colour_t secondColour(-1, -1, -1, -1);
+
+    static ColourType_t colourType = ColourType_t::HOME;
+
+    float red, green, blue;
+    uint16_t rawRed, rawGreen, rawBlue, clear;
+    const int integrationTime = COLOUR_SENSOR_INTEGRATION_TIME_MS / COLOUR_SENSOR_UPDATE_PERIOD;
+
+    if ( colourTimer < integrationTime ) {
+        return colourType;
+    } else {
+        colourTimer = 0;
+    }
+
+    GetRawColourData(&rawRed, &rawGreen, &rawBlue, &clear);
+    uint32_t sum = clear;
+    red = rawRed;
+    green = rawGreen;
+    blue = rawBlue;
+    red /= sum;
+    green /= sum;
+    blue /= sum;
+    red *= 256;
+    green *= 256;
+    blue *= 256;
+
+    if ( firstRead ) {
+        if ( firstColour.R == -1 && firstColour.R == -1 && firstColour.R == -1 ) {
+            firstColour.R = red;
+            firstColour.G = green;
+            firstColour.B = blue;
+        }
+        if ( (red < firstColour.R + COLOUR_THRESHOLD) && (green < firstColour.G + COLOUR_THRESHOLD) && (blue < firstColour.B + COLOUR_THRESHOLD) ) {
+            colourType = ColourType_t::HOME;
+            return ColourType_t::HOME;
+        } else {
+            firstRead = false;
+            secondRead = true;
+        }
+    }
+    if ( secondRead ) {
+        if ( secondColour.R == -1 && secondColour.R == -1 && secondColour.R == -1 ) {
+            secondColour.R = red;
+            secondColour.G = green;
+            secondColour.B = blue;
+        }
+        if ( (red < secondColour.R + COLOUR_THRESHOLD) && (green < secondColour.G + COLOUR_THRESHOLD) && (blue < secondColour.B + COLOUR_THRESHOLD) ) {
+            colourType = ColourType_t::ARENA;
+            return ColourType_t::ARENA;
+        } else {
+            secondRead = false;
+        }
+    }
+
+    if ( !firstRead && !secondRead ) {
+        if ( (red < firstColour.R + COLOUR_THRESHOLD) && (green < firstColour.G + COLOUR_THRESHOLD) && (blue < firstColour.B + COLOUR_THRESHOLD) ) {
+            colourType = ColourType_t::HOME;
+            return HOME;
+        } else if ( (red < secondColour.R + COLOUR_THRESHOLD) && (green < secondColour.G + COLOUR_THRESHOLD) && (blue < secondColour.B + COLOUR_THRESHOLD) ) {
+            colourType = ColourType_t::ARENA;
+            return ColourType_t::ARENA;
+        } else {
+            colourType = ColourType_t::ENEMY;
+            return ColourType_t::ENEMY;
+        }
+    }
+    return colourType;
+}
+
+// /**
+//  * Reads the colours of the suface under the colour sensor
+//  */
+// Colour_t GetColour()
+// {
+//     uint16_t red, green, blue, clear;
+//     Colour_t colour;
+
+//     colourSensor.setInterrupt(false);
+//     delay(60);
+//     colourSensor.getRawData(&red, &green, &blue, &clear);
+//     colourSensor.setInterrupt(true);
+
+//     colour.R = red;
+//     colour.G = blue;
+//     colour.B = green;
+//     colour.C = clear;
+
+//     return colour;
+// }
+
+/**
+ * Initialise the circular buffers for the TOF sensor data and the IMU data
  */
 void InitCircularBuffers()
 {
@@ -203,6 +389,7 @@ void InitCircularBuffers()
     for ( int i = 0; i < NUM_TOF_L1; i++ ) {
         CircBuffInit(&sensorL1Data[i], CIRCULAR_BUF_SIZE);
     }
+    Serial.println("TOF Circular Buffers Initialised");
 }
 
 
@@ -211,10 +398,10 @@ void InitCircularBuffers()
  */
 void InitIOExpander()
 {
-    io.begin(TOF_CONTROL_ADDRESS);
     Wire.begin();
     Wire.setClock(400000);
-    // io.begin(AIO_ADDRESS);
+    ioTOF.begin(TOF_CONTROL_ADDRESS);
+    ioAIO.begin(AIO_ADDRESS);
 }
 
 /**
@@ -222,8 +409,8 @@ void InitIOExpander()
  */
 void InitLimitSwitch()
 {
-    io.pinMode(AIO_0, INPUT);
-    io.pinMode(AIO_1, INPUT);
+    ioAIO.pinMode(AIO_0, INPUT);
+    ioAIO.pinMode(AIO_1, INPUT);
 }
 
 /**
@@ -234,14 +421,14 @@ void InitTOF()
 {
     // Disable/reset all sensors by driving their XSHUT pins low.
     for ( uint8_t i = 0; i < NUM_TOF_L0; i++ ) {
-        io.pinMode(xShutPinsL0[i], OUTPUT);
-        io.digitalWrite(xShutPinsL0[i], LOW);
+        ioTOF.pinMode(xShutPinsL0[i], OUTPUT);
+        ioTOF.digitalWrite(xShutPinsL0[i], LOW);
     }
 
     // Disable/reset all sensors by driving their XSHUT pins low.
     for ( uint8_t i = 0; i < NUM_TOF_L1; i++ ) {
-        io.pinMode(xShutPinsL1[i], OUTPUT);
-        io.digitalWrite(xShutPinsL1[i], LOW);
+        ioTOF.pinMode(xShutPinsL1[i], OUTPUT);
+        ioTOF.digitalWrite(xShutPinsL1[i], LOW);
     }
 
     // Enable, initialise, and start each sensor
@@ -250,12 +437,12 @@ void InitTOF()
         // board to pull it high. (We do NOT want to drive XSHUT high since it is
         // not level shifted.) Then wait a bit for the sensor to start up.
         // pinMode(xshutPins[i], INPUT);
-        io.digitalWrite(xShutPinsL0[i], HIGH);
+        ioTOF.digitalWrite(xShutPinsL0[i], HIGH);
         delay(10);
 
         sensorsL0[i].setTimeout(500);
         if ( !sensorsL0[i].init() ) {
-            Serial.print("Failed to detect and initialise sensor L0 ");
+            Serial.print("FAILED TO DETECT AND INITIALISE L0 ");
             Serial.print(i);
             while ( 1 )
                 ;
@@ -275,12 +462,12 @@ void InitTOF()
         // board to pull it high. (We do NOT want to drive XSHUT high since it is
         // not level shifted.) Then wait a bit for the sensor to start up.
         // pinMode(xshutPins[i], INPUT);
-        io.digitalWrite(xShutPinsL1[i], HIGH);
+        ioTOF.digitalWrite(xShutPinsL1[i], HIGH);
         delay(10);
 
         sensorsL1[i].setTimeout(500);
         if ( !sensorsL1[i].init() ) {
-            Serial.print("Failed to detect and initialise sensor L1 ");
+            Serial.print("FAILED TO DETECT AND INITIALISE L1 ");
             Serial.print(i);
             while ( 1 )
                 ;
@@ -290,6 +477,10 @@ void InitTOF()
         // the default of 0x29 (except for the last one, which could be left at
         // the default). To make it simple, we'll just count up from 0x2A.
         sensorsL1[i].setAddress(VL53L1X_ADDRESS_START + i);
+
+        // Set ROI size and centre on each sensor
+        sensorsL1[i].setROISize(TOF_L1_ROI_X, TOF_L1_ROI_Y);
+        sensorsL1[i].setROICenter(TOF_L1_ROI_CENTRE);
 
         sensorsL1[i].startContinuous(50);
     }
@@ -301,7 +492,7 @@ void InitTOF()
 void InitIMU()
 {
     if ( !bno.begin() ) {
-        Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+        Serial.println("IMU NOT DETECTED");
     }
 }
 
@@ -316,6 +507,14 @@ void InitColourSensor()
 }
 
 /**
+ * Returns 1 if the blue button is pressed and 0 otherwise
+ */
+uint8_t BlueButtonState()
+{
+    return ioAIO.digitalRead(AIO_8);
+}
+
+/**
  * Initialise the IO board, I2C bus, circular buffers, and all sensors
  */
 void InitSensors()
@@ -325,7 +524,136 @@ void InitSensors()
     InitCircularBuffers();
 
     InitTOF();
+    InitColourSensor();
     InitLimitSwitch();
-    // InitIMU();
-    // InitColourSensor();
+    InitIMU();
+
+    ioAIO.pinMode(AIO_8, INPUT);  // Blue Button
+}
+
+/**
+ * Check minimum distance for the avoidance state
+ */
+DistanceFunction distanceFunctions[] = {
+    GetL0TL,
+    GetL0TR,
+    GetL0BL,
+    GetL0BR,
+    GetL1TL,
+    GetL1TR,
+    GetL1BL,
+    GetL1BR
+};
+
+DistanceFunction distanceFunctionsTop[] = {
+    GetL0TL,
+    GetL0TR,
+    GetL1TL,
+    GetL1TR
+};
+
+/**
+ * Check the detection ranges for each double-sensor array
+ */
+bool detectedByPercentageDifference(uint16_t top, uint16_t bottom)
+{
+    int16_t diff = top - bottom;
+    return (diff * 100) > (top * DIFFERENCE_PERCENTAGE);
+}
+
+bool detectedByAbsoluteDifference(uint16_t top, uint16_t bottom)
+{
+    int16_t diff = top - bottom;
+    return ((diff) > DIFFERENCE_ABSOLUTE);
+}
+
+/**
+ * Array checking functions
+ */
+bool detectedFarLeft(void)
+{
+    uint16_t top = GetL0TL();
+    uint16_t bottom = GetL0BL();
+    bool detected = detectedByPercentageDifference(top, bottom);
+    // Serial.print(" Far Left Detected: ");
+    // Serial.println(detected);
+    return detectedByPercentageDifference(top, bottom);
+}
+
+bool detectedFarRight(void)
+{
+    uint16_t top = GetL0TR();
+    uint16_t bottom = GetL0BR();
+    bool detected = detectedByPercentageDifference(top, bottom);
+    // Serial.print(" Far Right Detected: ");
+    // Serial.println(detected);
+    return detectedByPercentageDifference(top, bottom);
+}
+
+bool detectedCentreRight(void)
+{
+    uint16_t top = GetL1TR();
+    uint16_t bottom = GetL1BR();
+    // Serial.print("Right Top 1: ");
+    // Serial.print(top);
+    // Serial.print(" Bottom: ");
+    // Serial.print(bottom);
+    bool detected = detectedByAbsoluteDifference(top, bottom);
+    // Serial.print(" Centre Right Detected: ");
+    // Serial.println(detected);
+    return detectedByAbsoluteDifference(top, bottom);
+}
+
+bool detectedCentreLeft(void)
+{
+    uint16_t top = GetL1TL();
+    uint16_t bottom = GetL1BL();
+    // Serial.print("Left Top 1: ");
+    // Serial.print(top);
+    // Serial.print(" Bottom: ");
+    // Serial.print(bottom);
+    bool detected = detectedByAbsoluteDifference(top, bottom);
+    // Serial.print(" Centre Left Detected: ");
+    // Serial.println(detected);
+    return detectedByAbsoluteDifference(top, bottom);
+}
+
+bool weightDetected(void)
+{
+    return (detectedFarLeft() || detectedFarRight() || detectedCentreLeft() || detectedCentreRight());
+}
+
+/**
+ * Check if the robot is lined up with the weight
+ * Works as expected
+ */
+bool checkTargetHeading(int targetHeading)
+{
+    int currentHeading = GetOrientationYaw();
+    int error = targetHeading - currentHeading;
+    if (error > 180) {
+        error = error - 360;
+    } else if (error < -180) {
+        error = error + 360;
+    }
+    if (error < 5 && error > -5) {
+        Serial.println("At target heading");
+    }
+    return (error < 5 && error > -5);
+}
+
+bool isLinedUp(int rangeLeft, int rangeRight) {
+    int diff = abs(rangeLeft - rangeRight);
+    Serial.print("Diff: ");
+    Serial.println(diff);
+    return (abs(rangeLeft - rangeRight) < CENTRAL_THRESHOLD);
+}
+
+int truncateHeading(int heading) {
+    if (heading > 360) {
+        heading = heading - 360;
+    } else if (heading < 0) {
+        heading = heading + 360;
+    }
+    return heading;
 }

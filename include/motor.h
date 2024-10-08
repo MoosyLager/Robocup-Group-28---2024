@@ -1,6 +1,13 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
+#include <AccelStepper.h>
+#include <Arduino.h>
+#include <Servo.h>
+#include <elapsedMillis.h>
+#include <stdbool.h>
+#include <stdint.h>
+
 #define LEFT_MOTOR_ADDRESS  0
 #define RIGHT_MOTOR_ADDRESS 1
 #define COLLECTION_MOTOR_ADDRESS 7
@@ -14,12 +21,6 @@
 #define MAX_MOTOR_VAL       1990
 #define MOTOR_STOP_VAL      1500
 
-#include <AccelStepper.h>
-#include <Arduino.h>
-#include <Servo.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <elapsedMillis.h>
 
 #define LEFT_MOTOR_ADDRESS  0
 #define RIGHT_MOTOR_ADDRESS 1
@@ -30,6 +31,8 @@
 #define MAX_MOTOR_VAL       1990
 #define MOTOR_STOP_VAL      1500
 #define INTEGRAL_LIMIT      50000000
+#define POSITIONAL_CONVERSION 1273/10 //Careful about using this
+#define POSITIONAL_OFFSET 0
 
 extern elapsedMillis currentTime;
 
@@ -53,6 +56,8 @@ typedef struct {
     uint16_t Kd;                 // Derivative gain
     signed long targetMotorPos;   // Target position for position control
     signed int targetMotorSpeed;  // Target speed for speed control
+    bool isPositionControl;       // To switch between position and speed control
+    signed long prevTime;
 } Motor_t;
 
 extern Motor_t leftMotor;
@@ -67,5 +72,12 @@ signed int CheckSpeedLimits(signed int speed);
 void findTargetMotorSpeed(uint16_t* leftMotorTarget, uint16_t* rightMotorTarget );
 void findMotorSpeed(signed long deltaPos, signed int deltaT);
 signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long target, unsigned long deltaT);
-void PIDMotorControl(Motor_t *leftMotor, Motor_t *rightMotor, bool isPositionControl);
+void PIDMotorControl(Motor_t *motor);
+void moveForward(int speed);
+void moveBackward(int speed);
+void rotateCW(int speed);
+void rotateCCW(int speed);
+void moveDistance(int distance, Motor_t *motor);
+void move(int speedL, int speedR);
+
 #endif

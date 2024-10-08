@@ -19,16 +19,41 @@
  */
 #define COLOUR_SENSOR_ADDRESS 0x29
 #define COLOUR_SENSOR_WIRE    Wire1
+#define COLOUR_SENSOR_INTEGRATION_TIME_MS 300
+#define COLOUR_SENSOR_UPDATE_PERIOD       20
+#define COLOUR_THRESHOLD                  2
 
 /**
  * Wrapper to hold RGBA colour information
  */
-typedef struct {
+struct Colour_t {
     uint16_t R;
     uint16_t G;
     uint16_t B;
     uint16_t C;
-} Colour_t;
+
+    Colour_t()
+    {
+        R = 0;
+        G = 0;
+        B = 0;
+        C = 0;
+    }
+
+    Colour_t(uint16_t r, uint16_t g, uint16_t b, uint16_t c)
+    {
+        R = r;
+        G = g;
+        B = b;
+        C = c;
+    }
+};
+
+typedef enum {
+    HOME,
+    ARENA,
+    ENEMY
+} ColourType_t;
 
 extern Adafruit_TCS34725 colourSensor;
 
@@ -50,7 +75,7 @@ extern Adafruit_TCS34725 colourSensor;
 #define AIO_4       4
 #define AIO_5       5
 #define AIO_6       6
-#define AIO_8       8
+#define AIO_8       8  // Blue button
 #define AIO_9       9
 #define AIO_10      10
 #define AIO_11      11
@@ -78,6 +103,10 @@ extern Adafruit_TCS34725 colourSensor;
 #define TOF_XSHUT_L1_3        6
 #define TOF_XSHUT_L1_4        7
 
+#define TOF_L1_ROI_X          16   // Width of the ROI (Max 16)
+#define TOF_L1_ROI_Y          4    // Height of the ROI (Max 16)
+#define TOF_L1_ROI_CENTRE     199  // SPAD number of the centre (refer to datasheet - default 199)
+
 /**
  * IMU
  */
@@ -86,16 +115,41 @@ extern Adafruit_TCS34725 colourSensor;
 #define IMU_ADDRESS        0x28
 #define IMU_WIRE           Wire1
 
+/**
+ * Sensor thresholds
+ */
+#define AVOIDANCE_THRESHOLD  65
+#define LONG_RANGE_THRESHOLD 1500
+#define SHORT_RANGE_THRESHOLD 600
+#define COLLECTION_THRESHOLD 450 // To be tested
+#define DIFFERENCE_PERCENTAGE 20//% difference between the two sensors
+#define DIFFERENCE_ABSOLUTE 100 //mm difference between the two sensors
+#define SHORT_RANGE_MULTIPLIER 1.5
+#define CENTRAL_THRESHOLD 3
+#define SIDE_BIAS_LEFT 40
+#define SIDE_BIAS_RIGHT 40
+
+typedef uint16_t (*DistanceFunction)();  // Function pointer type for distance functions
+extern DistanceFunction distanceFunctions[];
+extern DistanceFunction distanceFunctionsTop[];
+
 extern sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
 extern Adafruit_BNO055 bno;
-extern int8_t boardTempIMU;
+extern int8_t boardTemp;
 
+extern VL53L0X sensorsL0[NUM_TOF_L0];
+extern VL53L1X sensorsL1[NUM_TOF_L1];
+extern CircBuff_t sensorL0Data[NUM_TOF_L0];
+extern CircBuff_t sensorL1Data[NUM_TOF_L1];
+
+uint16_t CalculateBufferMean(CircBuff_t *buffer);
 void InitSensors();
 void InitTOF();
 void InitIOExpander();
 void InitLimitSwitch();
 void InitColourSensor();
 void InitIMU();
+void InitCircularBuffers();
 
 void UpdateIMU();
 void UpdateTOFL0();
@@ -110,8 +164,31 @@ uint16_t GetL1TR();
 uint16_t GetL1BL();
 uint16_t GetL1BR();
 
+ 
+float GetOrientationPitch();
+float GetOrientationRoll();
+float GetOrientationYaw();
+float GetAccelerationSideways();
+float GetAccelerationUpwards();
+float GetAccelerationForward();
+
+
 Colour_t GetColour();
 int CollectorPosition();
 int RampPosition();
 
-#endif
+uint8_t BlueButtonState();
+bool CheckAvoidance(void);
+bool detectedByPercentageDifference(uint16_t top, uint16_t bottom);
+bool detectedByAbsoluteDifference(uint16_t top, uint16_t bottom);
+bool detectedFarRight(void);
+bool detectedFarLeft(void);
+bool detectedCentreRight(void);
+bool detectedCentreLeft(void);
+bool weightDetected(void);
+bool checkTargetHeading(int targetHeading);
+bool isLinedUp(int rangeLeft, int rangeRight);
+int truncateHeading(int heading);
+
+
+#endif // SENSOR_H

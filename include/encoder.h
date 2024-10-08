@@ -8,9 +8,12 @@
 /**
  * Collector encoder data
  */
-#define COLLECTION_MOTOR_PULSE_PER_REV 11
-#define MOTOR_REV_PER_COLLECTION 2.75
-#define COLLECTOR_TICKS_PER_REV         6500
+#define COLLECTOR_TICKS_PER_REV 6600
+#define ENCODER_MAX_VAL         2147483647
+#define ENCODER_MIN_VAL         -2147483648
+#define ENCODER_PER_REV     3000
+#define DIST_PER_REV 232.5
+#define ENCODER_PER_DIST ENCODER_PER_REV / DIST_PER_REV
 
 /**
  * Pins connected to drive encoder phases
@@ -44,7 +47,7 @@ extern volatile unsigned int rightMotorPos;
 extern unsigned int prevRightMotorPos;
 
 extern volatile int collectionMotorPos;
-extern int prevCollectionMotorPos;
+extern volatile int prevCollectionMotorPos;
 
 extern boolean leftASet;
 extern boolean leftBSet;
@@ -59,5 +62,6 @@ void RightEncoderIntHandler();
 void CollectionEncoderIntHandler();
 void InitDriveEncoders();
 void InitCollectionEncoder();
+void InitEncoders();
 
 #endif
