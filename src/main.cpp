@@ -6,13 +6,14 @@
 #include <Arduino.h>
 #include <elapsedMillis.h>
 
-elapsedMillis updateFSM;
-elapsedMillis updatePWM;
+elapsedMillis updateFSMTimer;
+elapsedMillis updatePWMTimer;
 elapsedMillis updateSensorsTimer;
+elapsedMillis buttonTimer;
+
+bool pwmOn = false;
 
 RobotFSM fsm;
-
-// elapsedMillis timer;
 
 void setup()
 {
