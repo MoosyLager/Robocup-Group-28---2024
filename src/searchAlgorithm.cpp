@@ -13,7 +13,7 @@ elapsedMillis weightWatchDog;
 elapsedMillis rotationCounter;
 elapsedMillis moduleCounter;
 elapsedMillis avoidanceTimer;
-elapsedMillis collectionWatchDog;
+elapsedMillis collectionJawsWatchDog;
 bool onLeft = false;
 
 void initializeRobotFSM(RobotFSM* fsm)
@@ -21,7 +21,7 @@ void initializeRobotFSM(RobotFSM* fsm)
     fsm->currentState = HUNTING;            // Start in CALIBRATING state
     fsm->lastMainState = HUNTING;           // Set last state to the initial state
     fsm->previousState = HUNTING;           // Set previous state to the initial state
-    fsm->huntState = SEARCH;                // Start in SEARCH state
+    fsm->huntState = COLLECT;                // Start in SEARCH state
     fsm->returnState = HOMESEEK;            // Start in HOMESEEK state
     fsm->collectedWeights = 0;              // No weights collected at the start
     fsm->calibrated = false;                // Robot is not calibrated at the start
@@ -163,36 +163,6 @@ void checkWallDistancesTop(RobotFSM* fsm)
 
     // If no obstacle is found
     // Need to be careful that the robot doesn't get stuck in this state
-}
-
-void checkWallDistancesTop(RobotFSM* fsm)
-{
-    const int numFunctionsTop = 4;
-
-    // Iterate through each distance function and check for obstacles
-    for ( int i = 0; i < numFunctionsTop; i++ ) {
-        uint16_t distance = distanceFunctions[i]();  // Call the function
-        // Could change this to test both sensors top and bottom
-        if ( distance < AVOIDANCE_THRESHOLD ) {
-            fsm->weightPos = NONE;         // Reset the weight position if an obstacle is found
-            fsm->evasiveManeuverCompleted = false;
-            fsm->currentState = AVOIDING;  // Change the state if below threshold
-            avoidanceTimer = 0;
-            // Determine side of detection based on the function index
-            if ( i % 2 == 0 ) {
-                fsm->avoidanceSide = LEFT;  // L0 corresponds to the left side
-                fsm->targetHeading = GetOrientationYaw() + 25;
-                onLeft = true;
-            } else {
-                fsm->avoidanceSide = RIGHT;  // L1 corresponds to the right side
-                fsm->targetHeading = GetOrientationYaw() - 25;
-                onLeft = false;
-            }
-            return;                        // Exit early since an obstacle was found
-        } else {
-            fsm->avoidanceSide = NO_WALL;  // Reset the avoidance side if no obstacle is found
-        }
-    }
 }
 
 void handleAvoiding(RobotFSM* fsm)
@@ -389,6 +359,7 @@ void handleChasing(RobotFSM* fsm)
         moveForward(3000);
         if ( leftMotor.currentMotorPos >= leftMotor.targetMotorPos || rightMotor.currentMotorPos >= rightMotor.targetMotorPos ) {  // Might have to change to current
             fsm->huntState = COLLECT;
+            collectionJawsWatchDog = 0;
             moveForward(0);
         }
         Serial.print("Left Motor Error: ");
@@ -412,31 +383,31 @@ void handleChasing(RobotFSM* fsm)
 
 void handleCollecting(RobotFSM * fsm)
 {
-    // Need to change the actuator to move
+    Serial.println("Collecting");
     moveForward(0);
-    static bool collectorActuating = true;
     static bool atLimit = false;
+    static bool timeOut = false;
+    bool atLimitSwtichDatum = !CollectorPosition();
 
-    if (!atLimit) {
-        SetMotorSpeed(&collectionMotor, MIN_MOTOR_VAL);
-        if (!CollectorPosition()) {
-            collectionMotor.currentMotorPos = 0;
-            atLimit = true;
-            collectionMotor.targetMotorPos = collectionMotor.currentMotorPos + COLLECTOR_STOP_POS;
-        }
-    else {
-        if (abs(collectionMotor.targetMotorPos - collectionMotor.currentMotorPos) > COLLECTOR_STOP_THRESHOLD) {
-            SetMotorSpeed(&collectionMotor, MIN_MOTOR_VAL);
-        } else {
-            SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
-            atLimit = false;
-            collectorActuating = false;
-            fsm->weightNum++;
-            if (fsm->weightNum >= 3) {
-                fsm->currentState = RETURNING;
-                fsm->lastMainState = RETURNING;
-                fsm->returnState = HOMESEEK;
+    if (!timeOut) {
+        if (!atLimit) {
+            if(atLimitSwtichDatum) {
+                Serial.println("At limit");
+                atLimit = true;
+                collectionMotor.currentMotorPos = 0;
+                collectionMotor.targetMotorPos = collectionMotorPos + COLLECTOR_STOP_POS;
             } else {
+                SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
+            }
+        } else {
+            Serial.print("targetMotorPos: ");
+            Serial.print(collectionMotor.targetMotorPos);
+            Serial.print(" currentMotorPos: ");
+            Serial.println(collectionMotor.currentMotorPos);
+            if (collectionMotor.targetMotorPos >= collectionMotorPos) {
+                SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
+                atLimit = false;
+                collectorActuating = false;
                 fsm->huntState = SEARCH;
                 fsm->currentState = HUNTING;
                 fsm->lastMainState = HUNTING;
@@ -444,20 +415,23 @@ void handleCollecting(RobotFSM * fsm)
         }
     }
 
-    if (collectionWatchDog > COLLECTION_TIMEOUT) {
-        // Needs a way to get out of the stuck weight
-        if ((abs(collectionMotor.targetMotorPos - collectionMotor.currentMotorPos - COLLECTOR_TICKS_PER_REV)) > COLLECTOR_STOP_THRESHOLD) {
-            SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
-        } else {
-            SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
-            atLimit = false;
-            collectorActuating = false;
-            fsm->huntState = SEARCH;
-            fsm->currentState = HUNTING;
-            fsm->lastMainState = HUNTING;
-            }
-        }
-    }
+    
+//     if (collectionJawsWatchDog > COLLECTION_TIMEOUT) {
+//         timeOut = true;
+//         // Needs a way to get out of the stuck weight
+//         Serial.println("Stuck weight");
+//         if ((abs(collectionMotor.targetMotorPos - collectionMotor.currentMotorPos - COLLECTOR_TICKS_PER_REV)) > COLLECTOR_STOP_THRESHOLD) {
+//             SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
+//         } else {
+//             SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
+//             atLimit = false;
+//             collectorActuating = false;
+//             fsm->huntState = SEARCH;
+//             fsm->currentState = HUNTING;
+//             fsm->lastMainState = HUNTING;
+//             collectionJawsWatchDog = 0;
+//         }
+//     }
 }
 
 /*

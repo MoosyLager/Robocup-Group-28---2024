@@ -6,17 +6,23 @@
 #include <Arduino.h>
 #include <elapsedMillis.h>
 
+elapsedMillis updateFSM;
+elapsedMillis updatePWM;
+elapsedMillis updateSensorsTimer;
+
+RobotFSM fsm;
+
 // elapsedMillis timer;
 
 void setup()
 {
     Serial.begin(9600);
-    // InitSensors();
-    // InitMotors();
-    // InitEncoders();
-    // initializeRobotFSM(&fsm);
-    // delay(7000);
-    // Serial.println("Setup complete");
+    InitSensors();
+    InitMotors();
+    InitEncoders();
+    initializeRobotFSM(&fsm);
+    delay(5000);
+    Serial.println("Setup complete");
     // for ( int i = 0; i < 100; i++ ) {
     //     UpdateTOFL0();
     //     UpdateTOFL1();
@@ -77,24 +83,24 @@ void loop()
     //     UpdateIMU();
     //     updateSensorsTimer = 0;
     // }
-    // if ( updateFSM > 31 ) {
-    //     // processFSM(&fsm);
-    //     updateFSM = 0;
-    //     Serial.print("L0TL: ");
-    //     Serial.print(GetL0TL());
-    //     Serial.print(" L0TR: ");
-    //     Serial.print(GetL0TR());
-    //     Serial.print(" L0BL: ");
-    //     Serial.print(GetL0BL());
-    //     Serial.print(" L0BR: ");
-    //     Serial.println(GetL0BR());
-    //     Serial.print("L1TL: ");
-    //     Serial.print(GetL1TL());
-    //     Serial.print(" L1TR: ");
-    //     Serial.print(GetL1TR());
-    //     Serial.print(" L1BL: ");
-    //     Serial.print(GetL1BL());
-    //     Serial.print(" L1BR: ");
-    //     Serial.println(GetL1BR());
-    // }
+    if (updateFSM > 31 ) {
+        processFSM(&fsm);
+        updateFSM = 0;
+        // Serial.print("L0TL: ");
+        // Serial.print(GetL0TL());
+        // Serial.print(" L0TR: ");
+        // Serial.print(GetL0TR());
+        // Serial.print(" L0BL: ");
+        // Serial.print(GetL0BL());
+        // Serial.print(" L0BR: ");
+        // Serial.println(GetL0BR());
+        // Serial.print("L1TL: ");
+        // Serial.print(GetL1TL());
+        // Serial.print(" L1TR: ");
+        // Serial.print(GetL1TR());
+        // Serial.print(" L1BL: ");
+        // Serial.print(GetL1BL());
+        // Serial.print(" L1BR: ");
+        // Serial.println(GetL1BR());
+    }
 }
