@@ -81,17 +81,14 @@ void loop()
     //     updateSensorsTimer = 0;
     // }
 
-    if (updateFSM > 47) {
+    if (updateFSM > 71) {
         processFSM(&fsm);
         updateFSM = 0;
-        // Serial.print("Left Motor Target: ");
-        // Serial.print(leftMotor.targetMotorSpeed);
-        // Serial.print(" Right Motor Target: ");
-        // Serial.println(rightMotor.targetMotorSpeed);
-        // Serial.print(" Left Motor Speed: ");
-        // Serial.print(leftMotor.currentMotorSpeed);
-        // Serial.print(" Right Motor Speed: ");
-        // Serial.println(rightMotor.currentMotorSpeed);
+        Serial.println("--------------------");
+        // Serial.print("Current Heading: ");
+        // Serial.print(GetOrientationYaw());
+        // Serial.print(" Target Heading: ");
+        // Serial.println(fsm.targetHeading);
     }
 
     // if (updatePWM > 51) {

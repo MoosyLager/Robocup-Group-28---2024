@@ -563,52 +563,63 @@ bool detectedByAbsoluteDifference(uint16_t top, uint16_t bottom)
 /**
  * Array checking functions
  */
-bool detectedFarRight(void)
+bool detectedFarLeft(void)
 {
     uint16_t top = GetL0TL();
     uint16_t bottom = GetL0BL();
+    bool detected = detectedByPercentageDifference(top, bottom);
+    Serial.print(" Far Left Detected: ");
+    Serial.println(detected);
     return detectedByPercentageDifference(top, bottom);
 }
 
-bool detectedFarLeft(void)
+bool detectedFarRight(void)
 {
     uint16_t top = GetL0TR();
     uint16_t bottom = GetL0BR();
+    bool detected = detectedByPercentageDifference(top, bottom);
+    Serial.print(" Far Right Detected: ");
+    Serial.println(detected);
     return detectedByPercentageDifference(top, bottom);
 }
 
 bool detectedCentreRight(void)
 {
-    uint16_t top = GetL1TL();
-    uint16_t bottom = GetL1BL();
-    Serial.print("Right Top: ");
+    uint16_t top = GetL1TR();
+    uint16_t bottom = GetL1BR();
+    Serial.print("Right Top 1: ");
     Serial.print(top);
     Serial.print(" Bottom: ");
-    Serial.println(bottom);
+    Serial.print(bottom);
+    bool detected = detectedByAbsoluteDifference(top, bottom);
+    Serial.print(" Centre Right Detected: ");
+    Serial.println(detected);
     return detectedByAbsoluteDifference(top, bottom);
 }
 
 bool detectedCentreLeft(void)
 {
-    uint16_t top = GetL1TR();
-    Serial.print("Left Top: ");
+    uint16_t top = GetL1TL();
+    uint16_t bottom = GetL1BL();
+    Serial.print("Left Top 1: ");
     Serial.print(top);
     Serial.print(" Bottom: ");
-    uint16_t bottom = GetL1BR();
-    Serial.println(bottom);
+    Serial.print(bottom);
+    bool detected = detectedByAbsoluteDifference(top, bottom);
+    Serial.print(" Centre Left Detected: ");
+    Serial.println(detected);
     return detectedByAbsoluteDifference(top, bottom);
 }
 
 bool weightDetected(void)
 {
-
-    Serial.print(" Detected Centre Left: ");
-    Serial.print(detectedCentreLeft());
-    Serial.print(" Detected Centre Right: ");
-    Serial.print(detectedCentreRight());
     return (detectedFarLeft() || detectedFarRight() || detectedCentreLeft() || detectedCentreRight());
 }
 
+/**
+ * Check if the robot is lined up with the weight
+ * Works as expected
+ */
 bool checkTargetHeading(int targetHeading)
 {
     int currentHeading = GetOrientationYaw();
@@ -618,9 +629,24 @@ bool checkTargetHeading(int targetHeading)
     } else if (error < -180) {
         error = error + 360;
     }
+    if (error < 5 && error > -5) {
+        Serial.println("At target heading");
+    }
     return (error < 5 && error > -5);
 }
 
 bool isLinedUp(int rangeLeft, int rangeRight) {
-    return ((rangeLeft - rangeRight < CENTRAL_THRESHOLD) || (rangeRight - rangeLeft < CENTRAL_THRESHOLD));
+    int diff = abs(rangeLeft - rangeRight);
+    Serial.print("Diff: ");
+    Serial.println(diff);
+    return (abs(rangeLeft - rangeRight) < CENTRAL_THRESHOLD);
+}
+
+int truncateHeading(int heading) {
+    if (heading > 360) {
+        heading = heading - 360;
+    } else if (heading < 0) {
+        heading = heading + 360;
+    }
+    return heading;
 }
