@@ -28,7 +28,7 @@ void setup()
 
 void loop()
 {
-    if ( BlueButtonState() && timer > 2500 && !pwmOn ) {
+    if ( BlueButtonState() && buttonTimer > 2500 && !pwmOn ) {
         pwmOn = true;
     }
 
