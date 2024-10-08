@@ -21,9 +21,10 @@ void InitMotors()
     // Initialize the left motor
     leftMotor.servoDriver.attach(LEFT_MOTOR_ADDRESS);
     leftMotor.motorType = LEFT_MOTOR;
-    leftMotor.Kp = 50;  // Example gains
-    leftMotor.Ki = 10;
+    leftMotor.Kp = 70;  // Example gains
+    leftMotor.Ki = 12;
     leftMotor.Kd = 0;
+    leftMotor.integral = -1500000;
     leftMotor.speedInverted = true;  // Normal direction control
     leftMotor.currentMotorSpeed = 0;
     leftMotor.prevSampledMotorPos = 0;
@@ -35,9 +36,10 @@ void InitMotors()
     // Initialize the right motor
     rightMotor.servoDriver.attach(RIGHT_MOTOR_ADDRESS);
     rightMotor.motorType = RIGHT_MOTOR;
-    rightMotor.Kp = 50;
-    rightMotor.Ki = 10;
+    rightMotor.Kp = 70;
+    rightMotor.Ki = 12;
     rightMotor.Kd = 0;
+    rightMotor.integral = 1500000;
     rightMotor.speedInverted = false;  // Inverted control for right motor
     rightMotor.currentMotorSpeed = 0;
     rightMotor.prevSampledMotorPos = 0;
@@ -116,7 +118,8 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
     }
 
     // Integral control (updated to use per-motor integral)
-    signed int integral = motor->integral +  motor->Ki * error;
+    signed int integral = motor->integral + motor->Ki * error;
+    
     if (integral > INTEGRAL_LIMIT) {
         integral = INTEGRAL_LIMIT;
     } else if (integral < -INTEGRAL_LIMIT) {
@@ -131,6 +134,31 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
     //Invert control if needed
     if ((motor->speedInverted)) {
         control = -control;
+    }
+    if (motor->motorType == LEFT_MOTOR) {
+        Serial.print("LEFT MOTOR: ");
+        Serial.print("Error: ");
+        Serial.print(error);
+        Serial.print(" P: ");
+        Serial.print(p / 1000); ;
+        Serial.print(" D: ");
+        Serial.print(d / 1000);
+        Serial.print(" I: ");
+        Serial.print(motor->integral / 1000);
+        Serial.print(" Control: ");
+        Serial.println(control);
+    } else if (motor->motorType == RIGHT_MOTOR) {
+        Serial.print("RIGHT MOTOR: ");
+        Serial.print("Error: ");
+        Serial.print(error);
+        Serial.print(" P: ");
+        Serial.print(p / 1000);
+        Serial.print(" D: ");
+        Serial.print(d / 1000);
+        Serial.print(" I: ");
+        Serial.print(motor->integral / 1000);
+        Serial.print(" Control: ");
+        Serial.println(control);
     }
     return control;
 }
@@ -181,6 +209,12 @@ void rotateCW(int speed) {
 void rotateCCW(int speed) {
     leftMotor.targetMotorSpeed = -speed;
     rightMotor.targetMotorSpeed = speed / 2;
+    leftMotor.isPositionControl = false;
+    rightMotor.isPositionControl = false;
+}
+void move(int speedL, int speedR) {
+    leftMotor.targetMotorSpeed = speedL;
+    rightMotor.targetMotorSpeed = speedR;
     leftMotor.isPositionControl = false;
     rightMotor.isPositionControl = false;
 }
