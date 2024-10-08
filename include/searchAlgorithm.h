@@ -12,7 +12,7 @@ extern bool finished_calibrating;
 #define ROTATION_FAILURE_TIMEOUT 5000
 #define SPIN_TIMEOUT 4000
 #define EVASIVE_MANEUVER_TIMEOUT 4000
-#define LINEAR_OFFSET 0100
+#define LINEAR_OFFSET 65
 #define SENSOR_LOGIC_CROSSOVER_LOW 220
 #define SENSOR_LOGIC_CROSSOVER_HIGH 360
 
@@ -74,6 +74,7 @@ typedef struct {
 
 // Function prototypes
 void checkWallDistances(RobotFSM* fsm);
+void checkWallDistancesTop(RobotFSM* fsm);
 void processFSM(RobotFSM* fsm);
 void initializeRobotFSM(RobotFSM* fsm);
 void handleCalibrating(RobotFSM *fsm);

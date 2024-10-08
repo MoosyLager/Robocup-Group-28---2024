@@ -13,7 +13,7 @@
 #define ENCODER_MIN_VAL         -2147483648
 #define ENCODER_PER_REV     3000
 #define DIST_PER_REV 232.5
-#define ENCODER_PER_DIST ENCODER_PER_REV / DIST_PER_REV
+#define ENCODER_PER_DIST 129 / 10
 
 /**
  * Pins connected to drive encoder phases

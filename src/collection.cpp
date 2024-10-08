@@ -122,6 +122,66 @@ void CalibrateRamp()
         rampStepper.setCurrentPosition(0);
         Serial.println("Ramp Calibrated!");
     }
+    // switch ( rampCalibration ) {
+    //     case CalibrationState::CALIBRATION_START:
+    //         // Serial.println("Calibrating Ramp...");
+    //         rampStepper.setSpeed(-STEPPER_MAX_SPEED / 2);
+    //         rampCalibration = CALIBRATION_RUNNING;
+    //         break;
+    //     case CalibrationState::CALIBRATION_RUNNING:
+    //         if ( !RampPosition() ) {
+    //             rampStepper.setSpeed(0);
+    //             rampStepper.setCurrentPosition(0);
+    //             rampCalibration = CALIBRATION_DONE;
+    //         }
+    //         rampStepper.run();
+    //         break;
+    //     case CalibrationState::CALIBRATION_DONE:
+    //         // Serial.println("Ramp Calibrated!");
+    //         break;
+    // }
+}
+
+/**
+ * Set the collector jaws to an open position to allow for weights to pass through
+ */
+void OpenCollector()
+{
+    Serial.println("Opening Collector...");
+    collectorTarget = 0 + COLLECTOR_OPEN_OFFSET;
+    collectorActuating = true;
+    static bool notLimit = true;
+    
+
+    if ( notLimit) {
+        SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
+    } else {
+        
+    }
+}
+
+/**
+ * Set the collector jaws to a closed position to block weights from passing through
+ */
+void CloseCollector()
+{
+    Serial.println("Closing Collector...");
+    prevCollectionMotorPos = collectionMotorPos;
+    collectorTarget = prevCollectionMotorPos + COLLECTOR_CLOSED_OFFSET;
+    collectorActuating = true;
+}
+
+/**
+ * Actuate the collector through a full rotation and move to the closed position
+ */
+void CollectWeight()
+{
+    Serial.println("Actuating Collector...");
+    SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
+    prevCollectionMotorPos = collectionMotorPos;
+    collectorTarget = prevCollectionMotorPos - COLLECTOR_TICKS_PER_REV;
+    collectorActuating = true;
+    collectingWeight = true;
 }
 
 /**
