@@ -76,7 +76,7 @@ extern Adafruit_TCS34725 colourSensor;
 #define AIO_5       5
 #define AIO_6       6
 #define AIO_8       8  // Blue button
-#define AIO_9       9
+#define AIO_9       9  // Inductive Sensor
 #define AIO_10      10
 #define AIO_11      11
 #define AIO_12      12
@@ -179,6 +179,8 @@ int CollectorPosition();
 int RampPosition();
 
 uint8_t BlueButtonState();
+uint8_t ReadInductiveSensor();
+
 bool CheckAvoidance(void);
 bool detectedByPercentageDifference(uint16_t top, uint16_t bottom);
 bool detectedByAbsoluteDifference(uint16_t top, uint16_t bottom);

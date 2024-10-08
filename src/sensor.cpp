@@ -513,6 +513,14 @@ uint8_t BlueButtonState()
 }
 
 /**
+ * Returns 0 if the inductive sensor is trigered and 1 otherwise
+ */
+uint8_t ReadInductiveSensor()
+{
+    return ioAIO.digitalRead(AIO_9);
+}
+
+/**
  * Initialise the IO board, I2C bus, circular buffers, and all sensors
  */
 void InitSensors()
@@ -527,6 +535,7 @@ void InitSensors()
     InitIMU();
 
     ioAIO.pinMode(AIO_8, INPUT);  // Blue Button
+    ioAIO.pinMode(AIO_9, INPUT);  // Inductive Sensor
 }
 
 /**
