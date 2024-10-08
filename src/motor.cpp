@@ -64,7 +64,7 @@ void InitMotors()
     collectionMotor.prevTime = 0;
 
     // Initialise the ramp stepper motor
-    rampStepper = AccelStepper(1, STEPPER_DIR_PIN, STEPPER_STEP_PIN);
+    rampStepper = AccelStepper(AccelStepper::DRIVER, STEPPER_STEP_PIN, STEPPER_DIR_PIN);
     rampStepper.setMaxSpeed(STEPPER_MAX_SPEED);
     rampStepper.setAcceleration(STEPPER_MAX_ACCELERATION);
     rampStepper.setCurrentPosition(0);
