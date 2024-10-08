@@ -545,6 +545,13 @@ DistanceFunction distanceFunctions[] = {
     GetL1BR
 };
 
+DistanceFunction distanceFunctionsTop[] = {
+    GetL0TL,
+    GetL0TR,
+    GetL1TL,
+    GetL1TR
+};
+
 /**
  * Check the detection ranges for each double-sensor array
  */
@@ -568,8 +575,8 @@ bool detectedFarLeft(void)
     uint16_t top = GetL0TL();
     uint16_t bottom = GetL0BL();
     bool detected = detectedByPercentageDifference(top, bottom);
-    Serial.print(" Far Left Detected: ");
-    Serial.println(detected);
+    // Serial.print(" Far Left Detected: ");
+    // Serial.println(detected);
     return detectedByPercentageDifference(top, bottom);
 }
 
@@ -578,8 +585,8 @@ bool detectedFarRight(void)
     uint16_t top = GetL0TR();
     uint16_t bottom = GetL0BR();
     bool detected = detectedByPercentageDifference(top, bottom);
-    Serial.print(" Far Right Detected: ");
-    Serial.println(detected);
+    // Serial.print(" Far Right Detected: ");
+    // Serial.println(detected);
     return detectedByPercentageDifference(top, bottom);
 }
 
@@ -587,13 +594,13 @@ bool detectedCentreRight(void)
 {
     uint16_t top = GetL1TR();
     uint16_t bottom = GetL1BR();
-    Serial.print("Right Top 1: ");
-    Serial.print(top);
-    Serial.print(" Bottom: ");
-    Serial.print(bottom);
+    // Serial.print("Right Top 1: ");
+    // Serial.print(top);
+    // Serial.print(" Bottom: ");
+    // Serial.print(bottom);
     bool detected = detectedByAbsoluteDifference(top, bottom);
-    Serial.print(" Centre Right Detected: ");
-    Serial.println(detected);
+    // Serial.print(" Centre Right Detected: ");
+    // Serial.println(detected);
     return detectedByAbsoluteDifference(top, bottom);
 }
 
@@ -601,13 +608,13 @@ bool detectedCentreLeft(void)
 {
     uint16_t top = GetL1TL();
     uint16_t bottom = GetL1BL();
-    Serial.print("Left Top 1: ");
-    Serial.print(top);
-    Serial.print(" Bottom: ");
-    Serial.print(bottom);
+    // Serial.print("Left Top 1: ");
+    // Serial.print(top);
+    // Serial.print(" Bottom: ");
+    // Serial.print(bottom);
     bool detected = detectedByAbsoluteDifference(top, bottom);
-    Serial.print(" Centre Left Detected: ");
-    Serial.println(detected);
+    // Serial.print(" Centre Left Detected: ");
+    // Serial.println(detected);
     return detectedByAbsoluteDifference(top, bottom);
 }
 
