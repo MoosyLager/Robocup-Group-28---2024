@@ -48,7 +48,7 @@ void processFSM(RobotFSM* fsm)
     }
 
     if ( !fsm->currentState == CALIBRATING ) {
-        checkWallDistances(fsm);
+        checkWallDistancesTop(fsm);
     }
 
 
@@ -163,36 +163,6 @@ void checkWallDistancesTop(RobotFSM* fsm)
     // Need to be careful that the robot doesn't get stuck in this state
 }
 
-void checkWallDistancesTop(RobotFSM* fsm)
-{
-    const int numFunctionsTop = 4;
-
-    // Iterate through each distance function and check for obstacles
-    for (int i = 0; i < numFunctionsTop; i++) {
-        uint16_t distance = distanceFunctions[i]();  // Call the function
-        // Could change this to test both sensors top and bottom
-        if (distance < AVOIDANCE_THRESHOLD) {
-            fsm->weightPos = NONE;  // Reset the weight position if an obstacle is found
-            fsm->evasiveManeuverCompleted = false;
-            fsm->currentState = AVOIDING;  // Change the state if below threshold
-            avoidanceTimer = 0;
-            // Determine side of detection based on the function index
-            if (i % 2 == 0) {
-                fsm->avoidanceSide = LEFT;  // L0 corresponds to the left side
-                fsm->targetHeading = GetOrientationYaw() + 25   ;
-                onLeft = true;
-            } else {
-                fsm->avoidanceSide = RIGHT; // L1 corresponds to the right side
-                fsm->targetHeading = GetOrientationYaw() - 25;
-                onLeft = false;
-            }
-            return;  // Exit early since an obstacle was found
-        } else {
-            fsm->avoidanceSide = NO_WALL;  // Reset the avoidance side if no obstacle is found
-        }
-    }
-}
-
 void handleAvoiding(RobotFSM* fsm)
 {
     if ( !(fsm->evasiveManeuverCompleted) ) {
@@ -284,21 +254,47 @@ void handleChasing(RobotFSM* fsm)
     static bool calculatedDist = false;
 
     if (!calculatedDist ) {
-        if ((detectedCentreRight() || detectedCentreLeft())) {
+        // Check for weight directly ahead (highest priority)
+        if (detectedCentreRight() || detectedCentreLeft()) {
             fsm->weightPos = AHEAD;
-            Serial.println("Ahead");
-        } else if (detectedFarRight()) {
-            fsm->weightPos = ON_FAR_RIGHT;
-            Serial.println("On Far Right");
-            // Rotate counter-clockwise
-            move(1800, -1800);
-        } else if (detectedFarLeft()) {
-            fsm->weightPos = ON_FAR_LEFT;
-            Serial.println("On Far Left");
-            // Rotate clockwise
-            move(-1800, 1800);
-        } else {
-            Serial.println("Currently no weight seen");// Could abstract this to the weight detection function
+            Serial.println("Weight Ahead");
+            moveForward(1500);  // Move towards the weight ahead
+        } else if (fsm->weightPos == ON_FAR_LEFT) {
+            if (!detectedCentreLeft() && !detectedCentreRight()) {
+                // Continue rotating clockwise (towards far left) until it is detected by the center left sensor
+                Serial.println("Pursuing weight on Far Left, rotating clockwise");
+                move(-1200, 1200);
+            } else {
+                // Weight is now in the central sensor range
+                fsm->weightPos = AHEAD;  // Transition to AHEAD state
+                Serial.println("Weight detected by central sensor, switching to AHEAD");
+            }
+        } else if (fsm->weightPos == ON_FAR_RIGHT) {
+            if (!detectedCentreRight() && !detectedCentreLeft()) {
+                // Continue rotating counter-clockwise (towards far right) until it is detected by the center right sensor
+                Serial.println("Pursuing weight on Far Right, rotating counter-clockwise");
+                move(1200, -1200);
+            } else {
+                // Weight is now in the central sensor range
+                fsm->weightPos = AHEAD;  // Transition to AHEAD state
+                Serial.println("Weight detected by central sensor (Right), switching to AHEAD");
+            }
+        } else if (fsm->weightPos != ON_FAR_LEFT && fsm->weightPos != ON_FAR_RIGHT) {
+            if (detectedFarRight()) {
+                // Latch onto far right and ignore the left
+                fsm->weightPos = ON_FAR_RIGHT;
+                Serial.println("Detected Weight on Far Right, rotating to pursue");
+                move(1800, -1800);  // Start rotating counter-clockwise
+            } 
+            else if (detectedFarLeft()) {
+                // Latch onto far left and ignore the right
+                fsm->weightPos = ON_FAR_LEFT;
+                Serial.println("Detected Weight on Far Left, rotating to pursue");
+                move(-1800, 1800);  // Start rotating clockwise
+            } 
+            else {
+                Serial.println("No weight anywhere");
+            }
         }
         
         if (fsm->weightPos == AHEAD) {
@@ -310,7 +306,7 @@ void handleChasing(RobotFSM* fsm)
                 if (GetL1BR() < SENSOR_LOGIC_CROSSOVER_LOW) {
                     Serial.print(" at close range, rotate CW");
                     // Rotate CW but also move backwards
-                    move(1200, -1600);
+                    move(700, -1600);
                 } else if (GetL1BR() > SENSOR_LOGIC_CROSSOVER_HIGH) {
                     Serial.print(" at far range, rotate CCW");
                     // Rotate CCW but also move forwards
@@ -321,7 +317,7 @@ void handleChasing(RobotFSM* fsm)
                 if (GetL1BL() < SENSOR_LOGIC_CROSSOVER_LOW) {
                     Serial.print(" at close range, rotate CCW");
                     // Rotate CCW but also move backwards
-                    move(-1600, 1200);
+                    move(-1600, 700);
                 } else if (GetL1BL() > SENSOR_LOGIC_CROSSOVER_HIGH) {
                     Serial.print(" at far range, rotate CW");
                     // Rotate CW but also move forwards
@@ -334,10 +330,10 @@ void handleChasing(RobotFSM* fsm)
                     rangeLeft = GetL1BL();
                     rangeRight = GetL1BR();
                     if (rangeLeft > rangeRight) {
-                        move(400, -800);
+                        move(1500, -1500);
                         Serial.println(" Rotating CW!");
                     } else {
-                        move(-800, 400);
+                        move(-1500, 1500);
                         Serial.println(" Rotating CCW!");
                     }
                     linedUp = isLinedUp(rangeLeft, rangeRight);
@@ -346,11 +342,11 @@ void handleChasing(RobotFSM* fsm)
                     if (!calculatedDist) {
                         double s = (230 + rangeLeft + rangeRight) / 2;
                         int area = sqrt(s*(s-rangeLeft)*(s-rangeRight)*(s-230));
-                        distToTravel = 2 * area / 230;
+                        distToTravel = 2 * area / 230 + LINEAR_OFFSET;
                         Serial.print("Distance to travel: ");
                         Serial.println(distToTravel);
-                        leftMotor.targetMotorPos = (distToTravel + LINEAR_OFFSET) * ENCODER_PER_DIST  + leftMotor.currentMotorPos;
-                        rightMotor.targetMotorPos = (distToTravel + LINEAR_OFFSET) * ENCODER_PER_DIST + rightMotor.currentMotorPos;
+                        leftMotor.targetMotorPos = (distToTravel) * ENCODER_PER_DIST  + leftMotor.currentMotorPos;
+                        rightMotor.targetMotorPos = (distToTravel) * ENCODER_PER_DIST + rightMotor.currentMotorPos;
                         fsm->distToTravel = distToTravel;
                         calculatedDist = true;
                     }
@@ -382,63 +378,63 @@ void handleChasing(RobotFSM* fsm)
         } 
 }
 
-                    void handleCollecting(RobotFSM * fsm)
-                    {
-                        // Need to change the actuator to move
-                        moveForward(0);
+void handleCollecting(RobotFSM * fsm)
+{
+    // Need to change the actuator to move
+    moveForward(0);
 
-                        if ( !collectorActuating ) {
-                            fsm->collectedWeights++;
-                            fsm->huntState = SEARCH;
-                            if ( fsm->collectedWeights >= 3 ) {
-                                fsm->currentState = RETURNING;
-                                fsm->lastMainState = RETURNING;
-                                fsm->returnState = HOMESEEK;
-                            }
-                        }
+    if ( !collectorActuating ) {
+        fsm->collectedWeights++;
+        fsm->huntState = SEARCH;
+        if ( fsm->collectedWeights >= 3 ) {
+            fsm->currentState = RETURNING;
+            fsm->lastMainState = RETURNING;
+            fsm->returnState = HOMESEEK;
+        }
+    }
 
-                        /*
-                        if (collectionJammed()) {
-                            reverseToOpenJam();
-                        }*/
-                    }
+    /*
+    if (collectionJammed()) {
+        reverseToOpenJam();
+    }*/
+}
 
-                    /*
-                    RETURNING SUB-STATE FUNCTIONS
-                    */
-                    void handleHomeSeeking(RobotFSM * fsm)
-                    {
-                        // homeSeekMotorFunction();
-                        // error = desiredHeading - currentHeading;
+/*
+RETURNING SUB-STATE FUNCTIONS
+*/
+void handleHomeSeeking(RobotFSM * fsm)
+{
+    // homeSeekMotorFunction();
+    // error = desiredHeading - currentHeading;
 
-                        // if (error > 180) {
-                        //     error = error - 360;
-                        // } else if (error < -180) {
-                        //     error = error + 360;
-                        // }
+    // if (error > 180) {
+    //     error = error - 360;
+    // } else if (error < -180) {
+    //     error = error + 360;
+    // }
 
-                        // if (error > 0) {
-                        //     // Drive forward and turn right
-                        // } else if (error < 0) {
-                        //     // Drive forward and turn left
-                        // }
+    // if (error > 0) {
+    //     // Drive forward and turn right
+    // } else if (error < 0) {
+    //     // Drive forward and turn left
+    // }
 
-                        // if (colorDetected()) {
-                        //     fsm->returnState = DEPOSIT;
-                        // }
-                    }
+    // if (colorDetected()) {
+    //     fsm->returnState = DEPOSIT;
+    // }
+}
 
-                    void handleDepositing(RobotFSM * fsm)
-                    {
-                        // depositMotorFunction();
-                        // TIMER DELAY
-                        bool weightsDeposited = false;
-                        // Set collection acutation to open
-                        if ( weightsDeposited ) {
-                            fsm->currentState = HUNTING;
-                            fsm->lastMainState = HUNTING;
-                            fsm->huntState = SEARCH;
-                            fsm->returnState = HOMESEEK;
-                            fsm->collectedWeights = 0;
-                        }
-                    }
+void handleDepositing(RobotFSM * fsm)
+{
+    // depositMotorFunction();
+    // TIMER DELAY
+    bool weightsDeposited = false;
+    // Set collection acutation to open
+    if ( weightsDeposited ) {
+        fsm->currentState = HUNTING;
+        fsm->lastMainState = HUNTING;
+        fsm->huntState = SEARCH;
+        fsm->returnState = HOMESEEK;
+        fsm->collectedWeights = 0;
+    }
+}

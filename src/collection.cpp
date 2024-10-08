@@ -129,6 +129,14 @@ void OpenCollector()
     Serial.println("Opening Collector...");
     collectorTarget = 0 + COLLECTOR_OPEN_OFFSET;
     collectorActuating = true;
+    static bool notLimit = true;
+    
+
+    if ( notLimit) {
+        SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
+    } else {
+        
+    }
 }
 
 /**

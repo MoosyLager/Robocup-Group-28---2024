@@ -546,7 +546,7 @@ DistanceFunction distanceFunctions[] = {
 };
 
 DistanceFunction distanceFunctionsTop[] = {
-    GetL0TL,
+    GetL0TL, 
     GetL0TR,
     GetL1TL,
     GetL1TR
