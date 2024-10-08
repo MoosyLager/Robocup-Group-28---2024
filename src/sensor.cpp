@@ -28,7 +28,11 @@ sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerD
 /**
  * Colour Sensor Data
  */
-Adafruit_TCS34725 colourSensor = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+Adafruit_TCS34725 colourSensor = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_300MS, TCS34725_GAIN_4X);
+elapsedMillis colourTimer;
+Colour_t homeColour;
+Colour_t arenaColour;
+Colour_t enemyColour;
 
 /**
  * TOF Data
@@ -240,43 +244,139 @@ float GetOrientationYaw()
     return orientationData.orientation.x;
 }
 
+/**
+ * Returns the current linear acceleration in the longitudinal direction
+ */
 float GetAccelerationForward()
 {
     return linearAccelData.acceleration.y;
 }
 
+/**
+ * Returns the current linear acceleration in the tranverse direction
+ */
 float GetAccelerationSideways()
 {
     return linearAccelData.acceleration.x;
 }
 
+/**
+ * Returns the current linear acceleration in the z-direction
+ */
 float GetAccelerationUpwards()
 {
     return linearAccelData.acceleration.z;
 }
 
-
+/**
+ * Reads the raw colour value of the sensor with no delay
+ */
+void GetRawColourData(uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c)
+{
+    *c = colourSensor.read16(TCS34725_CDATAL);
+    *r = colourSensor.read16(TCS34725_RDATAL);
+    *g = colourSensor.read16(TCS34725_GDATAL);
+    *b = colourSensor.read16(TCS34725_BDATAL);
+}
 
 /**
- * Reads the colours of the suface under the colour sensor
+ * updates the colour sensor values
  */
-Colour_t GetColour()
+ColourType_t ReadColour()
 {
-    uint16_t red, green, blue, clear;
-    Colour_t colour;
+    static bool firstRead = true;
+    static bool secondRead = false;
 
-    colourSensor.setInterrupt(false);
-    delay(60);
-    colourSensor.getRawData(&red, &green, &blue, &clear);
-    colourSensor.setInterrupt(true);
+    static Colour_t firstColour(-1, -1, -1, -1);
+    static Colour_t secondColour(-1, -1, -1, -1);
 
-    colour.R = red;
-    colour.G = blue;
-    colour.B = green;
-    colour.C = clear;
+    static ColourType_t colourType = ColourType_t::HOME;
 
-    return colour;
+    float red, green, blue;
+    uint16_t rawRed, rawGreen, rawBlue, clear;
+    const int integrationTime = COLOUR_SENSOR_INTEGRATION_TIME_MS / COLOUR_SENSOR_UPDATE_PERIOD;
+
+    if ( colourTimer < integrationTime ) {
+        return colourType;
+    } else {
+        colourTimer = 0;
+    }
+
+    GetRawColourData(&rawRed, &rawGreen, &rawBlue, &clear);
+    uint32_t sum = clear;
+    red = rawRed;
+    green = rawGreen;
+    blue = rawBlue;
+    red /= sum;
+    green /= sum;
+    blue /= sum;
+    red *= 256;
+    green *= 256;
+    blue *= 256;
+
+    if ( firstRead ) {
+        if ( firstColour.R == -1 && firstColour.R == -1 && firstColour.R == -1 ) {
+            firstColour.R = red;
+            firstColour.G = green;
+            firstColour.B = blue;
+        }
+        if ( (red < firstColour.R + COLOUR_THRESHOLD) && (green < firstColour.G + COLOUR_THRESHOLD) && (blue < firstColour.B + COLOUR_THRESHOLD) ) {
+            colourType = ColourType_t::HOME;
+            return ColourType_t::HOME;
+        } else {
+            firstRead = false;
+            secondRead = true;
+        }
+    }
+    if ( secondRead ) {
+        if ( secondColour.R == -1 && secondColour.R == -1 && secondColour.R == -1 ) {
+            secondColour.R = red;
+            secondColour.G = green;
+            secondColour.B = blue;
+        }
+        if ( (red < secondColour.R + COLOUR_THRESHOLD) && (green < secondColour.G + COLOUR_THRESHOLD) && (blue < secondColour.B + COLOUR_THRESHOLD) ) {
+            colourType = ColourType_t::ARENA;
+            return ColourType_t::ARENA;
+        } else {
+            secondRead = false;
+        }
+    }
+
+    if ( !firstRead && !secondRead ) {
+        if ( (red < firstColour.R + COLOUR_THRESHOLD) && (green < firstColour.G + COLOUR_THRESHOLD) && (blue < firstColour.B + COLOUR_THRESHOLD) ) {
+            colourType = ColourType_t::HOME;
+            return HOME;
+        } else if ( (red < secondColour.R + COLOUR_THRESHOLD) && (green < secondColour.G + COLOUR_THRESHOLD) && (blue < secondColour.B + COLOUR_THRESHOLD) ) {
+            colourType = ColourType_t::ARENA;
+            return ColourType_t::ARENA;
+        } else {
+            colourType = ColourType_t::ENEMY;
+            return ColourType_t::ENEMY;
+        }
+    }
+    return colourType;
 }
+
+// /**
+//  * Reads the colours of the suface under the colour sensor
+//  */
+// Colour_t GetColour()
+// {
+//     uint16_t red, green, blue, clear;
+//     Colour_t colour;
+
+//     colourSensor.setInterrupt(false);
+//     delay(60);
+//     colourSensor.getRawData(&red, &green, &blue, &clear);
+//     colourSensor.setInterrupt(true);
+
+//     colour.R = red;
+//     colour.G = blue;
+//     colour.B = green;
+//     colour.C = clear;
+
+//     return colour;
+// }
 
 /**
  * Initialise the circular buffers for the TOF sensor data and the IMU data
@@ -342,7 +442,7 @@ void InitTOF()
 
         sensorsL0[i].setTimeout(500);
         if ( !sensorsL0[i].init() ) {
-            Serial.print("Failed to detect and initialise sensor L0 ");
+            Serial.print("FAILED TO DETECT AND INITIALISE L0 ");
             Serial.print(i);
             while ( 1 )
                 ;
@@ -367,7 +467,7 @@ void InitTOF()
 
         sensorsL1[i].setTimeout(500);
         if ( !sensorsL1[i].init() ) {
-            Serial.print("Failed to detect and initialise sensor L1 ");
+            Serial.print("FAILED TO DETECT AND INITIALISE L1 ");
             Serial.print(i);
             while ( 1 )
                 ;
@@ -392,7 +492,7 @@ void InitTOF()
 void InitIMU()
 {
     if ( !bno.begin() ) {
-        Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+        Serial.println("IMU NOT DETECTED");
     }
 }
 
@@ -444,7 +544,6 @@ DistanceFunction distanceFunctions[] = {
     GetL1BL,
     GetL1BR
 };
-
 
 /**
  * Check the detection ranges for each double-sensor array

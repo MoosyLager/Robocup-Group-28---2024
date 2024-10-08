@@ -1,9 +1,9 @@
 #include "collection.h"
 #include "encoder.h"
 #include "motor.h"
+#include "searchAlgorithm.h"
 #include "sensor.h"
 #include <Arduino.h>
-#include "searchAlgorithm.h"
 #include <elapsedMillis.h>
 #include <SparkFunSX1509.h>
 #include <VL53L0X.h>

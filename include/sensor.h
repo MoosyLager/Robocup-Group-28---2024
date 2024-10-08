@@ -19,16 +19,41 @@
  */
 #define COLOUR_SENSOR_ADDRESS 0x29
 #define COLOUR_SENSOR_WIRE    Wire1
+#define COLOUR_SENSOR_INTEGRATION_TIME_MS 300
+#define COLOUR_SENSOR_UPDATE_PERIOD       20
+#define COLOUR_THRESHOLD                  2
 
 /**
  * Wrapper to hold RGBA colour information
  */
-typedef struct {
+typedef struct Colour_t {
     uint16_t R;
     uint16_t G;
     uint16_t B;
     uint16_t C;
-} Colour_t;
+
+    Colour_t()
+    {
+        R = 0;
+        G = 0;
+        B = 0;
+        C = 0;
+    }
+
+    Colour_t(uint16_t r, uint16_t g, uint16_t b, uint16_t c)
+    {
+        R = r;
+        G = g;
+        B = b;
+        C = c;
+    }
+};
+
+typedef enum {
+    HOME,
+    ARENA,
+    ENEMY
+} ColourType_t;
 
 extern Adafruit_TCS34725 colourSensor;
 
