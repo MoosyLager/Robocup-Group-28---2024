@@ -12,7 +12,7 @@ extern bool finished_calibrating;
 #define ROTATION_FAILURE_TIMEOUT 5000
 #define SPIN_TIMEOUT 4000
 #define EVASIVE_MANEUVER_TIMEOUT 4000
-#define LINEAR_OFFSET
+#define LINEAR_OFFSET 80
 
 typedef enum {
     FORWARD,

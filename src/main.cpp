@@ -9,13 +9,13 @@
 #include <VL53L0X.h>
 #include <Wire.h>
 
-
-
 RobotFSM fsm;
 elapsedMicros timer;
 elapsedMillis updateSensorsTimer = 0;
 elapsedMillis updateFSM = 0;
 elapsedMillis updatePWM = 0;
+
+bool toggle = false;
 
 void setup()
 {
@@ -84,21 +84,21 @@ void loop()
     if (updateFSM > 71) {
         processFSM(&fsm);
         updateFSM = 0;
-        Serial.println("--------------------");
-        // Serial.print("Current Heading: ");
-        // Serial.print(GetOrientationYaw());
-        // Serial.print(" Target Heading: ");
-        // Serial.println(fsm.targetHeading);
+    //     Serial.println("--------------------");
+    //     // Serial.print("Current Heading: ");
+    //     // Serial.print(GetOrientationYaw());
+    //     // Serial.print(" Target Heading: ");
+    //     // Serial.println(fsm.targetHeading);
     }
 
-    // if (updatePWM > 51) {
-    //     // UpdateMotors();
-    //     updatePWM = 0;
-    //     PIDMotorControl(&leftMotor);
-    //     PIDMotorControl(&rightMotor);
-    // }
+    if (updatePWM > 19) {
+        updatePWM = 0;
+        PIDMotorControl(&leftMotor);
+        PIDMotorControl(&rightMotor);
+        
+    }
 
-    if (updateSensorsTimer > 31) {
+    if (updateSensorsTimer > 51) {
         UpdateTOFL0();
         UpdateTOFL1();
         UpdateIMU();
