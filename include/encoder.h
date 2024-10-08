@@ -47,7 +47,7 @@ extern volatile unsigned int rightMotorPos;
 extern unsigned int prevRightMotorPos;
 
 extern volatile int collectionMotorPos;
-extern int prevCollectionMotorPos;
+extern volatile int prevCollectionMotorPos;
 
 extern boolean leftASet;
 extern boolean leftBSet;
