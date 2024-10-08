@@ -21,7 +21,7 @@ void setup()
     InitSensors();
     InitMotors();
     InitEncoders();
-    initializeRobotFSM(&fsm);
+    // initializeRobotFSM(&fsm);
 
     for ( int i = 0; i < 2 * CIRCULAR_BUF_SIZE; i++ ) {
         UpdateTOFL0();
@@ -44,25 +44,26 @@ void setup()
 
 void loop()
 {
-    if ( BlueButtonState() && buttonTimer > 2500 && !pwmOn ) {
-        pwmOn = true;
-    }
+    Serial.println(ReadInductiveSensor());
+    // if ( BlueButtonState() && buttonTimer > 2500 && !pwmOn ) {
+    //     pwmOn = true;
+    // }
 
-    if ( updateFSMTimer > 70 ) {
-        processFSM(&fsm);
-        updateFSMTimer = 0;
-    }
+    // if ( updateFSMTimer > 70 ) {
+    //     processFSM(&fsm);
+    //     updateFSMTimer = 0;
+    // }
 
-    if ( updatePWMTimer > 20 && pwmOn ) {
-        PIDMotorControl(&leftMotor);
-        PIDMotorControl(&rightMotor);
-        updatePWMTimer = 0;
-    }
+    // if ( updatePWMTimer > 20 && pwmOn ) {
+    //     PIDMotorControl(&leftMotor);
+    //     PIDMotorControl(&rightMotor);
+    //     updatePWMTimer = 0;
+    // }
 
-    if ( updateSensorsTimer > 50 ) {
-        UpdateTOFL0();
-        UpdateTOFL1();
-        UpdateIMU();
-        updateSensorsTimer = 0;
-    }
+    // if ( updateSensorsTimer > 50 ) {
+    //     UpdateTOFL0();
+    //     UpdateTOFL1();
+    //     UpdateIMU();
+    //     updateSensorsTimer = 0;
+    // }
 }

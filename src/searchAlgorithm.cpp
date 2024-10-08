@@ -425,6 +425,23 @@ void handleCollecting(RobotFSM * fsm)
             }
         }
     }
+
+    if ( collectionJawsWatchDog > COLLECTION_TIMEOUT ) {
+        timeOut = true;
+        // Needs a way to get out of the stuck weight
+        Serial.println("Stuck weight");
+        if ( (abs(collectionMotor.targetMotorPos - collectionMotor.currentMotorPos - COLLECTOR_TICKS_PER_REV)) > COLLECTOR_STOP_THRESHOLD ) {
+            SetMotorSpeed(&collectionMotor, MIN_MOTOR_VAL);
+        } else {
+            SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
+            atLimit = false;
+            collectorActuating = false;
+            fsm->huntState = SEARCH;
+            fsm->currentState = HUNTING;
+            fsm->lastMainState = HUNTING;
+            collectionJawsWatchDog = 0;
+        }
+    }
 }
 
 /*
