@@ -13,6 +13,7 @@ elapsedMillis weightWatchDog;
 elapsedMillis rotationCounter;
 elapsedMillis moduleCounter;
 elapsedMillis avoidanceTimer;
+elapsedMillis collectionWatchDog;
 bool onLeft = false;
 
 void initializeRobotFSM(RobotFSM* fsm)
@@ -29,6 +30,7 @@ void initializeRobotFSM(RobotFSM* fsm)
     fsm->evasiveManeuverCompleted = false;  // Evasive maneuver not completed at the start
     fsm->targetHeading = 0;
     fsm->distToTravel = 0;
+    fsm->weightNum = 0;
 }
 
 void checkCalibration(RobotFSM* fsm)
@@ -412,21 +414,50 @@ void handleCollecting(RobotFSM * fsm)
 {
     // Need to change the actuator to move
     moveForward(0);
+    static bool collectorActuating = true;
+    static bool atLimit = false;
 
-    if ( !collectorActuating ) {
-        fsm->collectedWeights++;
-        fsm->huntState = SEARCH;
-        if ( fsm->collectedWeights >= 3 ) {
-            fsm->currentState = RETURNING;
-            fsm->lastMainState = RETURNING;
-            fsm->returnState = HOMESEEK;
+    if (!atLimit) {
+        SetMotorSpeed(&collectionMotor, MIN_MOTOR_VAL);
+        if (!CollectorPosition()) {
+            collectionMotor.currentMotorPos = 0;
+            atLimit = true;
+            collectionMotor.targetMotorPos = collectionMotor.currentMotorPos + COLLECTOR_STOP_POS;
+        }
+    else {
+        if (abs(collectionMotor.targetMotorPos - collectionMotor.currentMotorPos) > COLLECTOR_STOP_THRESHOLD) {
+            SetMotorSpeed(&collectionMotor, MIN_MOTOR_VAL);
+        } else {
+            SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
+            atLimit = false;
+            collectorActuating = false;
+            fsm->weightNum++;
+            if (fsm->weightNum >= 3) {
+                fsm->currentState = RETURNING;
+                fsm->lastMainState = RETURNING;
+                fsm->returnState = HOMESEEK;
+            } else {
+                fsm->huntState = SEARCH;
+                fsm->currentState = HUNTING;
+                fsm->lastMainState = HUNTING;
+            }
         }
     }
 
-    /*
-    if (collectionJammed()) {
-        reverseToOpenJam();
-    }*/
+    if (collectionWatchDog > COLLECTION_TIMEOUT) {
+        // Needs a way to get out of the stuck weight
+        if ((abs(collectionMotor.targetMotorPos - collectionMotor.currentMotorPos - COLLECTOR_TICKS_PER_REV)) > COLLECTOR_STOP_THRESHOLD) {
+            SetMotorSpeed(&collectionMotor, MAX_MOTOR_VAL);
+        } else {
+            SetMotorSpeed(&collectionMotor, MOTOR_STOP_VAL);
+            atLimit = false;
+            collectorActuating = false;
+            fsm->huntState = SEARCH;
+            fsm->currentState = HUNTING;
+            fsm->lastMainState = HUNTING;
+            }
+        }
+    }
 }
 
 /*
@@ -434,37 +465,19 @@ RETURNING SUB-STATE FUNCTIONS
 */
 void handleHomeSeeking(RobotFSM * fsm)
 {
-    // homeSeekMotorFunction();
-    // error = desiredHeading - currentHeading;
-
-    // if (error > 180) {
-    //     error = error - 360;
-    // } else if (error < -180) {
-    //     error = error + 360;
-    // }
-
-    // if (error > 0) {
-    //     // Drive forward and turn right
-    // } else if (error < 0) {
-    //     // Drive forward and turn left
-    // }
-
-    // if (colorDetected()) {
-    //     fsm->returnState = DEPOSIT;
-    // }
+    //Randomly Navigate
 }
 
 void handleDepositing(RobotFSM * fsm)
 {
-    // depositMotorFunction();
-    // TIMER DELAY
+    // ifColourSensor
     bool weightsDeposited = false;
-    // Set collection acutation to open
-    if ( weightsDeposited ) {
-        fsm->currentState = HUNTING;
-        fsm->lastMainState = HUNTING;
-        fsm->huntState = SEARCH;
-        fsm->returnState = HOMESEEK;
-        fsm->collectedWeights = 0;
-    }
+    // Set Heading to reverse of inital heading
+    // Open jaws
+    // Lift Ramp
+    // Then lower ramp
+    // Reset weights deposited
+    // fsm->currentState = HUNTING;
+    // fsm->lastMainState = HUNTING;
+    // fsm->huntState = SEARCH;
 }

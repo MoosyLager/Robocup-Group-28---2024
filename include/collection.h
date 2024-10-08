@@ -10,7 +10,7 @@
 #define COLLECTOR_CLOSED_OFFSET    100
 #define COLLECTOR_ACTUATING_OFFSET 100
 #define RAMP_LOWERED_OFFSET     0
-
+#define COLLECTOR_STOP_POS 100
 #define COLLECTOR_STOP_THRESHOLD 10
 
 extern bool collectorActuating;

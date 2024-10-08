@@ -15,6 +15,7 @@ extern bool finished_calibrating;
 #define LINEAR_OFFSET 65
 #define SENSOR_LOGIC_CROSSOVER_LOW 220
 #define SENSOR_LOGIC_CROSSOVER_HIGH 360
+#define COLLECTION_TIMEOUT 3500
 
 typedef enum {
     FORWARD,
@@ -70,6 +71,7 @@ typedef struct {
     bool evasiveManeuverCompleted;
     int targetHeading;
     int distToTravel;
+    uint8_t weightNum;
 } RobotFSM;
 
 // Function prototypes
