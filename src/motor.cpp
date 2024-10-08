@@ -21,7 +21,7 @@ void InitMotors()
     // Initialize the left motor
     leftMotor.servoDriver.attach(LEFT_MOTOR_ADDRESS);
     leftMotor.motorType = LEFT_MOTOR;
-    leftMotor.Kp = 70;  // Example gains
+    leftMotor.Kp = 93;  // Example gains
     leftMotor.Ki = 12;
     leftMotor.Kd = 0;
     leftMotor.integral = -1500000;
@@ -36,7 +36,7 @@ void InitMotors()
     // Initialize the right motor
     rightMotor.servoDriver.attach(RIGHT_MOTOR_ADDRESS);
     rightMotor.motorType = RIGHT_MOTOR;
-    rightMotor.Kp = 70;
+    rightMotor.Kp = 93;
     rightMotor.Ki = 12;
     rightMotor.Kd = 0;
     rightMotor.integral = 1500000;
@@ -136,29 +136,29 @@ signed int pidMotorControl(Motor_t *motor, bool isPositionControl, signed long t
         control = -control;
     }
     if (motor->motorType == LEFT_MOTOR) {
-        Serial.print("LEFT MOTOR: ");
-        Serial.print("Error: ");
-        Serial.print(error);
-        Serial.print(" P: ");
-        Serial.print(p / 1000); ;
-        Serial.print(" D: ");
-        Serial.print(d / 1000);
-        Serial.print(" I: ");
-        Serial.print(motor->integral / 1000);
-        Serial.print(" Control: ");
-        Serial.println(control);
+        // Serial.print("LEFT MOTOR: ");
+        // Serial.print("Error: ");
+        // Serial.print(error);
+        // Serial.print(" P: ");
+        // Serial.print(p / 1000); ;
+        // Serial.print(" D: ");
+        // Serial.print(d / 1000);
+        // Serial.print(" I: ");
+        // Serial.print(motor->integral / 1000);
+        // Serial.print(" Control: ");
+        // Serial.println(control);
     } else if (motor->motorType == RIGHT_MOTOR) {
-        Serial.print("RIGHT MOTOR: ");
-        Serial.print("Error: ");
-        Serial.print(error);
-        Serial.print(" P: ");
-        Serial.print(p / 1000);
-        Serial.print(" D: ");
-        Serial.print(d / 1000);
-        Serial.print(" I: ");
-        Serial.print(motor->integral / 1000);
-        Serial.print(" Control: ");
-        Serial.println(control);
+        // Serial.print("RIGHT MOTOR: ");
+        // Serial.print("Error: ");
+        // Serial.print(error);
+        // Serial.print(" P: ");
+        // Serial.print(p / 1000);
+        // Serial.print(" D: ");
+        // Serial.print(d / 1000);
+        // Serial.print(" I: ");
+        // Serial.print(motor->integral / 1000);
+        // Serial.print(" Control: ");
+        // Serial.println(control);
     }
     return control;
 }

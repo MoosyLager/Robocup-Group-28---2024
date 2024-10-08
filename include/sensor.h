@@ -125,10 +125,13 @@ extern Adafruit_TCS34725 colourSensor;
 #define DIFFERENCE_PERCENTAGE 20//% difference between the two sensors
 #define DIFFERENCE_ABSOLUTE 100 //mm difference between the two sensors
 #define SHORT_RANGE_MULTIPLIER 1.5
-#define CENTRAL_THRESHOLD 5
+#define CENTRAL_THRESHOLD 3
+#define SIDE_BIAS_LEFT 40
+#define SIDE_BIAS_RIGHT 40
 
 typedef uint16_t (*DistanceFunction)();  // Function pointer type for distance functions
 extern DistanceFunction distanceFunctions[];
+extern DistanceFunction distanceFunctionsTop[];
 
 extern sensors_event_t orientationData, angVelocityData, linearAccelData, magnetometerData, accelerometerData, gravityData;
 extern Adafruit_BNO055 bno;

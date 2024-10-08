@@ -7,12 +7,14 @@
 extern uint8_t weightsOnboard;
 extern bool finished_calibrating;
 
-#define LOST_WEIGHT_TIMEOUT 5000
+#define LOST_WEIGHT_TIMEOUT 7500
 #define ROTATION_TIMEOUT 20000
 #define ROTATION_FAILURE_TIMEOUT 5000
 #define SPIN_TIMEOUT 4000
 #define EVASIVE_MANEUVER_TIMEOUT 4000
-#define LINEAR_OFFSET 80
+#define LINEAR_OFFSET 0100
+#define SENSOR_LOGIC_CROSSOVER_LOW 220
+#define SENSOR_LOGIC_CROSSOVER_HIGH 360
 
 typedef enum {
     FORWARD,
@@ -23,8 +25,8 @@ typedef enum {
 
 typedef enum {
     AHEAD,
-    ON_RIGHT,
-    ON_LEFT, 
+    ON_FAR_RIGHT,
+    ON_FAR_LEFT, 
     NONE
 } WeightPos_t;
 
@@ -78,6 +80,7 @@ void handleCalibrating(RobotFSM *fsm);
 void handleSearching(RobotFSM *fsm);
 void handleChasing(RobotFSM *fsm);
 void handleHunting(RobotFSM *fsm);
+void handleCollecting(RobotFSM* fsm);
 void handleAvoiding(RobotFSM *fsm);
 void handleReturning(RobotFSM *fsm);
 void handleHomeSeeking(RobotFSM *fsm); 
