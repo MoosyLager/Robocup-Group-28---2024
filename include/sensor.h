@@ -114,6 +114,7 @@ extern Adafruit_TCS34725 colourSensor;
 #define IMU_ID             55
 #define IMU_ADDRESS        0x28
 #define IMU_WIRE           Wire1
+#define IMU_BUF_SIZE       10  // Adjust the size as needed for smoothing
 
 /**
  * Sensor thresholds

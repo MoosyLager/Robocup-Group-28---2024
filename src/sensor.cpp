@@ -2,8 +2,6 @@
 #include <elapsedMillis.h>
 #include "circularBuf.h"
 
-#define IMU_BUF_SIZE 10  // Adjust the size as needed for smoothing
-
 CircBuffFloat_t imuBufferForward;
 CircBuffFloat_t imuBufferSideways;
 CircBuffFloat_t imuBufferVertical;
