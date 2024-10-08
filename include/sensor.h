@@ -126,7 +126,7 @@ extern Adafruit_TCS34725 colourSensor;
 #define DIFFERENCE_PERCENTAGE 20//% difference between the two sensors
 #define DIFFERENCE_ABSOLUTE 100 //mm difference between the two sensors
 #define SHORT_RANGE_MULTIPLIER 1.5
-#define CENTRAL_THRESHOLD 3
+#define CENTRAL_THRESHOLD 15
 #define SIDE_BIAS_LEFT 40
 #define SIDE_BIAS_RIGHT 40
 

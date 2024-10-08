@@ -21,7 +21,7 @@ void setup()
     InitSensors();
     InitMotors();
     InitEncoders();
-    // initializeRobotFSM(&fsm);
+    initializeRobotFSM(&fsm);
 
     for ( int i = 0; i < 2 * CIRCULAR_BUF_SIZE; i++ ) {
         UpdateTOFL0();
@@ -30,6 +30,7 @@ void setup()
 
     while (notSet) {
         Serial.println("Calibrating IMU");
+        UpdateIMU();
         float heading = GetOrientationYaw();
         if (heading != 0) {
             initialHeading = heading;
@@ -39,31 +40,32 @@ void setup()
         }
     }
 
+    CalibrateCollectionSystem(&fsm);
+
     Serial.println("Setup complete");
 }
 
 void loop()
 {
-    Serial.println(ReadInductiveSensor());
-    // if ( BlueButtonState() && buttonTimer > 2500 && !pwmOn ) {
-    //     pwmOn = true;
-    // }
+    if ( BlueButtonState() && buttonTimer > 2500 && !pwmOn ) {
+        pwmOn = true;
+    }
 
-    // if ( updateFSMTimer > 70 ) {
-    //     processFSM(&fsm);
-    //     updateFSMTimer = 0;
-    // }
+    if ( updateFSMTimer > 37 ) {
+        processFSM(&fsm);
+        updateFSMTimer = 0;
+    }
 
-    // if ( updatePWMTimer > 20 && pwmOn ) {
-    //     PIDMotorControl(&leftMotor);
-    //     PIDMotorControl(&rightMotor);
-    //     updatePWMTimer = 0;
-    // }
+    if ( updatePWMTimer > 31 && pwmOn ) {
+        PIDMotorControl(&leftMotor);
+        PIDMotorControl(&rightMotor);
+        updatePWMTimer = 0;
+    }
 
-    // if ( updateSensorsTimer > 50 ) {
-    //     UpdateTOFL0();
-    //     UpdateTOFL1();
-    //     UpdateIMU();
-    //     updateSensorsTimer = 0;
-    // }
+    if ( updateSensorsTimer > 51 ) {
+        UpdateTOFL0();
+        UpdateTOFL1();
+        UpdateIMU();
+        updateSensorsTimer = 0;
+    }
 }
