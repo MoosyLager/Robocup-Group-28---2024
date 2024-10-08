@@ -5,32 +5,21 @@
 #include "sensor.h"
 #include <Arduino.h>
 #include <elapsedMillis.h>
-#include <SparkFunSX1509.h>
-#include <VL53L0X.h>
-#include <Wire.h>
 
-RobotFSM fsm;
-elapsedMicros timer;
-elapsedMillis updateSensorsTimer = 0;
-elapsedMillis updateFSM = 0;
-elapsedMillis updatePWM = 0;
-
-bool toggle = false;
+// elapsedMillis timer;
 
 void setup()
 {
     Serial.begin(9600);
-    // delay(1000);
-    InitSensors();
-    InitMotors();
-    InitEncoders();
-    initializeRobotFSM(&fsm);
-    delay(7000);
-    Serial.println("Setup complete");
+    // InitSensors();
+    // InitMotors();
+    // InitEncoders();
+    // initializeRobotFSM(&fsm);
+    // delay(7000);
+    // Serial.println("Setup complete");
     // for ( int i = 0; i < 100; i++ ) {
     //     UpdateTOFL0();
     //     UpdateTOFL1();
-
 }
 
 void loop()
@@ -57,7 +46,7 @@ void loop()
     //     float acc3 = GetOrientationYaw();
     //     Serial.print(" Yaw: ");
     //     Serial.print(acc3);
-        
+
     //     if (checkTargetHeading(fsm.targetHeading)) {
     //         Serial.print("At target heading");
     //     }
@@ -75,40 +64,37 @@ void loop()
     // //     // Serial.println(fsm.targetHeading);
     // }
 
-    if (updatePWM > 19) {
-        updatePWM = 0;
-        PIDMotorControl(&leftMotor);
-        PIDMotorControl(&rightMotor);
-        
-    }
+    // if (updatePWM > 19) {
+    //     updatePWM = 0;
+    //     PIDMotorControl(&leftMotor);
+    //     PIDMotorControl(&rightMotor);
 
-    if (updateSensorsTimer > 51) {
-        UpdateTOFL0();
-        UpdateTOFL1();
-        UpdateIMU();
-        updateSensorsTimer = 0;
+    // }
 
-    }
-    if (updateFSM > 31) {
-        processFSM(&fsm);
-        updateFSM = 0;
-        // Serial.print("L0TL: ");
-        // Serial.print(GetL0TL());
-        // Serial.print(" L0TR: ");
-        // Serial.print(GetL0TR());
-        // Serial.print(" L0BL: ");
-        // Serial.print(GetL0BL());
-        // Serial.print(" L0BR: ");
-        // Serial.println(GetL0BR());
-        // Serial.print("L1TL: ");
-        // Serial.print(GetL1TL());
-        // Serial.print(" L1TR: ");
-        // Serial.print(GetL1TR());
-        // Serial.print(" L1BL: ");
-        // Serial.print(GetL1BL());
-        // Serial.print(" L1BR: ");
-        // Serial.println(GetL1BR());
-    }
-    
-
+    // if ( updateSensorsTimer > 51 ) {
+    //     UpdateTOFL0();
+    //     UpdateTOFL1();
+    //     UpdateIMU();
+    //     updateSensorsTimer = 0;
+    // }
+    // if ( updateFSM > 31 ) {
+    //     // processFSM(&fsm);
+    //     updateFSM = 0;
+    //     Serial.print("L0TL: ");
+    //     Serial.print(GetL0TL());
+    //     Serial.print(" L0TR: ");
+    //     Serial.print(GetL0TR());
+    //     Serial.print(" L0BL: ");
+    //     Serial.print(GetL0BL());
+    //     Serial.print(" L0BR: ");
+    //     Serial.println(GetL0BR());
+    //     Serial.print("L1TL: ");
+    //     Serial.print(GetL1TL());
+    //     Serial.print(" L1TR: ");
+    //     Serial.print(GetL1TR());
+    //     Serial.print(" L1BL: ");
+    //     Serial.print(GetL1BL());
+    //     Serial.print(" L1BR: ");
+    //     Serial.println(GetL1BR());
+    // }
 }
