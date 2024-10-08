@@ -31,4 +31,12 @@ void UpdateCollector();
 
 void CalibrateCollectionSystem(RobotFSM* fsm);
 
+enum CalibrationState {
+    CALIBRATION_START,
+    CALIBRATION_RUNNING,
+    CALIBRATION_DONE
+};
+
+extern CalibrationState rampCalibration;
+
 #endif

@@ -271,7 +271,7 @@ void handleChasing(RobotFSM* fsm) {
                     distToTravel = 2 * area / 230;
                     Serial.print("Distance to travel: ");
                     Serial.println(distToTravel);
-                    leftMotor.targetMotorPos = distToTravel * ENCODER_PER_DISTANCE  + leftMotor.currentMotorPos + ;
+                    leftMotor.targetMotorPos = distToTravel * ENCODER_PER_DISTANCE + leftMotor.currentMotorPos;
                     rightMotor.targetMotorPos = distToTravel * ENCODER_PER_DISTANCE + rightMotor.currentMotorPos;
                     fsm->distToTravel = distToTravel;
                     calculatedDist = true;

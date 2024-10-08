@@ -8,6 +8,7 @@ bool collectingWeight = false;
 bool weightCollected = false;
 elapsedMillis collectionWatchDog;
 
+bool rampCalibrating = true;
 /**
  * Update the collection motor speed if needed
  */
@@ -71,21 +72,53 @@ void CalibrateCollector(void)
 /**
  * Calibrate the ramp stepper motor to a known position
  */
+// void CalibrateRamp()
+// {
+//     Serial.println("Calibraing Stepper Motor...");
+//     rampStepper.setSpeed(-STEPPER_MAX_SPEED);
+//     bool isCalibrated = false;
+//     while ( !isCalibrated ) {
+//         if ( !RampPosition() ) {
+//             rampStepper.setSpeed(0);
+//             rampStepper.setCurrentPosition(0);
+//             isCalibrated = true;
+//         }
+//         rampStepper.run();
+//     }
+
+//     Serial.println("Ramp Calibrated!");
+// }
 void CalibrateRamp()
 {
-    Serial.println("Calibraing Stepper Motor...");
-    rampStepper.setSpeed(STEPPER_MAX_SPEED / 2);
-    bool isCalibrated = false;
-    while ( !isCalibrated ) {
-        if ( !RampPosition() ) {
-            rampStepper.setSpeed(0);
-            rampStepper.setCurrentPosition(0);
-            isCalibrated = true;
-        }
-        rampStepper.run();
+    static bool once = true;
+    if ( once ) {
+        Serial.println("Calibrating Ramp...");
+        once = false;
     }
-
-    Serial.println("Ramp Calibrated!");
+    rampStepper.setSpeed(-STEPPER_MAX_SPEED);
+    if ( !RampPosition() ) {
+        rampStepper.setSpeed(0);
+        rampStepper.setCurrentPosition(0);
+        Serial.println("Ramp Calibrated!");
+    }
+    // switch ( rampCalibration ) {
+    //     case CalibrationState::CALIBRATION_START:
+    //         // Serial.println("Calibrating Ramp...");
+    //         rampStepper.setSpeed(-STEPPER_MAX_SPEED / 2);
+    //         rampCalibration = CALIBRATION_RUNNING;
+    //         break;
+    //     case CalibrationState::CALIBRATION_RUNNING:
+    //         if ( !RampPosition() ) {
+    //             rampStepper.setSpeed(0);
+    //             rampStepper.setCurrentPosition(0);
+    //             rampCalibration = CALIBRATION_DONE;
+    //         }
+    //         rampStepper.run();
+    //         break;
+    //     case CalibrationState::CALIBRATION_DONE:
+    //         // Serial.println("Ramp Calibrated!");
+    //         break;
+    // }
 }
 
 /**

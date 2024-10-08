@@ -26,7 +26,7 @@
 /**
  * Wrapper to hold RGBA colour information
  */
-typedef struct Colour_t {
+struct Colour_t {
     uint16_t R;
     uint16_t G;
     uint16_t B;
